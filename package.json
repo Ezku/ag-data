@@ -37,5 +37,8 @@
       "data-cover-never": "node_modules",
       "loader": "./node-loaders/coffee-script"
     }
+  },
+  "dependencies": {
+    "ag-resource-loader-json": "^0.1.0"
   }
 }
