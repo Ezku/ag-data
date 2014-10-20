@@ -1,6 +1,6 @@
 language: node_js
 node_js:
-  - "0.10"
+- '0.10'
 before_install: npm install -g grunt-cli
 after_success: grunt travis
 deploy:
@@ -10,3 +10,5 @@ deploy:
     tags: true
     all_branches: true
     repo: AppGyver/ag-data
+  api_key:
+    secure: eJAXItkyyfiRZW6Q6ueDewQkjWxOiw3kSWKhLayfNeY0AlqCb99COOj+B43e6TpEkiQAWogTCKdt0ptLwkUrq4vvPw2GSMXjk6ANByU9QxMv1qLv9riWg2sHUrM/wsPFhlHQkMf3GxV5QcgD0dwnA2gYSMuV9Zdsqm7jK5AVbyc=
