@@ -1,0 +1,41 @@
+{
+  "name": "ag-data",
+  "version": "0.0.0",
+  "description": "Library for fluently accessing cloud data through the AG data proxy",
+  "main": "lib/index.js",
+  "scripts": {
+    "test": "grunt test",
+    "prepublish": "grunt compile"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/AppGyver/ag-data.git"
+  },
+  "keywords": [],
+  "author": "Eevert Saukkokoski <eevert.saukkokoski@appgyver.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/AppGyver/ag-data/issues"
+  },
+  "homepage": "https://github.com/AppGyver/ag-data",
+  "devDependencies": {
+    "chai": "^1.9.2",
+    "coffee-script": "^1.8.0",
+    "grunt": "^0.4.5",
+    "grunt-coffeelint": "0.0.13",
+    "grunt-contrib-clean": "^0.6.0",
+    "grunt-contrib-coffee": "^0.12.0",
+    "grunt-contrib-watch": "^0.6.1",
+    "grunt-env": "^0.4.2",
+    "grunt-mocha-cov": "^0.3.0",
+    "load-grunt-config": "^0.14.0",
+    "load-grunt-tasks": "^0.6.0"
+  },
+  "config": {
+    "blanket": {
+      "pattern": "src",
+      "data-cover-never": "node_modules",
+      "loader": "./node-loaders/coffee-script"
+    }
+  }
+}

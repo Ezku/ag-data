@@ -1,0 +1,12 @@
+language: node_js
+node_js:
+  - "0.10"
+before_install: npm install -g grunt-cli
+after_success: grunt travis
+deploy:
+  provider: npm
+  email: eevert.saukkokoski@appgyver.com
+  on:
+    tags: true
+    all_branches: true
+    repo: AppGyver/ag-data
