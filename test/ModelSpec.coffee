@@ -34,6 +34,11 @@ describe "ag-data.model", ->
           instance = new model
           instance.save().should.be.resolved
 
+        it "sends the instance properties to the resource", ->
+          model = createModelFromResource create: (properties) -> Promise.resolve properties
+          instance = new model foo: 'bar'
+          instance.save().should.eventually.have.property('foo').equal 'bar'
+
       describe "when the instance is already persistent", ->
         it "updates the instance through the resource", ->
           model = createModelFromResource {
