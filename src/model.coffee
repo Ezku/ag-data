@@ -29,7 +29,8 @@ module.exports = (resource) ->
         when 'deleted' then resource.create(this)
         when 'persisted'
           if @__dirty
-            resource.update(@__data)
+            resource.update(@__data).then =>
+              this.__dirty = false
           else
             Promise.resolve {}
       ).then (result) =>
