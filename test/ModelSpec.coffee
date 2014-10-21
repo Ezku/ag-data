@@ -31,6 +31,13 @@ describe "ag-data.model", ->
         model.find(1).should.eventually.have.property('foo').equal 'bar'
 
   describe "instance lifetime", ->
+    describe "a new instance", ->
+      it "has no identity", ->
+        model = createModelFromResource create: -> Promise.resolve {}
+        instance = new model
+        instance.should.have.property('__identity').not.exist
+
+
     describe "save", ->
       describe "with a new instance", ->
         it "creates the instance through the resource", ->

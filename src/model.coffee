@@ -5,6 +5,8 @@ module.exports = (resource) ->
     __state: 'new'
     __data: null
     __dirty: false
+    __identity: null
+
     constructor: (properties) ->
       @__data = properties
       for key, value of properties
