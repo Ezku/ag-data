@@ -4,12 +4,15 @@ module.exports = (resource) ->
   class Model
     __state: 'new'
     __data: null
+    __dirty: false
     constructor: (properties) ->
       @__data = properties
       for key, value of properties
         Object.defineProperty @, key, {
           get: => @__data[key]
-          set: (v) => @__data[key] = v
+          set: (v) =>
+            @__data[key] = v
+            @__dirty = true
         }
 
     @find: (id) -> resource.find(id).then (result) ->
@@ -21,7 +24,11 @@ module.exports = (resource) ->
       (switch @__state
         when 'new' then resource.create(this)
         when 'deleted' then resource.create(this)
-        when 'persisted' then resource.update(@__data)
+        when 'persisted'
+          if @__dirty
+            resource.update(@__data)
+          else
+            Promise.resolve {}
       ).then (result) =>
         this
 
