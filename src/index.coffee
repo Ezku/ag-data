@@ -1,9 +1,9 @@
 defaultLoader = require 'ag-resource-loader-json'
-model = require './model'
+createModelFromResource = require './model'
 
-module.exports =
+module.exports = data =
   loadResourceBundle: (object) ->
     bundle = defaultLoader.loadResourceBundle object
     # TODO: What about just loading up all resources at once?
     createModel: (resourceName) ->
-      model.createFromResource bundle.createResource resourceName
+      createModelFromResource bundle.createResource resourceName

@@ -1,2 +1,1 @@
-module.exports =
-  createFromResource: -> {}
+module.exports = (resource) -> {}
