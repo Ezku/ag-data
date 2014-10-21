@@ -5,6 +5,10 @@ chai = require('chai')
 chai.should()
 chai.use(require 'chai-as-promised')
 
+sinon = require 'sinon'
+chai.use(require 'sinon-chai')
+
+
 describe "ag-data.model", ->
   it "is a function", ->
     createModelFromResource.should.be.a 'function'
@@ -87,6 +91,26 @@ describe "ag-data.model", ->
           model = createModelFromResource create: (properties) -> Promise.resolve properties
           instance = new model foo: 'bar'
           instance.save().should.eventually.have.property('foo').equal 'bar'
+
+      describe "with a persistent instance", ->
+        it "sends updated properties to the resource", ->
+          update = sinon.stub().returns Promise.resolve {}
+          model = createModelFromResource {
+            find: -> Promise.resolve {
+              foo: 'bar'
+            }
+            update: update
+          }
+
+          model.find(1).then (instance) ->
+            instance.foo = 'qux'
+            instance.save().then ->
+              update.should.have.been.calledWith {
+                foo: 'qux'
+              }
+
+
+
 
 
 

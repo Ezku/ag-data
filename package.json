@@ -41,6 +41,8 @@
   "dependencies": {
     "ag-resource-loader-json": "^0.1.0",
     "bluebird": "^2.3.6",
-    "chai-as-promised": "^4.1.1"
+    "chai-as-promised": "^4.1.1",
+    "sinon": "^1.10.3",
+    "sinon-chai": "^2.6.0"
   }
 }
