@@ -157,6 +157,15 @@ describe "ag-data.model", ->
         model = createModelFromResource find: -> Promise.resolve {}
         model.find(1).should.eventually.have.property('__identity').exist
 
+      it "loses its identity when deleted", ->
+        model = createModelFromResource {
+          find: -> Promise.resolve {}
+          delete: -> Promise.resolve {}
+        }
+        model.find(1).then (instance) ->
+          instance.delete().then ->
+            instance.should.have.property('__identity').not.exist
+
 
 
 

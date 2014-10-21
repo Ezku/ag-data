@@ -43,4 +43,5 @@ module.exports = (resource) ->
         when 'deleted' then Promise.reject new Error "Will not delete an instance that is already deleted"
         when 'persisted' then resource.delete(this).then =>
           @__state = 'deleted'
+          @__identity = null
           this
