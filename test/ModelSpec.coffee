@@ -50,5 +50,14 @@ describe "ag-data.model", ->
           instance = new model
           instance.delete().should.be.rejected
 
+      describe "when the instance is already persistent", ->
+        it "succeeds if the resource deletion succeeds", ->
+          model = createModelFromResource {
+            find: -> Promise.resolve {}
+            delete: -> Promise.resolve {}
+          }
+          model.find(1).then (instance) ->
+            instance.delete().should.be.resolved
+
 
 
