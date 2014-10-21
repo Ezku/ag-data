@@ -99,7 +99,7 @@ describe "ag-data.model", ->
             find: -> Promise.resolve {
               foo: 'bar'
             }
-            update: update
+            update
           }
 
           model.find(1).then (instance) ->

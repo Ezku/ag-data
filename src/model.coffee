@@ -3,9 +3,14 @@ Promise = require 'bluebird'
 module.exports = (resource) ->
   class Model
     __state: 'new'
+    __data: null
     constructor: (properties) ->
+      @__data = properties
       for key, value of properties
-        @[key] = value
+        Object.defineProperty @, key, {
+          get: => @__data[key]
+          set: (v) => @__data[key] = v
+        }
 
     @find: (id) -> resource.find(id).then (result) ->
       instance = new Model result
@@ -16,7 +21,7 @@ module.exports = (resource) ->
       (switch @__state
         when 'new' then resource.create(this)
         when 'deleted' then resource.create(this)
-        when 'persisted' then resource.update(this)
+        when 'persisted' then resource.update(@__data)
       ).then (result) =>
         this
 
