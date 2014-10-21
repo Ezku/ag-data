@@ -1,7 +1,9 @@
 Promise = require 'bluebird'
 createModelFromResource = require('../src/model')
 
-require('chai').should()
+chai = require('chai')
+chai.should()
+chai.use(require 'chai-as-promised')
 
 describe "ag-data.model", ->
   it "is a function", ->
