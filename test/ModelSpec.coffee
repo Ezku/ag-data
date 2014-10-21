@@ -135,6 +135,21 @@ describe "ag-data.model", ->
             instance.save().then ->
               update.should.not.have.been.called
 
+        it "subsequent saves after initial save should have no effect", ->
+          update = sinon.stub().returns Promise.resolve {}
+          model = createModelFromResource {
+            find: -> Promise.resolve {
+              foo: 'bar'
+            }
+            update
+          }
+
+          model.find(1).then (instance) ->
+            instance.foo = 'qux'
+            instance.save().then ->
+              instance.save().then ->
+                update.should.have.been.calledOnce
+
 
 
 
