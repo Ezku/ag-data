@@ -28,7 +28,7 @@ describe "ag-data.model", ->
 
   describe "instance", ->
     describe "save", ->
-      describe "when the instance is new", ->
+      describe "with a new instance", ->
         it "creates the instance through the resource", ->
           model = createModelFromResource create: -> Promise.resolve {}
           instance = new model
@@ -39,7 +39,7 @@ describe "ag-data.model", ->
           instance = new model foo: 'bar'
           instance.save().should.eventually.have.property('foo').equal 'bar'
 
-      describe "when the instance is already persistent", ->
+      describe "with a persistent instance", ->
         it "updates the instance through the resource", ->
           model = createModelFromResource {
             find: -> Promise.resolve {}
@@ -47,6 +47,17 @@ describe "ag-data.model", ->
           }
           model.find(1).then (instance) ->
             instance.save().should.be.resolved
+
+      describe "with a deleted instance", ->
+        it "recreates the instance through the resource", ->
+          model = createModelFromResource {
+            find: -> Promise.resolve {}
+            create: -> Promise.resolve {}
+            delete: -> Promise.resolve {}
+          }
+          model.find(1).then (instance) ->
+            instance.delete().then ->
+              instance.save()
 
     describe "delete", ->
       describe "when the instance is new", ->

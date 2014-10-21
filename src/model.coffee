@@ -16,6 +16,7 @@ module.exports = (resource) ->
       (switch @__state
         when 'new' then resource.create(this)
         when 'persisted' then resource.update(this)
+        when 'deleted' then resource.create(this)
       ).then (result) =>
         this
 
