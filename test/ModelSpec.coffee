@@ -109,6 +109,20 @@ describe "ag-data.model", ->
                 foo: 'qux'
               }
 
+        it "saving with no changes should have no effect", ->
+          update = sinon.stub().returns Promise.resolve {}
+          model = createModelFromResource {
+            find: -> Promise.resolve {
+              foo: 'bar'
+            }
+            update
+          }
+
+          model.find(1).then (instance) ->
+            instance.save().then ->
+              update.should.not.have.been.called
+
+
 
 
 
