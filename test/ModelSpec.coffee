@@ -152,6 +152,11 @@ describe "ag-data.model", ->
         instance.save().then ->
           instance.should.have.property('__identity').exist
 
+    describe "a persisted instance", ->
+      it "has an identity", ->
+        model = createModelFromResource find: -> Promise.resolve {}
+        model.find(1).should.eventually.have.property('__identity').exist
+
 
 
 

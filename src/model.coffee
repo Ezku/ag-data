@@ -20,6 +20,7 @@ module.exports = (resource) ->
     @find: (id) -> resource.find(id).then (result) ->
       instance = new Model result
       instance.__state = 'persisted'
+      instance.__identity = true
       instance
 
     save: ->
