@@ -157,6 +157,17 @@ describe "ag-data.model", ->
         model = createModelFromResource find: -> Promise.resolve {}
         model.find(1).should.eventually.have.property('__identity').exist
 
+      it "maintains identity when saved", ->
+        model = createModelFromResource {
+          find: -> Promise.resolve { foo: 'bar' }
+          update: -> Promise.resolve {}
+        }
+        model.find(1).then (instance) ->
+          identity = instance.__identity
+          instance.foo = 'qux'
+          instance.save().then ->
+            instance.__identity.should.equal identity
+
       it "loses its identity when deleted", ->
         model = createModelFromResource {
           find: -> Promise.resolve {}
