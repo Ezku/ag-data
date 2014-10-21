@@ -17,7 +17,7 @@ describe "ag-data.model", ->
     createModelFromResource({}).should.be.a 'function'
 
   describe "class", ->
-    describe "find", ->
+    describe "find()", ->
       it "accepts an identifier and promises a model instance", ->
         model = createModelFromResource find: -> Promise.resolve {}
         model.find(1).should.be.resolved
@@ -32,7 +32,7 @@ describe "ag-data.model", ->
 
   describe "instance lifetime", ->
 
-    describe "save", ->
+    describe "save()", ->
       describe "with a new instance", ->
         it "creates the instance through the resource", ->
           model = createModelFromResource create: -> Promise.resolve {}
@@ -59,7 +59,7 @@ describe "ag-data.model", ->
             instance.delete().then ->
               instance.save()
 
-    describe "delete", ->
+    describe "delete()", ->
       describe "when the instance is new", ->
         it "fails because there is nothing to delete in the resource", ->
           model = createModelFromResource {}
@@ -86,7 +86,7 @@ describe "ag-data.model", ->
               instance.delete().should.be.rejected
 
   describe "instance data", ->
-    describe "save", ->
+    describe "save()", ->
       describe "with a new instance", ->
         it "sends the instance properties to the resource", ->
           model = createModelFromResource create: (properties) -> Promise.resolve properties
