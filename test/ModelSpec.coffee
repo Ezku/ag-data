@@ -19,7 +19,17 @@ describe "ag-data.model", ->
 
   describe "save", ->
     describe "when the instance is new", ->
-      it "persists a model instance through the resource", ->
+      it "creates the instance through the resource", ->
         model = createModelFromResource create: -> Promise.resolve {}
         instance = new model
         instance.save().should.be.resolved
+
+    describe "when the instance is already persistent", ->
+      it "updates the instance through the resource", ->
+        model = createModelFromResource {
+          find: -> Promise.resolve {}
+          update: -> Promise.resolve {}
+        }
+        model.find(1).then (instance) ->
+          instance.save().should.be.resolved
+
