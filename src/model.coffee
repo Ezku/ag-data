@@ -15,15 +15,15 @@ module.exports = (resource) ->
     save: ->
       (switch @__state
         when 'new' then resource.create(this)
-        when 'persisted' then resource.update(this)
         when 'deleted' then resource.create(this)
+        when 'persisted' then resource.update(this)
       ).then (result) =>
         this
 
     delete: ->
       switch @__state
         when 'new' then Promise.reject new Error "Will not delete an instance that is not persistent"
+        when 'deleted' then Promise.reject new Error "Will not delete an instance that is already deleted"
         when 'persisted' then resource.delete(this).then =>
           this.__state = 'deleted'
           this
-        when 'deleted' then Promise.reject new Error "Will not delete an instance that is already deleted"
