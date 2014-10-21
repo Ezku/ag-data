@@ -64,5 +64,17 @@ describe "ag-data.model", ->
           model.find(1).then (instance) ->
             instance.delete().should.be.resolved
 
+      describe "when the instance is already deleted", ->
+        it "fails because there is nothing to delete", ->
+          model = createModelFromResource {
+            find: -> Promise.resolve {}
+            delete: -> Promise.resolve {}
+          }
+          model.find(1).then (instance) ->
+            instance.delete().then ->
+              instance.delete().should.be.rejected
+
+
+
 
 
