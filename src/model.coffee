@@ -1,3 +1,4 @@
+Promise = require 'bluebird'
 
 module.exports = (resource) ->
   class Model
@@ -17,3 +18,8 @@ module.exports = (resource) ->
         when 'persisted' then resource.update(this)
       ).then (result) =>
         this
+
+    delete: ->
+      switch @__state
+        when 'new' then Promise.reject new Error "Will not delete an instance that is not persistent"
+        when 'persisted' then resource.delete(this)

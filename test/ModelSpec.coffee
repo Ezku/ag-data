@@ -43,3 +43,12 @@ describe "ag-data.model", ->
           model.find(1).then (instance) ->
             instance.save().should.be.resolved
 
+    describe "delete", ->
+      describe "when the instance is new", ->
+        it "fails because there is nothing to delete in the resource", ->
+          model = createModelFromResource {}
+          instance = new model
+          instance.delete().should.be.rejected
+
+
+
