@@ -31,18 +31,6 @@ describe "ag-data.model", ->
         model.find(1).should.eventually.have.property('foo').equal 'bar'
 
   describe "instance lifetime", ->
-    describe "a new instance", ->
-      it "has no identity", ->
-        model = createModelFromResource {}
-        instance = new model
-        instance.should.have.property('__identity').not.exist
-
-      it "gains an identity when saved", ->
-        model = createModelFromResource create: -> Promise.resolve {}
-        instance = new model
-        instance.save().then ->
-          instance.should.have.property('__identity').exist
-
 
     describe "save", ->
       describe "with a new instance", ->
@@ -150,9 +138,19 @@ describe "ag-data.model", ->
               instance.save().then ->
                 update.should.have.been.calledOnce
 
+  describe "instance identity", ->
 
+    describe "a new instance", ->
+      it "has no identity", ->
+        model = createModelFromResource {}
+        instance = new model
+        instance.should.have.property('__identity').not.exist
 
-
+      it "gains an identity when saved", ->
+        model = createModelFromResource create: -> Promise.resolve {}
+        instance = new model
+        instance.save().then ->
+          instance.should.have.property('__identity').exist
 
 
 
