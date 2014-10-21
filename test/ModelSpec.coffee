@@ -20,6 +20,12 @@ describe "ag-data.model", ->
         model.find(1).then (instance) ->
           instance.should.be.an.instanceof model
 
+      it "sets object properties from the resource on the instance", ->
+        model = createModelFromResource find: -> Promise.resolve {
+          foo: 'bar'
+        }
+        model.find(1).should.eventually.have.property('foo').equal 'bar'
+
   describe "instance", ->
     describe "save", ->
       describe "when the instance is new", ->
