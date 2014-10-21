@@ -24,7 +24,8 @@ module.exports = (resource) ->
 
     save: ->
       (switch @__state
-        when 'new' then resource.create(this)
+        when 'new' then resource.create(this).then =>
+          this.__identity = true
         when 'deleted' then resource.create(this)
         when 'persisted'
           if @__dirty
