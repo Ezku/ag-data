@@ -59,14 +59,16 @@ describe "ag-data.model", ->
 
       describe "with a deleted instance", ->
         it "recreates the instance through the resource", ->
-          model = createModelFromResource mockResource {
+          resource = mockResource {
             find: {}
             create: {}
             delete: {}
           }
+          model = createModelFromResource resource
           model.find(1).then (instance) ->
             instance.delete().then ->
-              instance.save()
+              instance.save().then ->
+                resource.create.should.have.been.calledOnce
 
     describe "delete()", ->
       describe "when the instance is new", ->
