@@ -155,7 +155,7 @@ describe "ag-data.model", ->
                 foo: 'qux'
               }
 
-        it.skip "should send changes in properties other than what were initially there", ->
+        it "should send changes in properties other than what were initially there", ->
           resource = mockResource {
             fields: {
               something: 'string'
