@@ -14,7 +14,8 @@ mockResource = (resourceProps) ->
     if value instanceof Function
       resource[key] = value
     else
-      resource[key] = do (value) -> -> Promise.resolve value
+      resource[key] = do (value) ->
+        sinon.stub().returns Promise.resolve value
   resource
 
 describe "ag-data.model", ->
@@ -105,81 +106,81 @@ describe "ag-data.model", ->
 
       describe "with a persistent instance", ->
         it "sends updated properties to the resource", ->
-          update = sinon.stub().returns Promise.resolve {}
-          model = createModelFromResource mockResource {
+          resource = mockResource {
             find: {
               foo: 'bar'
             }
-            update
+            update: {}
           }
+          model = createModelFromResource resource
 
           model.find(1).then (instance) ->
             instance.foo = 'qux'
             instance.save().then ->
-              update.should.have.been.calledWith {
+              resource.update.should.have.been.calledWith {
                 foo: 'qux'
               }
 
         it "does not send properties that have not changed", ->
-          update = sinon.stub().returns Promise.resolve {}
-          model = createModelFromResource mockResource {
+          resource = mockResource {
             find: {
               foo: 'bar'
               something: 'else'
             }
-            update
+            update: {}
           }
+          model = createModelFromResource resource
 
           model.find(1).then (instance) ->
             instance.foo = 'qux'
             instance.save().then ->
-              update.should.have.been.calledWith {
+              resource.update.should.have.been.calledWith {
                 foo: 'qux'
               }
 
         it.skip "should send changes in properties other than what were initially there", ->
-          update = sinon.stub().returns Promise.resolve {}
-          model = createModelFromResource mockResource {
+          resource = mockResource {
             find: {
               something: 'else'
             }
-            update
+            update: {}
           }
+          model = createModelFromResource resource
 
           model.find(1).then (instance) ->
             instance.foo = 'qux'
             instance.save().then ->
-              update.should.have.been.calledWith {
+              resource.update.should.have.been.calledWith {
                 foo: 'qux'
               }
 
         it "saving with no changes should have no effect", ->
-          update = sinon.stub().returns Promise.resolve {}
-          model = createModelFromResource mockResource {
+          resource = mockResource {
             find: {
               foo: 'bar'
             }
-            update
+            update: {}
           }
+          model = createModelFromResource resource
 
           model.find(1).then (instance) ->
             instance.save().then ->
-              update.should.not.have.been.called
+              resource.update.should.not.have.been.called
 
         it "subsequent saves after initial save should have no effect", ->
-          update = sinon.stub().returns Promise.resolve {}
-          model = createModelFromResource mockResource {
+          resource = mockResource {
             find: {
               foo: 'bar'
             }
-            update
+            update: {}
           }
+          model = createModelFromResource resource
 
           model.find(1).then (instance) ->
             instance.foo = 'qux'
             instance.save().then ->
               instance.save().then ->
-                update.should.have.been.calledOnce
+                resource.update.should.have.been.calledOnce
 
   describe "instance identity", ->
 
