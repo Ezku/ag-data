@@ -49,8 +49,11 @@ describe "ag-data.model", ->
           instance.should.be.an.instanceof model
 
       it "sets object properties from the resource on the instance", ->
-        model = createModelFromResource mockResource find: {
-          foo: 'bar'
+        model = createModelFromResource mockResource {
+          fields:
+            foo: 'string'
+          find:
+            foo: 'bar'
         }
         model.find(1).should.eventually.have.property('foo').equal 'bar'
 
@@ -116,6 +119,8 @@ describe "ag-data.model", ->
       describe "with a new instance", ->
         it "sends the instance properties to the resource", ->
           model = createModelFromResource mockResource {
+            fields:
+              foo: 'string'
             create: (properties) -> Promise.resolve properties
           }
           instance = new model foo: 'bar'
@@ -124,9 +129,10 @@ describe "ag-data.model", ->
       describe "with a persistent instance", ->
         it "sends updated properties to the resource", ->
           resource = mockResource {
-            find: {
+            fields:
+              foo: 'string'
+            find:
               foo: 'bar'
-            }
             update: {}
           }
           model = createModelFromResource resource
@@ -140,10 +146,12 @@ describe "ag-data.model", ->
 
         it "does not send properties that have not changed", ->
           resource = mockResource {
-            find: {
+            fields:
+              foo: 'string'
+              something: 'string'
+            find:
               foo: 'bar'
               something: 'else'
-            }
             update: {}
           }
           model = createModelFromResource resource
@@ -177,9 +185,10 @@ describe "ag-data.model", ->
 
         it "saving with no changes should have no effect", ->
           resource = mockResource {
-            find: {
+            fields:
+              foo: 'string'
+            find:
               foo: 'bar'
-            }
             update: {}
           }
           model = createModelFromResource resource
@@ -190,9 +199,10 @@ describe "ag-data.model", ->
 
         it "subsequent saves after initial save should have no effect", ->
           resource = mockResource {
-            find: {
+            fields:
+              foo: 'string'
+            find:
               foo: 'bar'
-            }
             update: {}
           }
           model = createModelFromResource resource
