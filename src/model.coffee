@@ -31,9 +31,9 @@ module.exports = (resource) ->
 
     save: ->
       (switch @__state
-        when 'new' then resource.create(this).then =>
+        when 'deleted' then Promise.reject new Error "Will not save a deleted instance"
+        when 'new' then resource.create(@__data).then =>
           @__identity = true
-        when 'deleted' then resource.create(this)
         when 'persisted'
           if @__dirty
             changes = {}
@@ -50,8 +50,8 @@ module.exports = (resource) ->
 
     delete: ->
       switch @__state
-        when 'new' then Promise.reject new Error "Will not delete an instance that is not persistent"
         when 'deleted' then Promise.reject new Error "Will not delete an instance that is already deleted"
+        when 'new' then Promise.reject new Error "Will not delete an instance that is not persistent"
         when 'persisted' then resource.delete(this).then =>
           @__state = 'deleted'
           @__identity = null

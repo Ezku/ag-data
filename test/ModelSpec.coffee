@@ -76,17 +76,15 @@ describe "ag-data.model", ->
             instance.save().should.be.resolved
 
       describe "with a deleted instance", ->
-        it "recreates the instance through the resource", ->
+        it "should always fail", ->
           resource = mockResource {
             find: {}
-            create: {}
             delete: {}
           }
           model = createModelFromResource resource
           model.find(1).then (instance) ->
             instance.delete().then ->
-              instance.save().then ->
-                resource.create.should.have.been.calledOnce
+              instance.save().should.be.rejected
 
     describe "delete()", ->
       describe "when the instance is new", ->
