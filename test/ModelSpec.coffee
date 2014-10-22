@@ -110,6 +110,23 @@ describe "ag-data.model", ->
                 foo: 'qux'
               }
 
+        it "does not send properties that have not changed", ->
+          update = sinon.stub().returns Promise.resolve {}
+          model = createModelFromResource {
+            find: -> Promise.resolve {
+              foo: 'bar'
+              something: 'else'
+            }
+            update
+          }
+
+          model.find(1).then (instance) ->
+            instance.foo = 'qux'
+            instance.save().then ->
+              update.should.have.been.calledWith {
+                foo: 'qux'
+              }
+
         it "saving with no changes should have no effect", ->
           update = sinon.stub().returns Promise.resolve {}
           model = createModelFromResource {
