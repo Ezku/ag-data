@@ -9,13 +9,19 @@ sinon = require 'sinon'
 chai.use(require 'sinon-chai')
 
 mockResource = (resourceProps) ->
-  resource = {}
+  resource = {
+    schema:
+      fields: {}
+  }
   for key, value of resourceProps
-    if value instanceof Function
-      resource[key] = value
-    else
-      resource[key] = do (value) ->
-        sinon.stub().returns Promise.resolve value
+    switch key
+      when 'fields' then resource.schema.fields = value
+      else
+        if value instanceof Function
+          resource[key] = value
+        else
+          resource[key] = do (value) ->
+            sinon.stub().returns Promise.resolve value
   resource
 
 describe "ag-data.model", ->
@@ -142,6 +148,10 @@ describe "ag-data.model", ->
 
         it.skip "should send changes in properties other than what were initially there", ->
           resource = mockResource {
+            fields: {
+              something: 'string'
+              foo: 'string'
+            }
             find: {
               something: 'else'
             }
