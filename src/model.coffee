@@ -4,18 +4,21 @@ module.exports = (resource) ->
   class Model
     __state: 'new'
     __data: null
+    __changed: null
     __dirty: false
     __identity: null
 
     constructor: (properties) ->
       @__data = properties
-      for key, value of properties
+      for key, value of properties then do (key) =>
         Object.defineProperty @, key, {
           get: => @__data[key]
           set: (v) =>
             @__data[key] = v
             @__dirty = true
+            @__changed[key] = true
         }
+      @__changed = {}
 
     @find: (id) -> resource.find(id).then (result) ->
       instance = new Model result
@@ -30,7 +33,12 @@ module.exports = (resource) ->
         when 'deleted' then resource.create(this)
         when 'persisted'
           if @__dirty
-            resource.update(@__data).then =>
+            changes = {}
+            for key, value of @__changed when value
+              changes[key] = @__data[key]
+
+            resource.update(changes).then =>
+              @__changed = {}
               @__dirty = false
           else
             Promise.resolve {}
