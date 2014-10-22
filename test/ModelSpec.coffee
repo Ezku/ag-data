@@ -58,7 +58,7 @@ describe "ag-data.model", ->
       it "sets object properties from the resource on the instance", ->
         model = createModelFromResource mockResource {
           fields:
-            foo: 'string'
+            foo: {}
           find:
             foo: 'bar'
         }
@@ -124,7 +124,7 @@ describe "ag-data.model", ->
       it "should have the properties passed to it on new", ->
         model = createModelFromResource mockResource {
           fields:
-            foo: 'string'
+            foo: {}
         }
         instance = new model foo: 'bar'
         instance.should.have.property('foo').equal 'bar'
@@ -132,7 +132,7 @@ describe "ag-data.model", ->
       it "should not have properties that do not belong to the schema", ->
         model = createModelFromResource mockResource {
           fields:
-            foo: 'string'
+            foo: {}
         }
         instance = new model foo: 'bar', qux: 'trol'
         instance.should.not.have.property('qux')
@@ -142,7 +142,7 @@ describe "ag-data.model", ->
         it "sends the instance properties to the resource", ->
           resource = mockResource {
             fields:
-              foo: 'string'
+              foo: {}
             create: {}
           }
           model = createModelFromResource resource
@@ -156,7 +156,7 @@ describe "ag-data.model", ->
         it "sends updated properties to the resource", ->
           resource = mockResource {
             fields:
-              foo: 'string'
+              foo: {}
             find:
               foo: 'bar'
             update: {}
@@ -173,8 +173,8 @@ describe "ag-data.model", ->
         it "does not send properties that have not changed", ->
           resource = mockResource {
             fields:
-              foo: 'string'
-              something: 'string'
+              foo: {}
+              something: {}
             find:
               foo: 'bar'
               something: 'else'
@@ -192,8 +192,8 @@ describe "ag-data.model", ->
         it "should send changes in properties other than what were initially there", ->
           resource = mockResource {
             fields: {
-              something: 'string'
-              foo: 'string'
+              something: {}
+              foo: {}
             }
             find: {
               something: 'else'
@@ -212,7 +212,7 @@ describe "ag-data.model", ->
         it "saving with no changes should have no effect", ->
           resource = mockResource {
             fields:
-              foo: 'string'
+              foo: {}
             find:
               foo: 'bar'
             update: {}
@@ -226,7 +226,7 @@ describe "ag-data.model", ->
         it "subsequent saves after initial save should have no effect", ->
           resource = mockResource {
             fields:
-              foo: 'string'
+              foo: {}
             find:
               foo: 'bar'
             update: {}
