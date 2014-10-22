@@ -118,13 +118,17 @@ describe "ag-data.model", ->
     describe "save()", ->
       describe "with a new instance", ->
         it "sends the instance properties to the resource", ->
-          model = createModelFromResource mockResource {
+          resource = mockResource {
             fields:
               foo: 'string'
-            create: (properties) -> Promise.resolve properties
+            create: {}
           }
+          model = createModelFromResource resource
           instance = new model foo: 'bar'
-          instance.save().should.eventually.have.property('foo').equal 'bar'
+          instance.save().then ->
+            resource.create.should.have.been.calledWith {
+              foo: 'bar'
+            }
 
       describe "with a persistent instance", ->
         it "sends updated properties to the resource", ->
