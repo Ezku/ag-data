@@ -113,6 +113,23 @@ describe "ag-data.model", ->
               instance.delete().should.be.rejected
 
   describe "instance data", ->
+    describe "with a new instance", ->
+      it "should have the properties passed to it on new", ->
+        model = createModelFromResource mockResource {
+          fields:
+            foo: 'string'
+        }
+        instance = new model foo: 'bar'
+        instance.should.have.property('foo').equal 'bar'
+
+      it "should not have properties that do not belong to the schema", ->
+        model = createModelFromResource mockResource {
+          fields:
+            foo: 'string'
+        }
+        instance = new model foo: 'bar', qux: 'trol'
+        instance.should.not.have.property('qux')
+
     describe "save()", ->
       describe "with a new instance", ->
         it "sends the instance properties to the resource", ->
