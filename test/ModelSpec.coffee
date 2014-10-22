@@ -33,13 +33,20 @@ describe "ag-data.model", ->
 
   describe "class", ->
     describe "metadata", ->
-      it "should have supported field names available on the model", ->
+      it "should have supported field names available", ->
         model = createModelFromResource mockResource {
           fields:
-            foo: 'string'
-            bar: 'string'
+            foo: {}
+            bar: {}
         }
         model.schema.fields.should.have.keys ['foo', 'bar']
+
+      it "should have the identity field name available", ->
+        model = createModelFromResource mockResource {
+          fields:
+            id: identity: true
+        }
+        model.schema.identity.should.equal 'id'
 
     describe "find()", ->
       it "accepts an identifier and promises a model instance", ->

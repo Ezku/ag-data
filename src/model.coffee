@@ -8,7 +8,11 @@ module.exports = (resource) ->
     __dirty: false
     __identity: null
 
-    @schema: resource.schema
+    @schema:
+      fields: resource.schema.fields
+      identity: do ->
+        for field, description of resource.schema.fields when description.identity
+          return field
 
     for key, value of resource.schema.fields then do (key) =>
       Object.defineProperty @prototype, key, {
