@@ -29,7 +29,7 @@ describe "ag-data.model", ->
     createModelFromResource.should.be.a 'function'
 
   it "accepts a resource and returns a model class", ->
-    createModelFromResource({}).should.be.a 'function'
+    createModelFromResource(mockResource {}).should.be.a 'function'
 
   describe "class", ->
     describe "metadata", ->
@@ -88,7 +88,7 @@ describe "ag-data.model", ->
     describe "delete()", ->
       describe "when the instance is new", ->
         it "fails because there is nothing to delete in the resource", ->
-          model = createModelFromResource {}
+          model = createModelFromResource mockResource {}
           instance = new model
           instance.delete().should.be.rejected
 
@@ -207,7 +207,7 @@ describe "ag-data.model", ->
 
     describe "a new instance", ->
       it "has no identity", ->
-        model = createModelFromResource {}
+        model = createModelFromResource mockResource {}
         instance = new model
         instance.should.have.property('__identity').not.exist
 
