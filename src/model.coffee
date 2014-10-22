@@ -10,16 +10,17 @@ module.exports = (resource) ->
 
     @schema: resource.schema
 
+    for key, value of resource.schema.fields then do (key) =>
+      Object.defineProperty @prototype, key, {
+        get: -> @__data[key]
+        set: (v) ->
+          @__data[key] = v
+          @__dirty = true
+          @__changed[key] = true
+      }
+
     constructor: (properties) ->
       @__data = properties
-      for key, value of properties then do (key) =>
-        Object.defineProperty @, key, {
-          get: => @__data[key]
-          set: (v) =>
-            @__data[key] = v
-            @__dirty = true
-            @__changed[key] = true
-        }
       @__changed = {}
 
     @find: (id) -> resource.find(id).then (result) ->
