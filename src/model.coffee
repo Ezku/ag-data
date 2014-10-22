@@ -8,6 +8,8 @@ module.exports = (resource) ->
     __dirty: false
     __identity: null
 
+    @schema: resource.schema
+
     constructor: (properties) ->
       @__data = properties
       for key, value of properties then do (key) =>

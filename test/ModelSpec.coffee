@@ -32,6 +32,15 @@ describe "ag-data.model", ->
     createModelFromResource({}).should.be.a 'function'
 
   describe "class", ->
+    describe "metadata", ->
+      it "should have supported field names available on the model", ->
+        model = createModelFromResource mockResource {
+          fields:
+            foo: 'string'
+            bar: 'string'
+        }
+        model.schema.fields.should.have.keys ['foo', 'bar']
+
     describe "find()", ->
       it "accepts an identifier and promises a model instance", ->
         model = createModelFromResource mockResource find: {}
