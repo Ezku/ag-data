@@ -127,6 +127,22 @@ describe "ag-data.model", ->
                 foo: 'qux'
               }
 
+        it "should send changes in properties other than what were initially there", ->
+          update = sinon.stub().returns Promise.resolve {}
+          model = createModelFromResource {
+            find: -> Promise.resolve {
+              something: 'else'
+            }
+            update
+          }
+
+          model.find(1).then (instance) ->
+            instance.foo = 'qux'
+            instance.save().then ->
+              update.should.have.been.calledWith {
+                foo: 'qux'
+              }
+
         it "saving with no changes should have no effect", ->
           update = sinon.stub().returns Promise.resolve {}
           model = createModelFromResource {
