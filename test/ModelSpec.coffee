@@ -292,6 +292,27 @@ describe "ag-data.model", ->
           instance.delete().then ->
             instance.should.have.property('__identity').not.exist
 
+  describe "instance identity tracking", ->
+
+    describe "a persisted instance", ->
+      it "does update with the current identity", ->
+        resource = mockResource {
+          fields:
+            foo: identity: true
+            bar: {}
+          find: {
+            foo: 123
+            bar: 'qux'
+          }
+          update: {}
+        }
+        model = createModelFromResource resource
+        model.find(1).then (instance) ->
+          instance.bar = 'baz'
+          instance.save().then ->
+            resource.update.should.have.been.calledWith 123, {
+              bar: 'baz'
+            }
 
 
 
