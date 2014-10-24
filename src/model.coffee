@@ -38,8 +38,10 @@ module.exports = (resource) ->
     save: ->
       (switch @__state
         when 'deleted' then Promise.reject new Error "Will not save a deleted instance"
-        when 'new' then resource.create(@__data).then =>
-          @__identity = true
+        when 'new' then resource.create(@__data).then (result) =>
+          @__identity = switch
+            when Model.schema.identity? then result[Model.schema.identity]
+            else true
         when 'persisted'
           if @__dirty
             changes = {}

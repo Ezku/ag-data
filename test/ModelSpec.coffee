@@ -247,13 +247,17 @@ describe "ag-data.model", ->
         instance = new model
         instance.should.have.property('__identity').not.exist
 
-      it "gains an identity when saved", ->
+      it "gains an identity from the resource when saved", ->
         model = createModelFromResource mockResource {
-          create: {}
+          fields:
+            foo: identity: true
+          create: {
+            foo: 123
+          }
         }
         instance = new model
         instance.save().then ->
-          instance.should.have.property('__identity').exist
+          instance.should.have.property('__identity').equal 123
 
     describe "a persisted instance", ->
       it "has an identity from the resource", ->
