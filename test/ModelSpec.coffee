@@ -166,7 +166,7 @@ describe "ag-data.model", ->
           model.find(1).then (instance) ->
             instance.foo = 'qux'
             instance.save().then ->
-              resource.update.should.have.been.calledWith {
+              resource.update.should.have.been.calledWith sinon.match.any, {
                 foo: 'qux'
               }
 
@@ -185,7 +185,7 @@ describe "ag-data.model", ->
           model.find(1).then (instance) ->
             instance.foo = 'qux'
             instance.save().then ->
-              resource.update.should.have.been.calledWith {
+              resource.update.should.have.been.calledWith sinon.match.any, {
                 foo: 'qux'
               }
 
@@ -205,7 +205,7 @@ describe "ag-data.model", ->
           model.find(1).then (instance) ->
             instance.foo = 'qux'
             instance.save().then ->
-              resource.update.should.have.been.calledWith {
+              resource.update.should.have.been.calledWith sinon.match.any, {
                 foo: 'qux'
               }
 

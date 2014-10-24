@@ -48,7 +48,7 @@ module.exports = (resource) ->
             for key, value of @__changed when value
               changes[key] = @__data[key]
 
-            resource.update(changes).then =>
+            resource.update(@__identity, changes).then =>
               @__changed = {}
               @__dirty = false
           else
