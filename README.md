@@ -8,3 +8,9 @@ ag-data
 
 Library for fluently accessing cloud data through the AG data proxy
 
+## To decide
+
+Is model.save an unidirectional update or a bidirectional sync?
+- "save" implies unidirectionality, means save without local changes is a no-op
+- if save receives new properties from backend on update, it implies bidirectionality
+- this is a contradiction unless "save" is renamed - how about "sync"?
