@@ -49,9 +49,15 @@ describe "ag-data.model", ->
         model.schema.identity.should.equal 'id'
 
     describe "find()", ->
-      it "accepts an identifier and promises a model instance", ->
-        model = createModelFromResource mockResource find: {}
-        model.find(1).should.be.resolved
+      it "accepts an identifier and passes it to the resource", ->
+        resource = mockResource find: {}
+        model = createModelFromResource resource
+        model.find(1).then (instance) ->
+          resource.find.should.have.been.calledWith 1
+
+      it "promises a model instance", ->
+        resource = mockResource find: {}
+        model = createModelFromResource resource
         model.find(1).then (instance) ->
           instance.should.be.an.instanceof model
 
