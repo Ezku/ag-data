@@ -241,20 +241,6 @@ describe "ag-data.model", ->
 
   describe "instance identity", ->
 
-    describe "identity field", ->
-
-      it "determines which field from resource to use as identity", ->
-        model = createModelFromResource mockResource {
-          fields:
-            foo: identity: true
-            bar: {}
-          find: {
-            foo: 123
-            bar: 'qux'
-          }
-        }
-        model.find(1).should.eventually.have.property('__identity').equal 123
-
     describe "a new instance", ->
       it "has no identity", ->
         model = createModelFromResource mockResource {}
@@ -270,11 +256,17 @@ describe "ag-data.model", ->
           instance.should.have.property('__identity').exist
 
     describe "a persisted instance", ->
-      it "has an identity", ->
+      it "has an identity from the resource", ->
         model = createModelFromResource mockResource {
-          find: {}
+          fields:
+            foo: identity: true
+            bar: {}
+          find: {
+            foo: 123
+            bar: 'qux'
+          }
         }
-        model.find(1).should.eventually.have.property('__identity').exist
+        model.find(1).should.eventually.have.property('__identity').equal 123
 
       it "maintains identity when saved", ->
         model = createModelFromResource mockResource {

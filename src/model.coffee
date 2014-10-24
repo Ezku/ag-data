@@ -30,7 +30,9 @@ module.exports = (resource) ->
     @find: (id) -> resource.find(id).then (result) ->
       instance = new Model result
       instance.__state = 'persisted'
-      instance.__identity = true
+      instance.__identity = switch
+        when Model.schema.identity? then result[Model.schema.identity]
+        else true
       instance
 
     save: ->
