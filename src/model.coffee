@@ -18,8 +18,8 @@ module.exports = (resource) ->
     # (states: [Object]) -> [Model] & { save: () -> Promise }
     collectionFromPersistentStates = (states) ->
       collection = (
-        for sate in states
-          instanceFromPersistentState sate
+        for state in states
+          instanceFromPersistentState state
       )
       collection.save = ->
         Promise.all (
