@@ -4,6 +4,16 @@ Promise = require 'bluebird'
 # tracking and identity tracking all in one place. Bundle in more concerns
 # at your own peril.
 module.exports = (resource) ->
+
+  # (state: Object) -> Model
+  instanceFromPersistentState = (state) ->
+    instance = new Model state
+    instance.__state = 'persisted'
+    instance.__identity = switch
+      when Model.schema.identity? then state[Model.schema.identity]
+      else true
+    instance
+
   class Model
     __state: 'new'
     __data: null
@@ -30,15 +40,11 @@ module.exports = (resource) ->
       @__data = properties
       @__changed = {}
 
-    @find: (id) -> resource.find(id).then (result) ->
-      instance = new Model result
-      instance.__state = 'persisted'
-      instance.__identity = switch
-        when Model.schema.identity? then result[Model.schema.identity]
-        else true
-      instance
+    @find: (id) -> resource.find(id).then instanceFromPersistentState
 
-    @findAll: (query) -> resource.findAll(query)
+    @findAll: (query) -> resource.findAll(query).then (collection) ->
+      for item in collection
+        instanceFromPersistentState item
 
     save: ->
       (switch @__state
