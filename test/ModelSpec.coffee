@@ -374,6 +374,21 @@ describe "ag-data.model", ->
               bar: 'baz'
             }
 
+      it "does delete with the current identity", ->
+        resource = mockResource {
+          fields:
+            foo: identity: true
+            bar: {}
+          find: {
+            foo: 123
+            bar: 'qux'
+          }
+          delete: {}
+        }
+        model = createModelFromResource resource
+        model.find(123).then (instance) ->
+          instance.delete().then ->
+            resource.delete.should.have.been.calledWith 123
 
 
 
