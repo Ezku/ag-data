@@ -180,6 +180,17 @@ describe "ag-data.model", ->
               instance.delete().should.be.rejected
 
   describe "instance data", ->
+    it "should be iterable", ->
+      model = createModelFromResource mockResource {
+        fields:
+          foo: {}
+      }
+      instance = new model foo: 'bar'
+      properties = {}
+      for key, value of instance
+        properties[key] = value
+      properties.should.deep.equal foo: 'bar'
+
     describe "with a new instance", ->
       it "should have the properties passed to it on new", ->
         model = createModelFromResource mockResource {
