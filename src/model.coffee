@@ -1,5 +1,8 @@
 Promise = require 'bluebird'
 
+# NOTE: It's dangerous to have lifecycle tracking, data storage, dirty state
+# tracking and identity tracking all in one place. Bundle in more concerns
+# at your own peril.
 module.exports = (resource) ->
   class Model
     __state: 'new'
