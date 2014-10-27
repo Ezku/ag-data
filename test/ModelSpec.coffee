@@ -70,6 +70,13 @@ describe "ag-data.model", ->
         }
         model.find(1).should.eventually.have.property('foo').equal 'bar'
 
+    describe "findAll()", ->
+      it "accepts query options and passes them to the resource", ->
+        resource = mockResource findAll: {}
+        model = createModelFromResource resource
+        model.findAll(limit: 123).then ->
+          resource.findAll.should.have.been.calledWith limit: 123
+
   describe "instance lifetime", ->
 
     describe "save()", ->
