@@ -109,6 +109,21 @@ describe "ag-data.model", ->
               foo: 'qux'
             }
 
+      it "takes into account pushed instances", ->
+        resource = mockResource {
+          findAll: []
+          create: {}
+        }
+        model = createModelFromResource resource
+        model.findAll().then (collection) ->
+          collection.push new model {
+            foo: 'bar'
+          }
+          collection.save().then ->
+            resource.create.should.have.been.calledWith {
+              foo: 'bar'
+            }
+
   describe "instance lifetime", ->
 
     describe "save()", ->
