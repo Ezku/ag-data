@@ -38,6 +38,8 @@ module.exports = (resource) ->
         else true
       instance
 
+    @findAll: (query) -> resource.findAll(query)
+
     save: ->
       (switch @__state
         when 'deleted' then Promise.reject new Error "Will not save a deleted instance"
