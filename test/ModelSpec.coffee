@@ -89,6 +89,26 @@ describe "ag-data.model", ->
           for instance in collection
             instance.should.be.an.instanceof model
 
+  describe "collection", ->
+    describe "save()", ->
+      it "delegates save to individual model instances", ->
+        resource = mockResource {
+          fields:
+            id: identity: true
+            foo: {}
+          findAll: [
+            { id: 123, foo: 'bar' }
+          ]
+          update: {}
+        }
+        model = createModelFromResource resource
+        model.findAll().then (collection) ->
+          collection[0].foo = 'qux'
+          collection.save().then ->
+            resource.update.should.have.been.calledWith 123, {
+              foo: 'qux'
+            }
+
   describe "instance lifetime", ->
 
     describe "save()", ->
