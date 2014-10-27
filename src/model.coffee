@@ -5,14 +5,28 @@ Promise = require 'bluebird'
 # at your own peril.
 module.exports = (resource) ->
 
-  # (state: Object) -> Model
-  instanceFromPersistentState = (state) ->
-    instance = new Model state
-    instance.__state = 'persisted'
-    instance.__identity = switch
-      when Model.schema.identity? then state[Model.schema.identity]
-      else true
-    instance
+  Gateway = do ->
+    # (state: Object) -> Model
+    instanceFromPersistentState = (state) ->
+      instance = new Model state
+      instance.__state = 'persisted'
+      instance.__identity = switch
+        when Model.schema.identity? then state[Model.schema.identity]
+        else true
+      instance
+
+    # (id: Model.schema.identity) -> Promise Model
+    find: (id) ->
+      resource
+        .find(id)
+        .then instanceFromPersistentState
+
+    # (query: Object) -> Promise [Model]
+    findAll: (query = {}) ->
+      resource
+        .findAll(query).then (collection) ->
+          for item in collection
+            instanceFromPersistentState item
 
   class Model
     __state: 'new'
@@ -20,6 +34,9 @@ module.exports = (resource) ->
     __changed: null
     __dirty: false
     __identity: null
+
+    @find: Gateway.find
+    @findAll: Gateway.findAll
 
     @schema:
       fields: resource.schema.fields
@@ -39,12 +56,6 @@ module.exports = (resource) ->
     constructor: (properties) ->
       @__data = properties
       @__changed = {}
-
-    @find: (id) -> resource.find(id).then instanceFromPersistentState
-
-    @findAll: (query) -> resource.findAll(query).then (collection) ->
-      for item in collection
-        instanceFromPersistentState item
 
     save: ->
       (switch @__state
