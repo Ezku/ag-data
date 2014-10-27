@@ -12,6 +12,7 @@ module.exports = (resource) ->
       instance.__state = 'persisted'
       instance.__identity = switch
         when Model.schema.identity? then state[Model.schema.identity]
+        # TODO: what happens on save and delete for an instance where this holds?
         else true
       instance
 
@@ -75,6 +76,7 @@ module.exports = (resource) ->
         when 'new' then resource.create(@__data).then (result) =>
           @__identity = switch
             when Model.schema.identity? then result[Model.schema.identity]
+            # TODO: what happens on save and delete for an instance where this holds?
             else true
         when 'persisted'
           if @__dirty
