@@ -94,7 +94,7 @@ module.exports = (resource) ->
       switch @__state
         when 'deleted' then Promise.reject new Error "Will not delete an instance that is already deleted"
         when 'new' then Promise.reject new Error "Will not delete an instance that is not persistent"
-        when 'persisted' then resource.delete(this).then =>
+        when 'persisted' then resource.delete(@__identity).then =>
           @__state = 'deleted'
           @__identity = null
           this
