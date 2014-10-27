@@ -86,10 +86,33 @@ describe "ag-data.model", ->
         }
         model = createModelFromResource resource
         model.findAll().then (collection) ->
-          for instance in collection
+          (for instance in collection
             instance.should.be.an.instanceof model
+          ).should.not.be.empty
 
   describe "collection", ->
+    it "should be iterable", ->
+      resource = mockResource {
+        fields:
+          id: identity: true
+          foo: {}
+        findAll: [
+          { id: 123, foo: 'bar' }
+        ]
+      }
+      model = createModelFromResource resource
+      model.findAll().then (collection) ->
+        items = []
+        for item in collection
+          props = {}
+          for key, value of item
+            props[key] = value
+          items.push props
+        
+        items.should.deep.equal [
+          { id: 123, foo: 'bar' }
+        ]
+
     describe "save()", ->
       it "delegates save to individual model instances", ->
         resource = mockResource {
