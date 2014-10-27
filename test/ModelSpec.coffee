@@ -77,6 +77,18 @@ describe "ag-data.model", ->
         model.findAll(limit: 123).then ->
           resource.findAll.should.have.been.calledWith limit: 123
 
+      it "promises an array of model instances", ->
+        resource = mockResource {
+          findAll: [
+            { foo: 'bar' }
+            { foo: 'qux' }
+          ]
+        }
+        model = createModelFromResource resource
+        model.findAll().then (collection) ->
+          for instance in collection
+            instance.should.be.an.instanceof model
+
   describe "instance lifetime", ->
 
     describe "save()", ->
