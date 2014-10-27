@@ -41,35 +41,7 @@ module.exports = (resource) ->
         .findAll(query)
         .then collectionFromPersistentStates
 
-  class Model
-    __state: 'new'
-    __data: null
-    __changed: null
-    __dirty: false
-    __identity: null
-
-    @find: Gateway.find
-    @findAll: Gateway.findAll
-
-    @schema:
-      fields: resource.schema.fields
-      identity: do ->
-        for field, description of resource.schema.fields when description.identity
-          return field
-
-    for key, value of resource.schema.fields then do (key) =>
-      Object.defineProperty @prototype, key, {
-        get: -> @__data[key]
-        set: (v) ->
-          @__data[key] = v
-          @__dirty = true
-          @__changed[key] = true
-      }
-
-    constructor: (properties) ->
-      @__data = properties
-      @__changed = {}
-
+  ModelOps =
     save: ->
       (switch @__state
         when 'deleted' then Promise.reject new Error "Will not save a deleted instance"
@@ -100,3 +72,50 @@ module.exports = (resource) ->
           @__state = 'deleted'
           @__identity = null
           this
+
+  class Model
+    @find: Gateway.find
+    @findAll: Gateway.findAll
+
+    @schema:
+      fields: resource.schema.fields
+      identity: do ->
+        for field, description of resource.schema.fields when description.identity
+          return field
+
+    # Define enumerable properties based on schema
+    for key, value of resource.schema.fields then do (key) =>
+      Object.defineProperty @prototype, key, {
+        get: -> @__data[key]
+        set: (v) ->
+          @__data[key] = v
+          @__dirty = true
+          @__changed[key] = true
+        enumerable: true
+      }
+
+    # Define non-enumerable methods on model instances
+    Object.defineProperties @prototype, {
+      save:
+        enumerable: false
+        get: -> ModelOps.save
+      delete:
+        enumerable: false
+        get: -> ModelOps.delete
+    }
+
+    constructor: (properties) ->
+      # Define non-enumerable metadata for this model instance
+      metadata =
+        __state: 'new'
+        __data: properties
+        __changed: {}
+        __dirty: false
+        __identity: null
+
+      for key, value of metadata then do (key) =>
+        Object.defineProperty @, key, {
+          enumerable: false
+          get: -> metadata[key]
+          set: (v) -> metadata[key] = v
+        }
