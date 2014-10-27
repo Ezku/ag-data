@@ -15,6 +15,19 @@ module.exports = (resource) ->
         else true
       instance
 
+    # (states: [Object]) -> [Model] & { save: () -> Promise }
+    collectionFromPersistentStates = (states) ->
+      collection = (
+        for sate in states
+          instanceFromPersistentState sate
+      )
+      collection.save = ->
+        Promise.all (
+          for item in this
+            item.save()
+        )
+      collection
+
     # (id: Model.schema.identity) -> Promise Model
     find: (id) ->
       resource
@@ -24,9 +37,8 @@ module.exports = (resource) ->
     # (query: Object) -> Promise [Model]
     findAll: (query = {}) ->
       resource
-        .findAll(query).then (collection) ->
-          for item in collection
-            instanceFromPersistentState item
+        .findAll(query)
+        .then collectionFromPersistentStates
 
   class Model
     __state: 'new'
