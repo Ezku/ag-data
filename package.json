@@ -29,7 +29,10 @@
     "grunt-env": "^0.4.2",
     "grunt-mocha-cov": "^0.3.0",
     "load-grunt-config": "^0.14.0",
-    "load-grunt-tasks": "^0.6.0"
+    "load-grunt-tasks": "^0.6.0",
+    "chai-as-promised": "^4.1.1",
+    "sinon": "^1.10.3",
+    "sinon-chai": "^2.6.0"
   },
   "config": {
     "blanket": {
@@ -40,9 +43,6 @@
   },
   "dependencies": {
     "ag-resource-loader-json": "^0.1.0",
-    "bluebird": "^2.3.6",
-    "chai-as-promised": "^4.1.1",
-    "sinon": "^1.10.3",
-    "sinon-chai": "^2.6.0"
+    "bluebird": "^2.3.6"
   }
 }
