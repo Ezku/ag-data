@@ -83,6 +83,13 @@ module.exports = (resource) ->
         for field, description of resource.schema.fields when description.identity
           return field
 
+    if @schema.identity? && !resource.schema.fields['id']?
+      identityField = @schema.identity
+      Object.defineProperty @prototype, 'id', {
+        get: -> @__data?[identityField]
+        enumerable: false
+      }
+
     # Define enumerable properties based on schema
     for key, value of resource.schema.fields then do (key) =>
       Object.defineProperty @prototype, key, {

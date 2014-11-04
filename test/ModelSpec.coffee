@@ -337,6 +337,18 @@ describe "ag-data.model", ->
 
   describe "instance identity", ->
 
+    it "can be accessed from .id", ->
+      model = createModelFromResource mockResource {
+        fields:
+          foo: identity: true
+          bar: {}
+        find: {
+          foo: 123
+          bar: 'qux'
+        }
+      }
+      model.find(1).should.eventually.have.property('id').equal 123
+
     describe "a new instance", ->
       it "has no identity", ->
         model = createModelFromResource mockResource {}
