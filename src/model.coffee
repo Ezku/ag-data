@@ -29,6 +29,8 @@ module.exports = (resource) ->
           for item in this
             item.save()
         )
+      collection.equals = (other) ->
+        
       collection
 
     # (id: Model.schema.identity) -> Promise Model
@@ -51,7 +53,9 @@ module.exports = (resource) ->
         Bacon.fromPromise ResourceGateway.findAll()
 
       whenChanged = (f) ->
-        updates.skipDuplicates(deepEqual).onValue f
+        updates.skipDuplicates((left, right) ->
+          left.equals right
+        ).onValue f
 
       { updates, whenChanged }
 
