@@ -1,4 +1,6 @@
 Promise = require 'bluebird'
+Bacon = require 'baconjs'
+
 createModelFromResource = require('../src/model')
 
 chai = require('chai')
@@ -123,6 +125,23 @@ describe "ag-data.model", ->
           }
           model = createModelFromResource resource
           model.all().whenChanged(->).should.be.a 'function'
+
+
+      describe "updates", ->
+        it "is a stream", ->
+          model = createModelFromResource mockResource {}
+          model.all().updates.should.have.property('onValue').be.a 'function'
+
+        it "outputs data from findAll", (done) ->
+          resource = mockResource {
+            findAll: [
+              { foo: 'bar' }
+            ]
+          }
+          model = createModelFromResource resource
+          model.all().updates.onValue ->
+            resource.findAll.should.have.been.calledOnce
+            done()
 
   describe "collection", ->
     it "should be iterable", ->

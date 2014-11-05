@@ -1,4 +1,5 @@
 Promise = require 'bluebird'
+Bacon = require 'baconjs'
 
 # NOTE: It's dangerous to have lifecycle tracking, data storage, dirty state
 # tracking and identity tracking all in one place. Bundle in more concerns
@@ -43,9 +44,13 @@ module.exports = (resource) ->
 
     # () -> Object
     all: ->
-      whenChanged: (f) ->
-        ResourceGateway.findAll().then f
-        return unsubscribe = ->
+      updates = Bacon.once(true).flatMap ->
+        Bacon.fromPromise ResourceGateway.findAll()
+
+      whenChanged = (f) ->
+        updates.onValue f
+
+      { updates, whenChanged }
 
 
   ModelOps =
