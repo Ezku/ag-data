@@ -26,6 +26,19 @@ mockResource = (resourceProps) ->
             sinon.stub().returns Promise.resolve value
   resource
 
+# Evaluates a function. Returns null if the function is successful, or an Error otherwise.
+# Usage:
+#   it "lols", (done) ->
+#     done asserting ->
+#       "lol".should.equal "lol"
+#
+asserting = (f) ->
+  try 
+    f()
+    null
+  catch e
+    e
+
 describe "ag-data.model", ->
   it "is a function", ->
     createModelFromResource.should.be.a 'function'
@@ -129,13 +142,13 @@ describe "ag-data.model", ->
 
           spy = sinon.stub()
           all.whenChanged spy
-
           all
             .updates
             .take(2)
+            .fold(0, (a) -> a + 1)
             .onValue (v) ->
-              spy.should.have.been.calledOnce
-              done()
+              done asserting ->
+                spy.should.have.been.calledOnce
 
           poll.push true
           poll.push true
@@ -187,9 +200,9 @@ describe "ag-data.model", ->
             .take(2)
             .fold(0, (a) -> a + 1)
             .onValue (v) ->
-              v.should.equal 2
-              resource.findAll.should.have.been.calledTwice
-              done()
+              done asserting ->
+                v.should.equal 2
+                resource.findAll.should.have.been.calledTwice
 
           poll.push true
           poll.push true
