@@ -272,7 +272,10 @@ describe "ag-data.model", ->
             }
 
     describe "equals()", ->
-      it "is a function", ->
+
+      collection = null
+
+      beforeEach ->
         resource = mockResource {
           fields:
             id: identity: true
@@ -282,8 +285,14 @@ describe "ag-data.model", ->
           ]
         }
         model = createModelFromResource resource
-        model.findAll().then (collection) ->
-          collection.equals.should.be.a 'function'
+        model.findAll().then (all) ->
+          collection = all
+
+      it "is a function", ->
+        collection.equals.should.be.a 'function'
+
+      it "returns true when passed the same collection", ->
+        collection.equals(collection).should.be.true
 
   describe "instance lifetime", ->
 

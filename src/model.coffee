@@ -30,7 +30,7 @@ module.exports = (resource) ->
             item.save()
         )
       collection.equals = (other) ->
-        
+        true
       collection
 
     # (id: Model.schema.identity) -> Promise Model
