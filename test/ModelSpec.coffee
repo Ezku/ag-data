@@ -143,6 +143,23 @@ describe "ag-data.model", ->
             resource.findAll.should.have.been.calledOnce
             done()
 
+        it "can be driven by a { poll } option to all()", ->
+          resource = mockResource {
+            findAll: [
+              { foo: 'bar' }
+            ]
+          }
+          model = createModelFromResource resource
+          poll = new Bacon.Bus
+          model.all({ poll })
+            .updates
+            .take(2)
+            .fold(0, (a) -> a + 1)
+            .onValue (v) ->
+              v.should.equal 2
+          poll.push true
+          poll.push true
+
   describe "collection", ->
     it "should be iterable", ->
       resource = mockResource {
