@@ -30,7 +30,7 @@ module.exports = (resource) ->
             item.save()
         )
       collection.equals = (other) ->
-        true
+        deepEqual collection.toJson(), other.toJson()
       collection.toJson = ->
         item.asJson for item in collection
       collection

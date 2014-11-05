@@ -294,6 +294,11 @@ describe "ag-data.model", ->
       it "returns true when passed the same collection", ->
         collection.equals(collection).should.be.true
 
+      it "returns false when the .toJson output on the other object differs", ->
+        collection.equals({
+          toJson: -> {}
+        }).should.be.false
+
     describe "toJson()", ->
 
       collection = null
