@@ -44,6 +44,7 @@
   "dependencies": {
     "ag-resource-loader-json": "^0.2.1",
     "baconjs": "^0.7.30",
-    "bluebird": "^2.3.6"
+    "bluebird": "^2.3.6",
+    "deep-equal": "^0.2.1"
   }
 }

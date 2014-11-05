@@ -1,5 +1,6 @@
 Promise = require 'bluebird'
 Bacon = require 'baconjs'
+deepEqual = require 'deep-equal'
 
 # NOTE: It's dangerous to have lifecycle tracking, data storage, dirty state
 # tracking and identity tracking all in one place. Bundle in more concerns
@@ -50,7 +51,7 @@ module.exports = (resource) ->
         Bacon.fromPromise ResourceGateway.findAll()
 
       whenChanged = (f) ->
-        updates.onValue f
+        updates.skipDuplicates(deepEqual).onValue f
 
       { updates, whenChanged }
 
