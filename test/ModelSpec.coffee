@@ -311,7 +311,7 @@ describe "ag-data.model", ->
         model.findAll().then (all) ->
           collection = all
 
-      it.skip "returns the plain old js object representation of the collection", ->
+      it "returns the plain old js object representation of the collection", ->
         collection.toJson().should.deep.equal [
           { id: 123, foo: 'bar' }
         ]
