@@ -130,7 +130,7 @@ describe "ag-data.model", ->
             resource.findAll.should.have.been.calledOnce
             done()
 
-        it.skip "skips duplicates", (done) ->
+        it "skips duplicates", (done) ->
           resource = mockResource {
             fields:
               foo: {}
