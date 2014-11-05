@@ -117,6 +117,29 @@ describe "ag-data.model", ->
             resource.findAll.should.have.been.calledOnce
             done()
 
+        it "skips duplicates", (done) ->
+          resource = mockResource {
+            findAll: [
+              { foo: 'bar' }
+            ]
+          }
+          model = createModelFromResource resource
+          poll = new Bacon.Bus
+          all = model.all({ poll })
+
+          spy = sinon.stub()
+          all.whenChanged spy
+
+          all
+            .updates
+            .take(2)
+            .onValue (v) ->
+              spy.should.have.been.calledOnce
+              done()
+
+          poll.push true
+          poll.push true
+
         it "returns an unsubscribe function", ->
           resource = mockResource {
             findAll: [
