@@ -104,6 +104,17 @@ describe "ag-data.model", ->
           model = createModelFromResource mockResource {}
           model.all().whenChanged.should.be.a 'function'
 
+        it "accepts a listener to call when changes from findAll are received", (done) ->
+          resource = mockResource {
+            findAll: [
+              { foo: 'bar' }
+            ]
+          }
+          model = createModelFromResource resource
+          model.all().whenChanged ->
+            resource.findAll.should.have.been.calledOnce
+            done()
+
   describe "collection", ->
     it "should be iterable", ->
       resource = mockResource {

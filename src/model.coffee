@@ -5,7 +5,7 @@ Promise = require 'bluebird'
 # at your own peril.
 module.exports = (resource) ->
 
-  Resource = do ->
+  ResourceGateway = do ->
     # (state: Object) -> Model
     instanceFromPersistentState = (state) ->
       instance = new Model state
@@ -43,9 +43,9 @@ module.exports = (resource) ->
 
     # () -> Object
     all: ->
-      {
-        whenChanged: ->
-      }
+      whenChanged: (f) ->
+        ResourceGateway.findAll().then f
+
 
   ModelOps =
     save: ->
@@ -80,9 +80,9 @@ module.exports = (resource) ->
           this
 
   class Model
-    @find: Resource.find
-    @findAll: Resource.findAll
-    @all: Resource.all
+    @find: ResourceGateway.find
+    @findAll: ResourceGateway.findAll
+    @all: ResourceGateway.all
 
     @schema:
       fields: resource.schema.fields
