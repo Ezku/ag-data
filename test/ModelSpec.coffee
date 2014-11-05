@@ -178,14 +178,17 @@ describe "ag-data.model", ->
 
         it "outputs data from findAll", (done) ->
           resource = mockResource {
+            fields:
+              foo: {}
             findAll: [
               { foo: 'bar' }
             ]
           }
           model = createModelFromResource resource
-          model.all().updates.onValue ->
-            resource.findAll.should.have.been.calledOnce
-            done()
+          model.all().updates.onValue (v) ->
+            done asserting ->
+              resource.findAll.should.have.been.calledOnce
+              v[0].foo.should.equal 'bar'
 
         it "can be driven by a { poll } option to all()", (done) ->
           resource = mockResource {
