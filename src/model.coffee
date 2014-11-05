@@ -31,6 +31,9 @@ module.exports = (resource) ->
         )
       collection.equals = (other) ->
         true
+      collection.toJson = ->
+        for item in collection
+          item.toJson()
       collection
 
     # (id: Model.schema.identity) -> Promise Model

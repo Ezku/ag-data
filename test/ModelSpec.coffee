@@ -33,7 +33,7 @@ mockResource = (resourceProps) ->
 #       "lol".should.equal "lol"
 #
 asserting = (f) ->
-  try 
+  try
     f()
     null
   catch e
@@ -293,6 +293,28 @@ describe "ag-data.model", ->
 
       it "returns true when passed the same collection", ->
         collection.equals(collection).should.be.true
+
+    describe "toJson()", ->
+
+      collection = null
+
+      beforeEach ->
+        resource = mockResource {
+          fields:
+            id: identity: true
+            foo: {}
+          findAll: [
+            { id: 123, foo: 'bar' }
+          ]
+        }
+        model = createModelFromResource resource
+        model.findAll().then (all) ->
+          collection = all
+
+      it.skip "returns the plain old js object representation of the collection", ->
+        collection.toJson().should.deep.equal [
+          { id: 123, foo: 'bar' }
+        ]
 
   describe "instance lifetime", ->
 
