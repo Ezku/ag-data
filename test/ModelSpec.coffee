@@ -90,6 +90,11 @@ describe "ag-data.model", ->
             instance.should.be.an.instanceof model
           ).should.not.be.empty
 
+    describe "all()", ->
+      it "is a function", ->
+        model = createModelFromResource mockResource {}
+        model.all.should.be.a 'function'
+
   describe "collection", ->
     it "should be iterable", ->
       resource = mockResource {

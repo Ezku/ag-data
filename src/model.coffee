@@ -5,7 +5,7 @@ Promise = require 'bluebird'
 # at your own peril.
 module.exports = (resource) ->
 
-  Gateway = do ->
+  Resource = do ->
     # (state: Object) -> Model
     instanceFromPersistentState = (state) ->
       instance = new Model state
@@ -41,6 +41,9 @@ module.exports = (resource) ->
         .findAll(query)
         .then collectionFromPersistentStates
 
+    # () -> ???
+    all: ->
+
   ModelOps =
     save: ->
       (switch @__state
@@ -74,8 +77,9 @@ module.exports = (resource) ->
           this
 
   class Model
-    @find: Gateway.find
-    @findAll: Gateway.findAll
+    @find: Resource.find
+    @findAll: Resource.findAll
+    @all: Resource.all
 
     @schema:
       fields: resource.schema.fields
