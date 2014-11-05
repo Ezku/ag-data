@@ -41,8 +41,11 @@ module.exports = (resource) ->
         .findAll(query)
         .then collectionFromPersistentStates
 
-    # () -> ???
+    # () -> Object
     all: ->
+      {
+        whenChanged: ->
+      }
 
   ModelOps =
     save: ->

@@ -95,6 +95,15 @@ describe "ag-data.model", ->
         model = createModelFromResource mockResource {}
         model.all.should.be.a 'function'
 
+      it "returns a collection gateway", ->
+        model = createModelFromResource mockResource {}
+        model.all().should.be.an 'object'
+
+      describe "whenChanged()", ->
+        it "is a function", ->
+          model = createModelFromResource mockResource {}
+          model.all().whenChanged.should.be.a 'function'
+
   describe "collection", ->
     it "should be iterable", ->
       resource = mockResource {
