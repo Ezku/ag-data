@@ -115,6 +115,15 @@ describe "ag-data.model", ->
             resource.findAll.should.have.been.calledOnce
             done()
 
+        it "returns an unsubscribe function", ->
+          resource = mockResource {
+            findAll: [
+              { foo: 'bar' }
+            ]
+          }
+          model = createModelFromResource resource
+          model.all().whenChanged(->).should.be.a 'function'
+
   describe "collection", ->
     it "should be iterable", ->
       resource = mockResource {

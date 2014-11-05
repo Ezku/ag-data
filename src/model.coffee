@@ -45,6 +45,7 @@ module.exports = (resource) ->
     all: ->
       whenChanged: (f) ->
         ResourceGateway.findAll().then f
+        return unsubscribe = ->
 
 
   ModelOps =
