@@ -383,6 +383,14 @@ describe "ag-data.model", ->
         properties[key] = value
       properties.should.deep.equal foo: 'bar'
 
+    it "can be accessed as a plain old js object", ->
+      model = createModelFromResource mockResource {
+        fields:
+          foo: {}
+      }
+      instance = new model foo: 'bar'
+      instance.asJson.should.deep.equal foo: 'bar'
+
     describe "with a new instance", ->
       it "should have the properties passed to it on new", ->
         model = createModelFromResource mockResource {

@@ -132,6 +132,9 @@ module.exports = (resource) ->
       delete:
         enumerable: false
         get: -> ModelOps.delete
+      asJson:
+        enumerable: false
+        get: -> @__data
     }
 
     constructor: (properties) ->
