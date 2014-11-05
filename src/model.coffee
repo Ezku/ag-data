@@ -42,9 +42,11 @@ module.exports = (resource) ->
         .findAll(query)
         .then collectionFromPersistentStates
 
-    # () -> Object
-    all: ->
-      updates = Bacon.once(true).flatMap ->
+    # ({ poll: Stream? }) -> Object
+    all: (options = {}) ->
+      shouldUpdate = options.poll ? Bacon.interval(options.interval ? 10000, true).startWith(true)
+
+      updates = shouldUpdate.flatMap ->
         Bacon.fromPromise ResourceGateway.findAll()
 
       whenChanged = (f) ->

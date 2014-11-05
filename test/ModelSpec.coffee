@@ -132,6 +132,14 @@ describe "ag-data.model", ->
           model = createModelFromResource mockResource {}
           model.all().updates.should.have.property('onValue').be.a 'function'
 
+        it "is driven by an interval by default", ->
+          model = createModelFromResource mockResource {}
+          model.all().updates.toString().should.match /Bacon\.interval/
+
+        it "has a default interval of 10000 ms", ->
+          model = createModelFromResource mockResource {}
+          model.all().updates.toString().should.match /\interval\(10000/
+
         it "outputs data from findAll", (done) ->
           resource = mockResource {
             findAll: [
@@ -143,7 +151,7 @@ describe "ag-data.model", ->
             resource.findAll.should.have.been.calledOnce
             done()
 
-        it "can be driven by a { poll } option to all()", ->
+        it "can be driven by a { poll } option to all()", (done) ->
           resource = mockResource {
             findAll: [
               { foo: 'bar' }
@@ -157,6 +165,9 @@ describe "ag-data.model", ->
             .fold(0, (a) -> a + 1)
             .onValue (v) ->
               v.should.equal 2
+              resource.findAll.should.have.been.calledTwice
+              done()
+
           poll.push true
           poll.push true
 
