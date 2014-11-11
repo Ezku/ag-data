@@ -413,6 +413,24 @@ describe "ag-data.model", ->
         instance = new model foo: 'bar', qux: 'trol'
         instance.should.not.have.property('qux')
 
+      it "should not have property in __proto__", ->
+        model = createModelFromResource mockResource {
+          fields:
+            foo: {}
+        }
+        instance = new model foo: 'bar'
+        Object.keys(instance.__proto__).should.not.include('foo')
+
+      it "should have properties in root", ->
+        model = createModelFromResource mockResource {
+          fields:
+            foo: {}
+        }
+        instance = new model foo: 'bar'
+        Object.keys(instance).should.include('foo')
+
+
+
     describe "save()", ->
       describe "with a new instance", ->
         it "sends the instance properties to the resource", ->

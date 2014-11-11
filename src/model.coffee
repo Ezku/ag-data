@@ -112,17 +112,6 @@ module.exports = (resource) ->
         enumerable: false
       }
 
-    # Define enumerable properties based on schema
-    for key, value of resource.schema.fields then do (key) =>
-      Object.defineProperty @prototype, key, {
-        get: -> @__data[key]
-        set: (v) ->
-          @__data[key] = v
-          @__dirty = true
-          @__changed[key] = true
-        enumerable: true
-      }
-
     # Define non-enumerable methods on model instances
     Object.defineProperties @prototype, {
       save:
@@ -150,4 +139,15 @@ module.exports = (resource) ->
           enumerable: false
           get: -> metadata[key]
           set: (v) -> metadata[key] = v
+        }
+
+      # Define enumerable properties based on schema
+      for key, value of resource.schema.fields then do (key) =>
+        Object.defineProperty @, key, {
+          get: -> @__data[key]
+          set: (v) ->
+            @__data[key] = v
+            @__dirty = true
+            @__changed[key] = true
+          enumerable: true
         }
