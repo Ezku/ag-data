@@ -140,7 +140,7 @@ describe "ag-data.model", ->
           }
           model = createModelFromResource resource
           poll = new Bacon.Bus
-          all = model.all({ poll })
+          all = model.all({}, { poll })
 
           spy = sinon.stub()
           all.whenChanged spy
@@ -200,7 +200,7 @@ describe "ag-data.model", ->
           }
           model = createModelFromResource resource
           poll = new Bacon.Bus
-          model.all({ poll })
+          model.all({}, { poll })
             .updates
             .take(2)
             .fold(0, (a) -> a + 1)
@@ -617,6 +617,3 @@ describe "ag-data.model", ->
         model.find(123).then (instance) ->
           instance.delete().then ->
             resource.delete.should.have.been.calledWith 123
-
-
-
