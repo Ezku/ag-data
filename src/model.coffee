@@ -35,6 +35,30 @@ module.exports = (resource) ->
         item.asJson for item in collection
       collection
 
+    # (collection: [Model]) -> [Model] & { whenChanged: ()->, updates: Stream }
+    dynamifyCollection = (query)-> (collection)->
+      updates = new Bacon.Bus()
+
+      # ((changedValue)->, { poll: Stream? interval: Number? }) -> ()->
+      collection.whenChanged = (f, options={}) ->
+        bus = new Bacon.Bus()
+        shouldUpdate = options.poll ? bus.bufferingThrottle(options.interval ? 10000)
+
+        updates.plug shouldUpdate.flatMap ->
+          Bacon.fromPromise ResourceGateway.findAll(query).tap ->
+            bus.push true # query done -> schedule new update
+
+        unsubscribe = updates.skipDuplicates (left, right) ->
+          left.equals right
+        .onValue f
+
+        bus.push true # schedule first update
+        unsubscribe
+
+      collection.updates = updates.delay(1) # TODO: although there's no Bus.asEventStream(), expose a Stream instead of original Bus.
+
+      collection
+
     # (id: Model.schema.identity) -> Promise Model
     find: (id) ->
       resource
@@ -46,8 +70,9 @@ module.exports = (resource) ->
       resource
         .findAll(query)
         .then collectionFromPersistentStates
+        .then dynamifyCollection(query)
 
-    # (query: Object, { poll: Stream? }) -> { updates: Stream, whenChanged: Stream }
+    # (query: Object, { poll: Stream? , interval: Number? }) -> { updates: Stream , whenChanged: Stream }
     all: (query = {}, options = {}) ->
       bus = new Bacon.Bus()
       shouldUpdate = options.poll ? bus.bufferingThrottle(options.interval ? 10000)
@@ -57,12 +82,12 @@ module.exports = (resource) ->
           bus.push true
 
       whenChanged = (f) ->
-        unsub = updates.skipDuplicates((left, right) ->
+        unbsubscribe = updates.skipDuplicates((left, right) ->
           left.equals right
         ).onValue f
 
         bus.push true
-        unsub
+        unbsubscribe
 
       { updates, whenChanged }
 
