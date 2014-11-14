@@ -1,6 +1,6 @@
 {
   "name": "ag-data",
-  "version": "0.3.4",
+  "version": "0.4.0",
   "description": "Library for fluently accessing cloud data through the AG data proxy",
   "main": "lib/index.js",
   "scripts": {
