@@ -47,17 +47,22 @@ module.exports = (resource) ->
         .findAll(query)
         .then collectionFromPersistentStates
 
-    # (query: Object, { poll: Stream? }) -> Object
+    # (query: Object, { poll: Stream? }) -> { updates: Stream, whenChanged: Stream }
     all: (query = {}, options = {}) ->
-      shouldUpdate = options.poll ? Bacon.interval(options.interval ? 10000, true).startWith(true)
+      bus = new Bacon.Bus()
+      shouldUpdate = options.poll ? bus.bufferingThrottle(options.interval ? 10000)
 
       updates = shouldUpdate.flatMap ->
-        Bacon.fromPromise ResourceGateway.findAll(query)
+        Bacon.fromPromise ResourceGateway.findAll(query).tap ->
+          bus.push true
 
       whenChanged = (f) ->
-        updates.skipDuplicates((left, right) ->
+        unsub = updates.skipDuplicates((left, right) ->
           left.equals right
         ).onValue f
+
+        bus.push true
+        unsub
 
       { updates, whenChanged }
 
