@@ -42,7 +42,7 @@ module.exports = (resource) ->
       # ((changedValue)->, { poll: Stream? interval: Number? }) -> ()->
       collection.whenChanged = (f, options={}) ->
         bus = new Bacon.Bus()
-        shouldUpdate = options.poll ? bus.bufferingThrottle(options.interval ? 10000)
+        shouldUpdate = options.poll ? bus.bufferingThrottle(options.interval ? 1000)
 
         updates.plug shouldUpdate.flatMap ->
           Bacon.fromPromise ResourceGateway.findAll(query).tap ->
@@ -75,7 +75,7 @@ module.exports = (resource) ->
     # (query: Object, { poll: Stream? , interval: Number? }) -> { updates: Stream , whenChanged: Stream }
     all: (query = {}, options = {}) ->
       bus = new Bacon.Bus()
-      shouldUpdate = options.poll ? bus.bufferingThrottle(options.interval ? 10000)
+      shouldUpdate = options.poll ? bus.bufferingThrottle(options.interval ? 1000)
 
       updates = shouldUpdate.flatMap ->
         Bacon.fromPromise ResourceGateway.findAll(query).tap ->
