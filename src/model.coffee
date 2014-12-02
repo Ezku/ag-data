@@ -13,7 +13,7 @@ module.exports = (resource) ->
       instance = new Model state
       instance.__state = 'persisted'
       instance.__identity = switch
-        when Model.schema.identity? then state[Model.schema.identity]
+        when Model.schema.identifier? then state[Model.schema.identifier]
         # TODO: what happens on save and delete for an instance where this holds?
         else true
       instance
@@ -59,7 +59,7 @@ module.exports = (resource) ->
 
       collection
 
-    # (id: Model.schema.identity) -> Promise Model
+    # (id: Model.schema.identifier) -> Promise Model
     find: (id) ->
       resource
         .find(id)
@@ -98,7 +98,7 @@ module.exports = (resource) ->
         when 'deleted' then Promise.reject new Error "Will not save a deleted instance"
         when 'new' then resource.create(@__data).then (result) =>
           @__identity = switch
-            when Model.schema.identity? then result[Model.schema.identity]
+            when Model.schema.identifier? then result[Model.schema.identifier]
             # TODO: what happens on save and delete for an instance where this holds?
             else true
         when 'persisted'
@@ -131,16 +131,14 @@ module.exports = (resource) ->
 
     @schema:
       fields: resource.schema.fields
-      identity: do ->
-        for field, description of resource.schema.fields when description.identity
-          return field
+      identifier: resource.schema.identifier
 
-    # TODO: Make identity immutable for the user. Now, the user can accidentally set it.
-    if @schema.identity? && !resource.schema.fields['id']?
-      identityField = @schema.identity
+    # Create accessor for identity field
+    if @schema.identifier?
+      identityField = @schema.identifier
       Object.defineProperty @prototype, 'id', {
         get: -> @__data?[identityField]
-        enumerable: false
+        enumerable: true
       }
 
     # Define non-enumerable methods on model instances
@@ -173,7 +171,8 @@ module.exports = (resource) ->
         }
 
       # Define enumerable properties based on schema
-      for key, value of resource.schema.fields then do (key) =>
+      # Don't make identifier settable
+      for key, value of resource.schema.fields when (key isnt resource.schema.identifier)
         Object.defineProperty @, key, {
           get: -> @__data[key]
           set: (v) ->
