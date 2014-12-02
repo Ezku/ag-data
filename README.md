@@ -14,3 +14,9 @@ Is model.save an unidirectional update or a bidirectional sync?
 - "save" implies unidirectionality, means save without local changes is a no-op
 - if save receives new properties from backend on update, it implies bidirectionality
 - this is a contradiction unless "save" is renamed - how about "sync"?
+
+## To do
+
+User can accidentally set a new value for the id column
+- Make id immutable
+

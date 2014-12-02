@@ -135,6 +135,7 @@ module.exports = (resource) ->
         for field, description of resource.schema.fields when description.identity
           return field
 
+    # TODO: Make identity immutable for the user. Now, the user can accidentally set it.
     if @schema.identity? && !resource.schema.fields['id']?
       identityField = @schema.identity
       Object.defineProperty @prototype, 'id', {
