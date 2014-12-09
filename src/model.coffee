@@ -174,6 +174,7 @@ module.exports = (resource) ->
 
       # Define enumerable properties based on schema
       # Don't make identifier settable
+      # NOTE: this is in the constructor to make these properties owned by the object
       for key, value of resource.schema.fields when (key isnt resource.schema.identifier)
         Object.defineProperty @, key, {
           get: -> @__data[key]
