@@ -244,8 +244,9 @@ describe "ag-data.model", ->
   describe "collection", ->
     it "should be iterable", ->
       resource = mockResource {
+        identifier: 'id'
         fields:
-          id: identity: true
+          id: {}
           foo: {}
         findAll: [
           { id: 123, foo: 'bar' }
@@ -258,7 +259,7 @@ describe "ag-data.model", ->
         items = []
         for item in collection
           props = {}
-          for key, value of item
+          for own key, value of item
             props[key] = value
           items.push props
 

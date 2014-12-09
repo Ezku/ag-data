@@ -135,14 +135,6 @@ module.exports = (resource) ->
       fields: resource.schema.fields
       identifier: resource.schema.identifier
 
-    # Create accessor for identity field
-    if @schema.identifier?
-      identityField = @schema.identifier
-      Object.defineProperty @prototype, 'id', {
-        get: -> @__data?[identityField]
-        enumerable: true
-      }
-
     # Define non-enumerable methods on model instances
     Object.defineProperties @prototype, {
       save:
@@ -175,6 +167,11 @@ module.exports = (resource) ->
       # Define enumerable properties based on schema
       # Don't make identifier settable
       # NOTE: this is in the constructor to make these properties owned by the object
+      if resource.schema.identifier?
+        Object.defineProperty @, 'id', {
+          get: -> @__data?[resource.schema.identifier]
+          enumerable: true
+        }
       for key, value of resource.schema.fields when (key isnt resource.schema.identifier)
         Object.defineProperty @, key, {
           get: -> @__data[key]
