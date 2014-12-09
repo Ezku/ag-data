@@ -94,11 +94,12 @@ module.exports = (resource, defaultRequestOptions) ->
 
       { updates, whenChanged }
 
-    # Object
+    # Stream
     options: do ->
-      if defaultRequestOptions?
-        resource.setOptions?(defaultRequestOptions)
-      defaultRequestOptions
+      requestOptionUpdates = Bacon.combineTemplate(defaultRequestOptions || {})
+      requestOptionUpdates.onValue (options) ->
+        resource.setOptions?(options)
+      requestOptionUpdates
 
 
   ModelOps =
