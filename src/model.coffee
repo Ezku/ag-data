@@ -37,6 +37,7 @@ module.exports = (resource) ->
 
     # (collection: [Model]) -> [Model] & { whenChanged: ()->, updates: Stream }
     dynamifyCollection = (query)-> (collection)->
+      # TODO: use .flatMapFirst to drive updates instead of Bus that's pushed manually
       updates = new Bacon.Bus()
 
       # ((changedValue)->, { poll: Stream? interval: Number? }) -> ()->
@@ -74,6 +75,7 @@ module.exports = (resource) ->
 
     # (query: Object, { poll: Stream? , interval: Number? }) -> { updates: Stream , whenChanged: Stream }
     all: (query = {}, options = {}) ->
+      # TODO: use .flatMapFirst to drive updates instead of Bus that's pushed manually
       bus = new Bacon.Bus()
       shouldUpdate = options.poll ? bus.bufferingThrottle(options.interval ? 1000)
 
