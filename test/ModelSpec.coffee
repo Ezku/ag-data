@@ -17,6 +17,7 @@ mockResource = (resourceProps) ->
   }
   for key, value of resourceProps
     switch key
+      when 'identifier' then resource.schema.identifier = value
       when 'fields' then resource.schema.fields = value
       else
         if value instanceof Function
@@ -56,12 +57,13 @@ describe "ag-data.model", ->
         }
         model.schema.fields.should.have.keys ['foo', 'bar']
 
-      it "should have the identity field name available", ->
+      it "should have the identifier field name available", ->
         model = createModelFromResource mockResource {
+          identifier: 'id'
           fields:
-            id: identity: true
+            id: {}
         }
-        model.schema.identity.should.equal 'id'
+        model.schema.identifier.should.equal 'id'
 
     describe "find()", ->
       it "accepts an identifier and passes it to the resource", ->
