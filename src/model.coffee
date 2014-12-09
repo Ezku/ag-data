@@ -5,7 +5,7 @@ deepEqual = require 'deep-equal'
 # NOTE: It's dangerous to have lifecycle tracking, data storage, dirty state
 # tracking and identity tracking all in one place. Bundle in more concerns
 # at your own peril.
-module.exports = (resource, options) ->
+module.exports = (resource, defaultRequestOptions) ->
 
   ResourceGateway = do ->
 
@@ -95,7 +95,10 @@ module.exports = (resource, options) ->
       { updates, whenChanged }
 
     # Object
-    options: options
+    options: do ->
+      if defaultRequestOptions?
+        resource.setOptions?(defaultRequestOptions)
+      defaultRequestOptions
 
 
   ModelOps =
