@@ -173,11 +173,12 @@ module.exports = (resource) ->
           enumerable: true
         }
       for key, value of resource.schema.fields when (key isnt resource.schema.identifier)
-        Object.defineProperty @, key, {
-          get: -> @__data[key]
-          set: (v) ->
-            @__data[key] = v
-            @__dirty = true
-            @__changed[key] = true
-          enumerable: true
-        }
+        do (key) =>
+          Object.defineProperty @, key, {
+            get: -> @__data[key]
+            set: (v) ->
+              @__data[key] = v
+              @__dirty = true
+              @__changed[key] = true
+            enumerable: true
+          }
