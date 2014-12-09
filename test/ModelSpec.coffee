@@ -352,8 +352,9 @@ describe "ag-data.model", ->
     describe "save()", ->
       it "delegates save to individual model instances", ->
         resource = mockResource {
+          identifier: 'id'
           fields:
-            id: identity: true
+            id: {}
             foo: {}
           findAll: [
             { id: 123, foo: 'bar' }
@@ -389,8 +390,9 @@ describe "ag-data.model", ->
 
       beforeEach ->
         resource = mockResource {
+          identifier: 'id'
           fields:
-            id: identity: true
+            id: {}
             foo: {}
           findAll: [
             { id: 123, foo: 'bar' }
@@ -417,8 +419,9 @@ describe "ag-data.model", ->
 
       beforeEach ->
         resource = mockResource {
+          identifier: 'id'
           fields:
-            id: identity: true
+            id: {}
             foo: {}
           findAll: [
             { id: 123, foo: 'bar' }
@@ -649,8 +652,9 @@ describe "ag-data.model", ->
 
     it "can be accessed from .id", ->
       model = createModelFromResource mockResource {
+        identifier: 'foo'
         fields:
-          foo: identity: true
+          foo: {}
           bar: {}
         find: {
           foo: 123
@@ -667,8 +671,9 @@ describe "ag-data.model", ->
 
       it "gains an identity from the resource when saved", ->
         model = createModelFromResource mockResource {
+          identifier: 'foo'
           fields:
-            foo: identity: true
+            foo: {}
           create: {
             foo: 123
           }
@@ -680,8 +685,9 @@ describe "ag-data.model", ->
     describe "a persisted instance", ->
       it "has an identity from the resource", ->
         model = createModelFromResource mockResource {
+          identifier: 'foo'
           fields:
-            foo: identity: true
+            foo: {}
             bar: {}
           find: {
             foo: 123
@@ -715,8 +721,9 @@ describe "ag-data.model", ->
     describe "a persisted instance", ->
       it "does update with the current identity", ->
         resource = mockResource {
+          identifier: 'foo'
           fields:
-            foo: identity: true
+            foo: {}
             bar: {}
           find: {
             foo: 123
@@ -734,8 +741,9 @@ describe "ag-data.model", ->
 
       it "does delete with the current identity", ->
         resource = mockResource {
+          identifier: 'foo'
           fields:
-            foo: identity: true
+            foo: {}
             bar: {}
           find: {
             foo: 123
