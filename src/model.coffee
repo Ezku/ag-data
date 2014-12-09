@@ -5,9 +5,10 @@ deepEqual = require 'deep-equal'
 # NOTE: It's dangerous to have lifecycle tracking, data storage, dirty state
 # tracking and identity tracking all in one place. Bundle in more concerns
 # at your own peril.
-module.exports = (resource) ->
+module.exports = (resource, options) ->
 
   ResourceGateway = do ->
+
     # (state: Object) -> Model
     instanceFromPersistentState = (state) ->
       instance = new Model state
@@ -93,6 +94,9 @@ module.exports = (resource) ->
 
       { updates, whenChanged }
 
+    # Object
+    options: options
+
 
   ModelOps =
     save: ->
@@ -130,6 +134,7 @@ module.exports = (resource) ->
     @find: ResourceGateway.find
     @findAll: ResourceGateway.findAll
     @all: ResourceGateway.all
+    @options: ResourceGateway.options
 
     @schema:
       fields: resource.schema.fields

@@ -19,3 +19,6 @@ describe "ag-data.model", ->
 
   it "accepts a resource and returns a model class", ->
     createModelFromResource(mockResource {}).should.be.a 'function'
+
+  it "optionally accepts an options object", ->
+    createModelFromResource(mockResource({}), {}).options.should.be.an 'object'
