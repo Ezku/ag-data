@@ -42,7 +42,7 @@
     }
   },
   "dependencies": {
-    "ag-resource-loader-json": "^0.3.1",
+    "ag-resource-loader-json": "^0.3.2",
     "baconjs": "0.7.34",
     "bluebird": "2.3.11",
     "deep-equal": "0.2.1"
