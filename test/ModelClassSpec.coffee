@@ -53,6 +53,14 @@ describe "ag-data.model.class", ->
       }
       model.find(1).should.eventually.have.property('foo').equal 'bar'
 
+  describe "fromJson()", ->
+    it "accepts an object and returns a model instance", ->
+      model = createModelFromResource mockResource {
+        fields:
+          foo: {}
+      }
+      model.fromJson(foo: 'bar').foo.should.equal 'bar'
+
   describe "findAll()", ->
     it "accepts query options and passes them to the resource", ->
       resource = mockResource findAll: {}
