@@ -87,7 +87,7 @@ describe "ag-data.model.instance", ->
           foo: {}
       }
       instance = new model foo: 'bar'
-      instance.toJson.should.deep.equal foo: 'bar'
+      instance.toJson().should.deep.equal foo: 'bar'
 
     describe "with a new instance", ->
       it "should have the properties passed to it on new", ->

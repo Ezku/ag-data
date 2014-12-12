@@ -158,7 +158,7 @@ module.exports = (resource, defaultRequestOptions) ->
         get: -> ModelOps.delete
       toJson:
         enumerable: false
-        get: -> @__data
+        get: -> => @__data
     }
 
     constructor: (properties) ->
