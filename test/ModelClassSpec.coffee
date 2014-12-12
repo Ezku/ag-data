@@ -61,6 +61,22 @@ describe "ag-data.model.class", ->
       }
       model.fromJson(foo: 'bar').foo.should.equal 'bar'
 
+    it "assumes the instance is persistent", ->
+      resource = mockResource {
+        identifier: 'id'
+        fields:
+          id: {}
+          foo: {}
+        update: {}
+      }
+      model = createModelFromResource resource
+      instance = model.fromJson(id: 123, foo: 'something')
+      instance.foo = 'something else'
+      instance.save().then ->
+        resource.update.should.have.been.calledWith 123, {
+          foo: 'something else'
+        }
+
   describe "findAll()", ->
     it "accepts query options and passes them to the resource", ->
       resource = mockResource findAll: {}
