@@ -118,6 +118,7 @@ module.exports = (resource, defaultRequestOptions) ->
         when 'new' then resource.create(@__data).then (result) =>
           @__data = result
           @__dirty = false
+          @__changed = {}
           @__state = 'persisted'
           @__identity = switch
             when Model.schema.identifier? then result[Model.schema.identifier]
