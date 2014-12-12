@@ -12,6 +12,7 @@ module.exports = (resource, defaultRequestOptions) ->
     # (state: Object) -> Model
     instanceFromPersistentState = (state) ->
       instance = new Model state
+      instance.__dirty = false
       instance.__state = 'persisted'
       instance.__identity = switch
         when Model.schema.identifier? then state[Model.schema.identifier]
@@ -173,7 +174,7 @@ module.exports = (resource, defaultRequestOptions) ->
         __state: 'new'
         __data: properties
         __changed: {}
-        __dirty: false
+        __dirty: (true for key, value of properties).length > 0
         __identity: null
 
       for key, value of metadata then do (key) =>
