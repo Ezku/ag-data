@@ -80,6 +80,21 @@ describe "ag-data.model.class", ->
         instance.delete().then ->
           resource.delete.should.have.been.calledWith 123
 
+    it "assumes everything but the identity in the instance is dirty", ->
+      resource = mockResource {
+        identifier: 'id'
+        fields:
+          id: {}
+          foo: {}
+        update: {}
+      }
+      model = createModelFromResource resource
+      instance = model.fromJson(id: 123, foo: 'something')
+      instance.save().then ->
+        resource.update.should.have.been.calledWith 123, {
+          foo: 'something'
+        }
+
   describe "findAll()", ->
     it "accepts query options and passes them to the resource", ->
       resource = mockResource findAll: {}

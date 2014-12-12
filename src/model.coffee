@@ -102,7 +102,12 @@ module.exports = (resource, defaultRequestOptions) ->
       requestOptionUpdates
 
     # (json: Object) -> Model
-    fromJson: instanceFromPersistentState
+    fromJson: (json) ->
+      instance = instanceFromPersistentState json
+      instance.__dirty = true
+      for key, value of instance.__data when (key isnt Model.schema.identifier)
+        instance.__changed[key] = true
+      instance
 
 
   ModelOps =
