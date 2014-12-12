@@ -249,16 +249,17 @@ describe "ag-data.model.instance", ->
 
       it "gains an identity from the resource when saved", ->
         model = createModelFromResource mockResource {
-          identifier: 'foo'
+          identifier: 'uid'
           fields:
-            foo: {}
+            uid: {}
           create: {
-            foo: 123
+            uid: 123
           }
         }
         instance = new model
         instance.save().then ->
           instance.should.have.property('__identity').equal 123
+          instance.id.should.equal 123
 
     describe "a persisted instance", ->
       it "has an identity from the resource", ->
@@ -276,7 +277,13 @@ describe "ag-data.model.instance", ->
 
       it "maintains identity when saved", ->
         model = createModelFromResource mockResource {
-          find: { foo: 'bar' }
+          identifier: 'uid'
+          fields:
+            uid: {}
+            foo: {}
+          find:
+            uid: 123
+            foo: 'bar'
           update: {}
         }
         model.find(1).then (instance) ->
@@ -284,6 +291,7 @@ describe "ag-data.model.instance", ->
           instance.foo = 'qux'
           instance.save().then ->
             instance.__identity.should.equal identity
+            instance[model.schema.identifier].should.equal identity
 
       it "loses its identity when deleted", ->
         model = createModelFromResource mockResource {
