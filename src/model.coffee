@@ -117,6 +117,8 @@ module.exports = (resource, defaultRequestOptions) ->
         when 'deleted' then Promise.reject new Error "Will not save a deleted instance"
         when 'new' then resource.create(@__data).then (result) =>
           @__data = result
+          @__dirty = false
+          @__state = 'persisted'
           @__identity = switch
             when Model.schema.identifier? then result[Model.schema.identifier]
             # TODO: what happens on save and delete for an instance where this holds?
