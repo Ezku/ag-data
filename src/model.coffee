@@ -102,8 +102,7 @@ module.exports = (resource, defaultRequestOptions) ->
       requestOptionUpdates
 
     # (json: Object) -> Model
-    fromJson: (json) ->
-      new Model json
+    fromJson: instanceFromPersistentState
 
 
   ModelOps =
