@@ -164,8 +164,8 @@ describe "ag-data.model.instance", ->
 
           instance = new model foo: 'bar'
           instance.save().then ->
-            resource.create.should.have.been.called
             instance.save().then ->
+              resource.create.should.have.been.calledOnce
               resource.update.should.not.have.been.called
 
       describe "with a persistent instance", ->
