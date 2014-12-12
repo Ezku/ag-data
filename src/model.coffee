@@ -101,6 +101,10 @@ module.exports = (resource, defaultRequestOptions) ->
         resource.setOptions?(options)
       requestOptionUpdates
 
+    # (json: Object) -> Model
+    fromJson: (json) ->
+      new Model json
+
 
   ModelOps =
     save: ->
@@ -139,6 +143,7 @@ module.exports = (resource, defaultRequestOptions) ->
     @findAll: ResourceGateway.findAll
     @all: ResourceGateway.all
     @options: ResourceGateway.options
+    @fromJson: ResourceGateway.fromJson
 
     @schema:
       fields: resource.schema.fields
