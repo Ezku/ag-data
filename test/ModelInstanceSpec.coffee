@@ -139,6 +139,21 @@ describe "ag-data.model.instance", ->
               foo: 'bar'
             }
 
+        it "re-saving with no changes should have no effect", ->
+          resource = mockResource {
+            fields:
+              foo: {}
+            create: { foo: 'bar' }
+            update: {}
+          }
+          model = createModelFromResource resource
+
+          instance = new model foo: 'bar'
+          instance.save().then ->
+            resource.create.should.have.been.called
+            instance.save().then ->
+              resource.update.should.not.have.been.called
+
       describe "with a persistent instance", ->
         it "sends updated properties to the resource", ->
           resource = mockResource {
