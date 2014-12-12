@@ -33,7 +33,7 @@ module.exports = (resource, defaultRequestOptions) ->
       collection.equals = (other) ->
         deepEqual collection.toJson(), other.toJson()
       collection.toJson = ->
-        item.asJson for item in collection
+        item.toJson for item in collection
       collection
 
     # (collection: [Model]) -> [Model] & { whenChanged: ()->, updates: Stream }
@@ -152,7 +152,7 @@ module.exports = (resource, defaultRequestOptions) ->
       delete:
         enumerable: false
         get: -> ModelOps.delete
-      asJson:
+      toJson:
         enumerable: false
         get: -> @__data
     }
