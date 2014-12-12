@@ -89,6 +89,20 @@ describe "ag-data.model.instance", ->
       instance = new model foo: 'bar'
       instance.toJson().should.deep.equal foo: 'bar'
 
+    describe "serialization", ->
+      it "preserves identity", ->
+        model = createModelFromResource mockResource {
+          identifier: 'uid'
+          fields:
+            uid: {}
+            foo: {}
+          find:
+            uid: 123
+            foo: 'bar'
+        }
+        model.find(123).then (instance) ->
+          model.fromJson(instance.toJson()).id.should.equal instance.id
+
     describe "with a new instance", ->
       it "should have the properties passed to it on new", ->
         model = createModelFromResource mockResource {
