@@ -33,7 +33,7 @@ module.exports = (resource, defaultRequestOptions) ->
       collection.equals = (other) ->
         deepEqual collection.toJson(), other.toJson()
       collection.toJson = ->
-        item.toJson for item in collection
+        item.toJson() for item in collection
       collection
 
     # (collection: [Model]) -> [Model] & { whenChanged: ()->, updates: Stream }
