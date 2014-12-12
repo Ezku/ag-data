@@ -306,7 +306,7 @@ describe "ag-data.model.instance", ->
           instance.foo = 'qux'
           instance.save().then ->
             instance.__identity.should.equal identity
-            instance[model.schema.identifier].should.equal identity
+            instance.id.should.equal identity
 
       it "loses its identity when deleted", ->
         model = createModelFromResource mockResource {
