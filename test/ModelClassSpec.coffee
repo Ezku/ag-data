@@ -68,6 +68,7 @@ describe "ag-data.model.class", ->
           id: {}
           foo: {}
         update: {}
+        delete: {}
       }
       model = createModelFromResource resource
       instance = model.fromJson(id: 123, foo: 'something')
@@ -76,6 +77,8 @@ describe "ag-data.model.class", ->
         resource.update.should.have.been.calledWith 123, {
           foo: 'something else'
         }
+        instance.delete().then ->
+          resource.delete.should.have.been.calledWith 123
 
   describe "findAll()", ->
     it "accepts query options and passes them to the resource", ->
