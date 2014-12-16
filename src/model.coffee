@@ -205,3 +205,8 @@ module.exports = (resource, defaultRequestOptions) ->
               @__changed[key] = true
             enumerable: true
           }
+
+  if defaultRequestOptions?.cache?.enabled
+    Model.cache = {}
+
+  Model
