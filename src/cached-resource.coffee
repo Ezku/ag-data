@@ -1,6 +1,6 @@
 Promise = require 'bluebird'
 
-module.exports = cacheResourceFromResource = (resource) ->
+module.exports = cachedResourceFromResource = (resource) ->
   # Setup caches
   collectionCache = {}
   instanceCache = {}
