@@ -83,3 +83,14 @@ describe "ag-data.model.options", ->
             enabled: true
         }
       ).should.have.property('cache').exist
+
+    it "will prevent consecutive find() calls from hitting the resource twice", ->
+      resource = mockResource {
+        find: {}
+      }
+      model = createModelFromResource resource, cache: enabled: true
+      model.find(123).then ->
+        model.find(123).then ->
+          resource.find.should.have.been.calledOnce
+
+
