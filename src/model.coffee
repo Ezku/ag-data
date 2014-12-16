@@ -1,6 +1,7 @@
 Promise = require 'bluebird'
 Bacon = require 'baconjs'
 deepEqual = require 'deep-equal'
+cacheResource = require './cache-resource'
 
 # NOTE: It's dangerous to have lifecycle tracking, data storage, dirty state
 # tracking and identity tracking all in one place. Bundle in more concerns
@@ -207,6 +208,7 @@ module.exports = (resource, defaultRequestOptions) ->
           }
 
   if defaultRequestOptions?.cache?.enabled
+    resource = cacheResource resource
     Model.cache = {}
 
   Model
