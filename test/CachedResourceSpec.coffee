@@ -70,3 +70,14 @@ describe "ag-data.cached-resource", ->
       }
       cachedResource.expirations.toString().should.match /never/
 
+    it "should clear individual instance cache", ->
+      expire = new Bacon.Bus
+      resource = mockResource {
+        find: {}
+      }
+      cachedResource = createCachedResource resource, { expire }
+      cachedResource.find(123).then ->
+        expire.push true
+        cachedResource.find(123).then ->
+          resource.find.should.have.been.calledTwice
+
