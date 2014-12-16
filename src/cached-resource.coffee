@@ -8,6 +8,9 @@ module.exports = cachedResourceFromResource = (resource, options = {}) ->
   expirations = switch
     when options.expire? then options.expire
     else Bacon.interval 10000
+
+  expirations.onValue ->
+    instanceCache = {}
   
   # Copy resource as a base
   cachedResource = {}
