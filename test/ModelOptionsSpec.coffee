@@ -73,3 +73,13 @@ describe "ag-data.model.options", ->
             foo: 'bar'
           }
         }
+
+  describe "enabling caching", ->
+    it "is done by a passing a boolean option", ->
+      createModelFromResource(
+        mockResource {}
+        {
+          cache:
+            enabled: true
+        }
+      ).should.have.property('cache').exist
