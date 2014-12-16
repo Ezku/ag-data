@@ -93,6 +93,15 @@ describe "ag-data.model.options", ->
         model.find(123).then ->
           resource.find.should.have.been.calledOnce
 
+    it "will prevent consecutive findAll() calls from hitting the resource twice", ->
+      resource = mockResource {
+        findAll: []
+      }
+      model = createModelFromResource resource, cache: enabled: true
+      model.findAll().then ->
+        model.findAll().then ->
+          resource.findAll.should.have.been.calledOnce
+
     it "will leverage knowledge about schema to allow findAll() to warm up the cache for find()", ->
       resource = mockResource {
         identifier: 'id'
