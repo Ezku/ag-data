@@ -18,4 +18,11 @@ module.exports = cacheResourceFromResource = (resource) ->
         cache[id] = result
         result
 
+  cachedResource.findAll = ->
+    resource.findAll().then (collection) ->
+      if resource.schema.identifier?
+        for item in collection when item[resource.schema.identifier]?
+          cache[item[resource.schema.identifier]] = item
+      collection
+
   cachedResource
