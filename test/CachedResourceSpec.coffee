@@ -54,5 +54,19 @@ describe "ag-data.cached-resource", ->
           resource.findAll.should.have.been.calledOnce
           resource.find.should.not.have.been.called
 
+  describe "cache expiration", ->
+    it "is driven by an interval by default", ->
+      cachedResource = createCachedResource mockResource {}
+      cachedResource.expirations.toString().should.match /Bacon\.interval/
 
+    it "has a default interval of 10 seconds", ->
+      cachedResource = createCachedResource mockResource {}
+      cachedResource.expirations.toString().should.match /\interval\(10000/
+
+    it "can be driven by an { expire } option provided when decorating", ->
+      expire = Bacon.never()
+      cachedResource = createCachedResource (mockResource {}), {
+        expire
+      }
+      cachedResource.expirations.toString().should.match /never/
 

@@ -1,9 +1,13 @@
+Bacon = require 'baconjs'
 Promise = require 'bluebird'
 
-module.exports = cachedResourceFromResource = (resource) ->
+module.exports = cachedResourceFromResource = (resource, options = {}) ->
   # Setup caches
   collectionCache = {}
   instanceCache = {}
+  expirations = switch
+    when options.expire? then options.expire
+    else Bacon.interval 10000
   
   # Copy resource as a base
   cachedResource = {}
@@ -31,9 +35,11 @@ module.exports = cachedResourceFromResource = (resource) ->
         collectionCache[cacheKey] = collection
         collection
 
+  # Extend with some properties
   cachedResource.cache = {
     collectionCache
     instanceCache
   }
+  cachedResource.expirations = expirations
 
   cachedResource
