@@ -86,12 +86,12 @@ module.exports = (resource, defaultRequestOptions) ->
           bus.push true
 
       whenChanged = (f) ->
-        unbsubscribe = updates.skipDuplicates((left, right) ->
+        unsub = updates.skipDuplicates((left, right) ->
           left.equals right
         ).onValue f
 
         bus.push true
-        unbsubscribe
+        unsub
 
       { updates, whenChanged }
 
