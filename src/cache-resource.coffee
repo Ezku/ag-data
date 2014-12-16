@@ -25,4 +25,6 @@ module.exports = cacheResourceFromResource = (resource) ->
           cache[item[resource.schema.identifier]] = item
       collection
 
+  cachedResource.cache = cache
+
   cachedResource

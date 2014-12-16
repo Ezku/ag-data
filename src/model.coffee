@@ -209,6 +209,6 @@ module.exports = (resource, defaultRequestOptions) ->
 
   if defaultRequestOptions?.cache?.enabled
     resource = cacheResource resource
-    Model.cache = {}
+    Model.cache = resource.cache
 
   Model
