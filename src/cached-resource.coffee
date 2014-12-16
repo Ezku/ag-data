@@ -11,6 +11,7 @@ module.exports = cachedResourceFromResource = (resource, options = {}) ->
 
   expirations.onValue ->
     instanceCache = {}
+    collectionCache = {}
   
   # Copy resource as a base
   cachedResource = {}
