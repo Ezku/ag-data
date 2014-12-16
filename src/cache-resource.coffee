@@ -1,7 +1,8 @@
 Promise = require 'bluebird'
 
 module.exports = cacheResourceFromResource = (resource) ->
-  # Setup cache
+  # Setup caches
+  collectionCache = {}
   instanceCache = {}
   
   # Copy resource as a base
@@ -18,13 +19,21 @@ module.exports = cacheResourceFromResource = (resource) ->
         instanceCache[id] = result
         result
 
-  cachedResource.findAll = ->
-    resource.findAll().then (collection) ->
-      if resource.schema.identifier?
-        for item in collection when item[resource.schema.identifier]?
-          instanceCache[item[resource.schema.identifier]] = item
-      collection
+  cachedResource.findAll = (query) ->
+    cacheKey = JSON.stringify query
+    if collectionCache[cacheKey]?
+      Promise.resolve collectionCache[cacheKey]
+    else
+      resource.findAll().then (collection) ->
+        if resource.schema.identifier?
+          for item in collection when item[resource.schema.identifier]?
+            instanceCache[item[resource.schema.identifier]] = item
+        collectionCache[cacheKey] = collection
+        collection
 
-  cachedResource.cache = instanceCache
+  cachedResource.cache = {
+    collectionCache
+    instanceCache
+  }
 
   cachedResource
