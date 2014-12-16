@@ -93,4 +93,22 @@ describe "ag-data.model.options", ->
         model.find(123).then ->
           resource.find.should.have.been.calledOnce
 
+    it "will leverage knowledge about schema to allow findAll() to warm up the cache for find()", ->
+      resource = mockResource {
+        identifier: 'id'
+        fields:
+          id: {}
+          foo: {}
+        findAll: [
+          { id: 123, foo: 'bar'}
+        ]
+        find: {}
+      }
+      model = createModelFromResource resource, cache: enabled: true
+      model.findAll().then (collection) ->
+        model.find(123).then ->
+          resource.findAll.should.have.been.calledOnce
+          resource.find.should.not.have.been.called
+
+
 
