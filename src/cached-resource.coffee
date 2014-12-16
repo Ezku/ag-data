@@ -1,17 +1,22 @@
 Bacon = require 'baconjs'
 Promise = require 'bluebird'
+asyncKeyValueStorage = require './async-key-value-storage'
+cache = require './cache'
 
 module.exports = cachedResourceFromResource = (resource, options = {}) ->
   # Setup caches
-  collectionCache = {}
-  instanceCache = {}
   expirations = switch
     when options.expire? then options.expire
     else Bacon.interval 10000
+  storage = switch
+    when options.storage? then options.storage
+    else asyncKeyValueStorage()
+  collectionCache = cache "collections-#{resource.name}", storage
+  instanceCache = cache "instances-#{resource.name}", storage
 
   expirations.onValue ->
-    instanceCache = {}
-    collectionCache = {}
+    instanceCache.clear()
+    collectionCache.clear()
   
   # Copy resource as a base
   cachedResource = {}
@@ -20,23 +25,15 @@ module.exports = cachedResourceFromResource = (resource, options = {}) ->
 
   # Decorate resource
   cachedResource.find = (id) ->
-    if instanceCache[id]?
-      Promise.resolve instanceCache[id]
-    else
-      resource.find(id).then (result) ->
-        instanceCache[id] = result
-        result
+    instanceCache.computeIfAbsent id, ->
+      resource.find(id)
 
   cachedResource.findAll = (query) ->
-    cacheKey = JSON.stringify query
-    if collectionCache[cacheKey]?
-      Promise.resolve collectionCache[cacheKey]
-    else
+    collectionCache.computeIfAbsent query, ->
       resource.findAll().then (collection) ->
         if resource.schema.identifier?
           for item in collection when item[resource.schema.identifier]?
-            instanceCache[item[resource.schema.identifier]] = item
-        collectionCache[cacheKey] = collection
+            instanceCache.set item[resource.schema.identifier] = item
         collection
 
   # Extend with some properties
