@@ -15,59 +15,61 @@ asserting = require './asserting'
 
 describe "ag-data.model.options", ->
 
-  it "allows setting options on resource", ->
-    resource = mockResource {
-      setOptions: {}
-    }
-    options = {
-      headers: {
-        foo: 'bar'
-      }
-    }
-    createModelFromResource(resource, options)
-    resource.setOptions.should.have.been.calledWith options
+  describe "passing options when constructing model", ->
 
-  it "may have streams as option values", ->
-    resource = mockResource {
-      setOptions: {}
-    }
-    createModelFromResource(resource, {
-      headers: {
-        foo: Bacon.once 'bar'
+    it "allows setting options on resource", ->
+      resource = mockResource {
+        setOptions: {}
       }
-    })
-    resource.setOptions.should.have.been.calledWith {
-      headers: {
-        foo: 'bar'
+      options = {
+        headers: {
+          foo: 'bar'
+        }
       }
-    }
+      createModelFromResource(resource, options)
+      resource.setOptions.should.have.been.calledWith options
 
-  describe "when no properties have values from the stream yet", ->
-    it "should not set options", ->
+    it "may have streams as option values", ->
       resource = mockResource {
         setOptions: {}
       }
       createModelFromResource(resource, {
         headers: {
-          foo: Bacon.never()
+          foo: Bacon.once 'bar'
         }
       })
-      resource.setOptions.should.not.have.been.called
-
-  describe "when pushing a fresh value to a stream", ->
-    it "will cause options to be set again", ->
-      resource = mockResource {
-        setOptions: {}
-      }
-      foo = new Bacon.Bus
-      createModelFromResource(resource, {
-        headers: {
-          foo
-        }
-      })
-      foo.push 'bar'
       resource.setOptions.should.have.been.calledWith {
         headers: {
           foo: 'bar'
         }
       }
+
+    describe "when no properties have values from the stream yet", ->
+      it "should not set options", ->
+        resource = mockResource {
+          setOptions: {}
+        }
+        createModelFromResource(resource, {
+          headers: {
+            foo: Bacon.never()
+          }
+        })
+        resource.setOptions.should.not.have.been.called
+
+    describe "when pushing a fresh value to a stream", ->
+      it "will cause options to be set again", ->
+        resource = mockResource {
+          setOptions: {}
+        }
+        foo = new Bacon.Bus
+        createModelFromResource(resource, {
+          headers: {
+            foo
+          }
+        })
+        foo.push 'bar'
+        resource.setOptions.should.have.been.calledWith {
+          headers: {
+            foo: 'bar'
+          }
+        }
