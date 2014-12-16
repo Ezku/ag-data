@@ -92,3 +92,21 @@ describe "ag-data.cached-resource", ->
         cachedResource.findAll().then ->
           resource.findAll.should.have.been.calledTwice
 
+  describe "storage injection", ->
+    it "can be done with a { storage } option provided when decorating", ->
+      storage =
+        getItem: sinon.stub().returns Promise.resolve {}
+        setItem: sinon.stub().returns Promise.resolve {}
+
+      resource = mockResource {
+        find: {
+          foo: 'bar'
+        }
+      }
+      cachedResource = createCachedResource resource, { storage }
+      cachedResource.find(123).then ->
+        storage.getItem.should.have.been.calledWith 123
+        storage.setItem.should.have.been.calledWith 123, {
+          foo: 'bar'
+        }
+
