@@ -81,3 +81,14 @@ describe "ag-data.cached-resource", ->
         cachedResource.find(123).then ->
           resource.find.should.have.been.calledTwice
 
+    it "should clear collection instance cache", ->
+      expire = new Bacon.Bus
+      resource = mockResource {
+        findAll: []
+      }
+      cachedResource = createCachedResource resource, { expire }
+      cachedResource.findAll().then ->
+        expire.push true
+        cachedResource.findAll().then ->
+          resource.findAll.should.have.been.calledTwice
+
