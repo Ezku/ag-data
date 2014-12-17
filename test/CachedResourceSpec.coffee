@@ -95,7 +95,7 @@ describe "ag-data.cached-resource", ->
   describe "storage injection", ->
     it "can be done with a { storage } option provided when decorating", ->
       storage =
-        getItem: sinon.stub().returns Promise.resolve {}
+        getItem: sinon.stub().returns Promise.resolve null
         setItem: sinon.stub().returns Promise.resolve {}
 
       resource = mockResource {
@@ -105,8 +105,8 @@ describe "ag-data.cached-resource", ->
       }
       cachedResource = createCachedResource resource, { storage }
       cachedResource.find(123).then ->
-        storage.getItem.should.have.been.calledWith 123
-        storage.setItem.should.have.been.calledWith 123, {
+        storage.getItem.should.have.been.calledWith "instances-foos(123)"
+        storage.setItem.should.have.been.calledWith "instances-foos(123)", {
           foo: 'bar'
         }
 
