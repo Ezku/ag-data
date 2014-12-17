@@ -72,6 +72,24 @@ describe "ag-data.cached-resource", ->
           cachedResource.find(123).then ->
             resource.find.should.have.been.calledTwice
 
+    it "will invalidate the collection cache", ->
+      resource = mockResource
+        identifier: 'id'
+        fields:
+          id: {}
+          foo: {}
+        update: {}
+        findAll: [
+          { id: 123, foo: 'bar' }
+        ]
+
+      cachedResource = createCachedResource resource
+      cachedResource.findAll().then (record) ->
+        record.foo = 'qux'
+        cachedResource.update(123, record).then ->
+          cachedResource.findAll().then ->
+            resource.findAll.should.have.been.calledTwice
+
   describe "create()", ->
     it "will invalidate the collection cache", ->
       resource = mockResource
