@@ -35,8 +35,9 @@ module.exports = cachedResourceFromResource = (resource, options = {}) ->
         collection
 
   cachedResource.update = (id, rest...) ->
-    instanceCache.invalidateIfSuccessful id, ->
-      resource.update(id, rest...)
+    collectionCache.invalidateIfSuccessful {}, ->
+      instanceCache.invalidateIfSuccessful id, ->
+        resource.update(id, rest...)
 
   cachedResource.create = (args...) ->
     collectionCache.invalidateIfSuccessful {}, ->
