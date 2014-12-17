@@ -30,7 +30,7 @@ module.exports = cachedResourceFromResource = (resource, options = {}) ->
 
   cachedResource.findAll = (query) ->
     collectionCache.computeIfAbsent query, ->
-      resource.findAll().then (collection) ->
+      resource.findAll(query).then (collection) ->
         if resource.schema.identifier?
           for item in collection when item[resource.schema.identifier]?
             instanceCache.set item[resource.schema.identifier] = item
