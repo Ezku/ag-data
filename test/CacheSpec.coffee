@@ -18,39 +18,43 @@ describe "ag-data.cache", ->
   it "accepts a namespace and a storage", ->
     createCache("namespace", {}).should.be.an 'object'
 
-  describe "set()", ->
-    it "will cause key to be present", ->
-      cache = createCache("namespace", asyncKeyValueStorage())
-      cache.set("key", "value").then ->
-        whenAbsent = sinon.stub()
-        cache.computeIfAbsent("key", whenAbsent).then ->
-          whenAbsent.should.not.have.been.called
+  it "can create a cache prop", ->
+    createCache("namespace", {}).prop("key").should.be.an 'object'    
 
-  describe "computeIfAbsent()", ->
-    it "will yield existing value if there is one", ->
+  describe "prop()", ->
+    cache = null
+    prop = null
+    beforeEach ->
       cache = createCache("namespace", asyncKeyValueStorage())
-      cache.set("key", "value").then ->
-        cache.computeIfAbsent("key", ->).should.eventually.equal "value"
+      prop = cache.prop "key-#{Math.random()}"
 
-    it "will yield value from computation if there is no value", ->
-      cache = createCache("namespace", asyncKeyValueStorage())
-      cache.computeIfAbsent("key", -> "value").should.eventually.equal "value"
+    describe "set()", ->
+      it "will cause key to be present", ->
+        prop.set("key", "value").then ->
+          whenAbsent = sinon.stub()
+          prop.computeIfAbsent(whenAbsent).then ->
+            whenAbsent.should.not.have.been.called
 
-    it "will set value after computing it", ->
-      cache = createCache("namespace", asyncKeyValueStorage())
-      cache.computeIfAbsent("key", -> "value").then ->
-        cache.computeIfAbsent("key", ->).should.eventually.equal "value"
+    describe "computeIfAbsent()", ->
+      it "will yield existing value if there is one", ->
+        prop.set("value").then ->
+          prop.computeIfAbsent(->).should.eventually.equal "value"
 
-  describe "invalidateIfSuccessful()", ->
-    it "will remove an existing value after success", ->
-      cache = createCache("namespace", asyncKeyValueStorage())
-      cache.set("key", "old value").then ->
-        cache.invalidateIfSuccessful("key", -> Promise.resolve()).then ->
-          cache.computeIfAbsent("key", -> "fresh value").should.eventually.equal "fresh value"
+      it "will yield value from computation if there is no value", ->
+        prop.computeIfAbsent(-> "value").should.eventually.equal "value"
 
-    it "will do nothing after failure", ->
-      cache = createCache("namespace", asyncKeyValueStorage())
-      cache.set("key", "old value").then ->
-        cache.invalidateIfSuccessful("key", -> Promise.reject(new Error "nope")).error ->
-          cache.computeIfAbsent("key", -> "fresh value").should.eventually.equal "old value"
+      it "will set value after computing it", ->
+        prop.computeIfAbsent(-> "value").then ->
+          prop.computeIfAbsent(->).should.eventually.equal "value"
+
+    describe "invalidateIfSuccessful()", ->
+      it "will remove an existing value after success", ->
+        prop.set("old value").then ->
+          prop.invalidateIfSuccessful(-> Promise.resolve()).then ->
+            prop.computeIfAbsent(-> "fresh value").should.eventually.equal "fresh value"
+
+      it "will do nothing after failure", ->
+        prop.set("old value").then ->
+          prop.invalidateIfSuccessful(-> Promise.reject(new Error "nope")).error ->
+            prop.computeIfAbsent(-> "fresh value").should.eventually.equal "old value"
 

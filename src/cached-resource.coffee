@@ -23,29 +23,29 @@ module.exports = cachedResourceFromResource = (resource, options = {}) ->
 
   # Decorate resource
   cachedResource.find = (id) ->
-    instanceCache.computeIfAbsent id, ->
+    instanceCache.prop(id).computeIfAbsent ->
       resource.find(id)
 
   cachedResource.findAll = (query = {}) ->
-    collectionCache.computeIfAbsent query, ->
+    collectionCache.prop(query).computeIfAbsent ->
       resource.findAll(query).then (collection) ->
         if resource.schema.identifier?
           for item in collection when item[resource.schema.identifier]?
-            instanceCache.set item[resource.schema.identifier], item
+            instanceCache.prop(item[resource.schema.identifier]).set item
         collection
 
   cachedResource.update = (id, rest...) ->
-    collectionCache.invalidateIfSuccessful {}, ->
-      instanceCache.invalidateIfSuccessful id, ->
+    collectionCache.prop({}).invalidateIfSuccessful ->
+      instanceCache.prop(id).invalidateIfSuccessful ->
         resource.update(id, rest...)
 
   cachedResource.create = (args...) ->
-    collectionCache.invalidateIfSuccessful {}, ->
+    collectionCache.prop({}).invalidateIfSuccessful ->
       resource.create(args...)
 
   cachedResource.delete = (id) ->
-    collectionCache.invalidateIfSuccessful {}, ->
-      instanceCache.invalidateIfSuccessful id, ->
+    collectionCache.prop({}).invalidateIfSuccessful ->
+      instanceCache.prop(id).invalidateIfSuccessful ->
         resource.delete id
 
   # Extend with some properties

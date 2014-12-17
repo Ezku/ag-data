@@ -6,9 +6,8 @@ module.exports = (namespace, storage) ->
   # Object -> String
   keyWithNamespace = (key) -> "#{namespace}(#{JSON.stringify (key or null)})"
 
-  # (key: String, compute: () -> Promise) -> Promise
-  computeIfAbsent: (key, compute) ->
-    index = keyWithNamespace key
+  # (index: String) -> (compute: () -> Promise) -> Promise
+  computeIfAbsent = (index) -> (compute) ->
     storage.getItem(index).then (value) ->
       if value?
         value
@@ -18,14 +17,14 @@ module.exports = (namespace, storage) ->
             journal.push index
             value
 
-  set: (key, value) ->
-    index = keyWithNamespace key
+  # (index: String) -> (value: Object) -> Promise
+  set = (index) -> (value) ->
     storage.setItem(index, value).then ->
       journal.push index
       value
 
-  invalidateIfSuccessful: (key, operation) ->
-    index = keyWithNamespace key
+  # (index: String) -> (operation: () -> Promise) -> Promise
+  invalidateIfSuccessful = (index) -> (operation) ->
     Promise.resolve(operation()).then (result) ->
       storage.removeItem(index).then ->
         result
@@ -38,3 +37,9 @@ module.exports = (namespace, storage) ->
       journal = []
       null
 
+  prop: (key) ->
+    index = keyWithNamespace key
+
+    computeIfAbsent: computeIfAbsent index
+    set: set index
+    invalidateIfSuccessful: invalidateIfSuccessful index
