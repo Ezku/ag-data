@@ -18,10 +18,8 @@ module.exports = cachedResourceFromResource = (resource, options = {}) ->
     instanceCache.clear()
     collectionCache.clear()
   
-  # Copy resource as a base
-  cachedResource = {}
-  for key, value of resource
-    cachedResource[key] = value
+  # Decorate underlying resource by having it as the prototype
+  cachedResource = Object.create resource
 
   # Decorate resource
   cachedResource.find = (id) ->
