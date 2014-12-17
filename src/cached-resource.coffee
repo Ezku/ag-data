@@ -43,8 +43,9 @@ module.exports = cachedResourceFromResource = (resource, options = {}) ->
       resource.create(args...)
 
   cachedResource.delete = (id) ->
-    instanceCache.invalidateIfSuccessful id, ->
-      resource.delete id
+    collectionCache.invalidateIfSuccessful {}, ->
+      instanceCache.invalidateIfSuccessful id, ->
+        resource.delete id
 
   # Extend with some properties
   cachedResource.cache = {
