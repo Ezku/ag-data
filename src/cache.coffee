@@ -4,7 +4,7 @@ module.exports = (namespace, storage) ->
   journal = []
 
   # Object -> String
-  keyWithNamespace = (key) -> "#{namespace}(#{JSON.stringify key})"
+  keyWithNamespace = (key) -> "#{namespace}(#{JSON.stringify (key or null)})"
 
   # (key: String, compute: () -> Promise) -> Promise
   computeIfAbsent: (key, compute) ->
