@@ -72,6 +72,22 @@ describe "ag-data.cached-resource", ->
           cachedResource.find(123).then ->
             resource.find.should.have.been.calledTwice
 
+  describe "create", ->
+    it "will invalidate the collection cache", ->
+      resource = mockResource
+        identifier: 'id'
+        fields:
+          id: {}
+          foo: {}
+        create: {}
+        findAll: {}
+
+      cachedResource = createCachedResource resource
+      cachedResource.findAll().then ->
+        cachedResource.create({}).then ->
+          cachedResource.findAll().then ->
+            resource.findAll.should.have.been.calledTwice
+
   describe "cache expiration", ->
     it "is driven by an interval by default", ->
       cachedResource = createCachedResource mockResource {}
