@@ -72,7 +72,7 @@ describe "ag-data.cached-resource", ->
           cachedResource.find(123).then ->
             resource.find.should.have.been.calledTwice
 
-  describe "create", ->
+  describe "create()", ->
     it "will invalidate the collection cache", ->
       resource = mockResource
         identifier: 'id'
@@ -87,6 +87,23 @@ describe "ag-data.cached-resource", ->
         cachedResource.create({}).then ->
           cachedResource.findAll().then ->
             resource.findAll.should.have.been.calledTwice
+
+  describe "delete()", ->
+    it "will invalidate the record cache", ->
+      resource = mockResource
+        identifier: 'id'
+        fields:
+          id: {}
+          foo: {}
+        find: {
+          id: 123, foo: 'bar'
+        }
+        delete: {}
+      cachedResource = createCachedResource resource
+      cachedResource.find(123).then (record) ->
+        cachedResource.delete(123).then ->
+          cachedResource.find(123).then ->
+            resource.find.should.have.been.calledTwice
 
   describe "cache expiration", ->
     it "is driven by an interval by default", ->
