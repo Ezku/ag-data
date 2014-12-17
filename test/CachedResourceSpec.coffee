@@ -54,6 +54,24 @@ describe "ag-data.cached-resource", ->
           resource.findAll.should.have.been.calledOnce
           resource.find.should.not.have.been.called
 
+  describe "update()", ->
+    it "will invalidate the record cache for a given record", ->
+      resource = mockResource
+        identifier: 'id'
+        fields:
+          id: {}
+          foo: {}
+        find: {
+          id: 123, foo: 'bar'
+        }
+        update: {}
+      cachedResource = createCachedResource resource
+      cachedResource.find(123).then (record) ->
+        record.foo = 'qux'
+        cachedResource.update(123, record).then ->
+          cachedResource.find(123).then ->
+            resource.find.should.have.been.calledTwice
+
   describe "cache expiration", ->
     it "is driven by an interval by default", ->
       cachedResource = createCachedResource mockResource {}
