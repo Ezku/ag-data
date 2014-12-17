@@ -33,7 +33,7 @@ module.exports = cachedResourceFromResource = (resource, options = {}) ->
       resource.findAll(query).then (collection) ->
         if resource.schema.identifier?
           for item in collection when item[resource.schema.identifier]?
-            instanceCache.set item[resource.schema.identifier] = item
+            instanceCache.set item[resource.schema.identifier], item
         collection
 
   # Extend with some properties
