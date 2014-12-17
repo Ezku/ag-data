@@ -70,7 +70,7 @@ describe "ag-data.cached-resource", ->
       }
       cachedResource.expirations.toString().should.match /never/
 
-    it "should clear individual instance cache", ->
+    it "should clear individual record cache", ->
       expire = new Bacon.Bus
       resource = mockResource {
         find: {}
@@ -81,7 +81,7 @@ describe "ag-data.cached-resource", ->
         cachedResource.find(123).then ->
           resource.find.should.have.been.calledTwice
 
-    it "should clear collection instance cache", ->
+    it "should clear collection record cache", ->
       expire = new Bacon.Bus
       resource = mockResource {
         findAll: []
@@ -105,8 +105,8 @@ describe "ag-data.cached-resource", ->
       }
       cachedResource = createCachedResource resource, { storage }
       cachedResource.find(123).then ->
-        storage.getItem.should.have.been.calledWith "instances-foos(123)"
-        storage.setItem.should.have.been.calledWith "instances-foos(123)", {
+        storage.getItem.should.have.been.calledWith "records-foos(123)"
+        storage.setItem.should.have.been.calledWith "records-foos(123)", {
           foo: 'bar'
         }
 

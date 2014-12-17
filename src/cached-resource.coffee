@@ -12,7 +12,7 @@ module.exports = cachedResourceFromResource = (resource, options = {}) ->
     when options.storage? then options.storage
     else asyncKeyValueStorage()
   collectionCache = createCache "collections-#{resource.name}", storage
-  instanceCache = createCache "instances-#{resource.name}", storage
+  instanceCache = createCache "records-#{resource.name}", storage
 
   expirations.onValue ->
     instanceCache.clear()
