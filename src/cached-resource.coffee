@@ -34,6 +34,10 @@ module.exports = cachedResourceFromResource = (resource, options = {}) ->
             instanceCache.set item[resource.schema.identifier], item
         collection
 
+  cachedResource.update = (id, rest...) ->
+    instanceCache.invalidateIfSuccessful id, ->
+      resource.update(id, rest...)
+
   # Extend with some properties
   cachedResource.cache = {
     collectionCache

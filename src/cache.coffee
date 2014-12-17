@@ -24,6 +24,12 @@ module.exports = (namespace, storage) ->
       journal.push index
       value
 
+  invalidateIfSuccessful: (key, operation) ->
+    index = keyWithNamespace key
+    Promise.resolve(operation()).then (result) ->
+      storage.removeItem(index).then ->
+        result
+
   clear: ->
     Promise.all(
       for index in journal
