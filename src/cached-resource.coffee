@@ -26,7 +26,7 @@ module.exports = cachedResourceFromResource = (resource, options = {}) ->
     instanceCache.computeIfAbsent id, ->
       resource.find(id)
 
-  cachedResource.findAll = (query) ->
+  cachedResource.findAll = (query = {}) ->
     collectionCache.computeIfAbsent query, ->
       resource.findAll(query).then (collection) ->
         if resource.schema.identifier?
@@ -37,6 +37,10 @@ module.exports = cachedResourceFromResource = (resource, options = {}) ->
   cachedResource.update = (id, rest...) ->
     instanceCache.invalidateIfSuccessful id, ->
       resource.update(id, rest...)
+
+  cachedResource.create = (args...) ->
+    collectionCache.invalidateIfSuccessful {}, ->
+      resource.create(args...)
 
   # Extend with some properties
   cachedResource.cache = {
