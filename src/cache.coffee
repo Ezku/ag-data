@@ -1,6 +1,8 @@
 Promise = require 'bluebird'
 
 module.exports = (namespace, storage) ->
+  journal = []
+
   # Object -> String
   keyWithNamespace = (key) -> "#{namespace}(#{JSON.stringify key})"
 
@@ -13,12 +15,20 @@ module.exports = (namespace, storage) ->
       else
         Promise.resolve(compute()).then (value) ->
           storage.setItem(index, value).then ->
+            journal.push index
             value
 
   set: (key, value) ->
     index = keyWithNamespace key
     storage.setItem(index, value).then ->
+      journal.push index
       value
 
   clear: ->
+    Promise.all(
+      for index in journal
+        storage.removeItem index
+    ).then ->
+      journal = []
+      null
 
