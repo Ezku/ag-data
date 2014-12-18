@@ -5,9 +5,9 @@ createCache = require './cache'
 
 module.exports = cachedResourceFromResource = (resource, options = {}) ->
   # Setup caches
-  expirations = switch
-    when options.expire? then options.expire
-    else Bacon.interval 10000
+  timeToLive = switch
+    when options.timeToLive? then options.timeToLive
+    else 10000
   storage = switch
     when options.storage? then options.storage
     else asyncKeyValueStorage()
@@ -48,6 +48,7 @@ module.exports = cachedResourceFromResource = (resource, options = {}) ->
   cachedResource.cache = {
     collectionCache
     instanceCache
+    timeToLive
   }
 
   cachedResource
