@@ -42,6 +42,7 @@ module.exports = (namespace, storage, time) ->
     index = keyWithNamespace key
 
     computeIfAbsent: computeIfAbsent index
+    computeUnlessValid: computeIfAbsent index
     set: set index
     invalidateIfSuccessful: invalidateIfSuccessful index
 

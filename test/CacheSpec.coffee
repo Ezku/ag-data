@@ -57,10 +57,14 @@ describe "ag-data.cache", ->
       it "will remove an existing value after success", ->
         prop.set("old value").then ->
           prop.invalidateIfSuccessful(-> Promise.resolve()).then ->
-            prop.computeIfAbsent(-> "fresh value").should.eventually.equal "fresh value"
+            prop.computeUnlessValid(-> "fresh value").should.eventually.equal "fresh value"
 
       it "will do nothing after failure", ->
         prop.set("old value").then ->
           prop.invalidateIfSuccessful(-> Promise.reject(new Error "nope")).error ->
-            prop.computeIfAbsent(-> "fresh value").should.eventually.equal "old value"
+            prop.computeUnlessValid(-> "fresh value").should.eventually.equal "old value"
+
+    describe "computeUnlessValid", ->
+      it "will yield value from computation if there is no value", ->
+        prop.computeUnlessValid(-> "value").should.eventually.equal "value"
 
