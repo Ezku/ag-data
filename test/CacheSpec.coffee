@@ -68,3 +68,7 @@ describe "ag-data.cache", ->
       it "will yield value from computation if there is no value", ->
         prop.computeUnlessValid(-> "value").should.eventually.equal "value"
 
+      it "will yield a value that was set immediately before", ->
+        prop.set("old value").then ->
+          prop.computeUnlessValid(-> "fresh value").should.eventually.equal "old value"
+
