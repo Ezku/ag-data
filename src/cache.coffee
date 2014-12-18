@@ -5,10 +5,19 @@ module.exports = (namespace, storage, time) ->
     d = new Date()
     d.getTime() * 1000 + d.getUTCMilliseconds()
 
-  journal = []
-
   # Object -> String
   keyWithNamespace = (key) -> "#{namespace}(#{JSON.stringify (key or null)})"
+
+  # String -> String
+  metadataKeyForIndex = (index) -> "#{index}[meta]"
+
+  # (metadata: { lastUpdated }, options: { timeToLive }) -> boolean
+  isValidMeta = (metadata, options) ->
+    return false unless options?.timeToLive?
+    return false unless metadata?.lastUpdated?
+    
+    lifetime = time() - metadata.lastUpdated
+    return lifetime < options.timeToLive
 
   # (index: String) -> (compute: () -> Promise) -> Promise
   computeIfAbsent = (index) -> (compute) ->
@@ -16,43 +25,42 @@ module.exports = (namespace, storage, time) ->
       if value?
         value
       else
-        Promise.resolve(compute()).then (value) ->
-          storage.setItem(index, value).then ->
-            journal.push index
-            value
+        Promise.resolve(compute()).then set(index)
+
+  # (index: String, timeToLive: Integer) -> (compute: () -> Promise) -> Promise
+  computeUnlessValid = (index, timeToLive) -> (compute) ->
+    storage.getItem(metadataKeyForIndex index).then (metadata) ->
+      if isValidMeta metadata, { timeToLive }
+        storage.getItem(index)
+      else
+        Promise.resolve(compute()).then set(index)
 
   # (index: String) -> (value: Object) -> Promise
   set = (index) -> (value) ->
     storage.setItem(index, value).then ->
-      journal.push index
-      value
+      storage.setItem((metadataKeyForIndex index), {
+        lastUpdated: time()
+      }).then ->
+        value
 
   # (index: String) -> (operation: () -> Promise) -> Promise
   invalidateIfSuccessful = (index) -> (operation) ->
     Promise.resolve(operation()).then (result) ->
-      storage.removeItem(index).then ->
+      storage.removeItem(metadataKeyForIndex index).then ->
         result
-
-  clear = ->
-    Promise.all(
-      for index in journal
-        storage.removeItem index
-    ).then ->
-      journal = []
-      null
 
   prop = (key, options) ->
     index = keyWithNamespace key
+    timeToLive = options?.timeToLive ? 10000
 
     # NOTE: Possibly smelly factoring because the only function to deal with timeToLive is computeUnlessValid
     computeIfAbsent: computeIfAbsent index
-    computeUnlessValid: computeIfAbsent index
+    computeUnlessValid: computeUnlessValid index, timeToLive
     set: set index
     invalidateIfSuccessful: invalidateIfSuccessful index
-    timeToLive: options?.timeToLive ? 10000
+    timeToLive: timeToLive
 
   return {
-    clear
     prop
     namespace
     storage
