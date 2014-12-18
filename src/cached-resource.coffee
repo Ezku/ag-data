@@ -19,11 +19,11 @@ module.exports = cachedResourceFromResource = (resource, options = {}) ->
 
   # Decorate resource
   cachedResource.find = (id) ->
-    instanceCache.prop(id).computeUnlessValid ->
+    instanceCache.prop(id, { timeToLive }).computeUnlessValid ->
       resource.find(id)
 
   cachedResource.findAll = (query = {}) ->
-    collectionCache.prop(query).computeUnlessValid ->
+    collectionCache.prop(query, { timeToLive }).computeUnlessValid ->
       resource.findAll(query).then (collection) ->
         if resource.schema.identifier?
           for item in collection when item[resource.schema.identifier]?
