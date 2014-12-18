@@ -110,3 +110,32 @@ describe "ag-data.model with cache", ->
               unsub()
               resource.findAll.should.have.been.calledTwice
               done()
+
+    it "will hit the resource again after the collection cache's timeToLive has expired", (done) ->
+      resource = mockResource {
+        identifier: 'id'
+        fields:
+          id: {}
+          foo: {}
+        findAll: [
+          { id: 123, foo: 'bar' }
+        ]
+      }
+      model = createModelFromResource resource, {
+        cache:
+          enabled: true
+          timeToLive: 20
+      }
+      updates = model.all({}, { interval: 10 }).updates
+      updates
+        .take(1)
+        .onValue ->
+          # Make sure there's a listener and the poller is triggering
+          unsub = updates.onValue ->
+
+          Promise.resolve()
+            .delay(15)
+            .then ->
+              unsub()
+              resource.findAll.should.have.been.calledTwice
+              done()
