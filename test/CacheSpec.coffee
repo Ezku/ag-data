@@ -42,60 +42,73 @@ describe "ag-data.cache", ->
       , 1
 
   describe "prop()", ->
-    cache = null
-    prop = null
-    currentTime = null
-    timeToLive = 1
-    step = (amount = 1) ->
-      currentTime = (currentTime || 0) + amount
-    beforeEach ->
-      currentTime = 0
-      cache = createCache("namespace", asyncKeyValueStorage(), -> currentTime)
-      prop = cache.prop "key-#{Math.random()}", { timeToLive }
 
     it "optionally accepts a timeToLive argument", ->
-      prop.timeToLive.should.equal timeToLive
+      timeToLive = 123
+      createCache("namespace", {})
+        .prop("key", { timeToLive })
+        .timeToLive.should.equal timeToLive
 
-    describe "set()", ->
-      it "will cause key to be present", ->
-        prop.set("key", "value").then ->
-          whenAbsent = sinon.stub()
-          prop.computeIfAbsent(whenAbsent).then ->
-            whenAbsent.should.not.have.been.called
+    describe "time-invariant behavior", ->
+      cache = null
+      prop = null
+      beforeEach ->
+        cache = createCache("namespace", asyncKeyValueStorage(), -> 1)
+        prop = cache.prop "key-#{Math.random()}"
 
-    describe "computeIfAbsent()", ->
-      it "will yield existing value if there is one", ->
-        prop.set("value").then ->
-          prop.computeIfAbsent(->).should.eventually.equal "value"
+      describe "set()", ->
+        it "will cause key to be present", ->
+          prop.set("key", "value").then ->
+            whenAbsent = sinon.stub()
+            prop.computeIfAbsent(whenAbsent).then ->
+              whenAbsent.should.not.have.been.called
 
-      it "will yield value from computation if there is no value", ->
-        prop.computeIfAbsent(-> "value").should.eventually.equal "value"
+      describe "computeIfAbsent()", ->
+        it "will yield existing value if there is one", ->
+          prop.set("value").then ->
+            prop.computeIfAbsent(->).should.eventually.equal "value"
 
-      it "will set value after computing it", ->
-        prop.computeIfAbsent(-> "value").then ->
-          prop.computeIfAbsent(->).should.eventually.equal "value"
+        it "will yield value from computation if there is no value", ->
+          prop.computeIfAbsent(-> "value").should.eventually.equal "value"
 
-    describe "invalidateIfSuccessful()", ->
-      it "will remove an existing value after success", ->
-        prop.set("old value").then ->
-          prop.invalidateIfSuccessful(-> Promise.resolve()).then ->
-            prop.computeUnlessValid(-> "fresh value").should.eventually.equal "fresh value"
+        it "will set value after computing it", ->
+          prop.computeIfAbsent(-> "value").then ->
+            prop.computeIfAbsent(->).should.eventually.equal "value"
 
-      it "will do nothing after failure", ->
-        prop.set("old value").then ->
-          prop.invalidateIfSuccessful(-> Promise.reject(new Error "nope")).error ->
+      describe "invalidateIfSuccessful()", ->
+        it "will invalidate an existing value after success", ->
+          prop.set("old value").then ->
+            prop.invalidateIfSuccessful(-> Promise.resolve()).then ->
+              prop.computeUnlessValid(-> "fresh value").should.eventually.equal "fresh value"
+
+        it "will do nothing after failure", ->
+          prop.set("old value").then ->
+            prop.invalidateIfSuccessful(-> Promise.reject(new Error "nope")).error ->
+              prop.computeUnlessValid(-> "fresh value").should.eventually.equal "old value"
+
+      describe "computeUnlessValid", ->
+        it "will yield value from computation if there is no value", ->
+          prop.computeUnlessValid(-> "value").should.eventually.equal "value"
+
+    describe "with time", ->
+      cache = null
+      prop = null
+      currentTime = null
+      timeToLive = 1
+      step = (amount = 1) ->
+        currentTime = (currentTime || 0) + amount
+      beforeEach ->
+        currentTime = 0
+        cache = createCache("namespace", asyncKeyValueStorage(), -> currentTime)
+        prop = cache.prop "key-#{Math.random()}", { timeToLive }
+
+      describe "computeUnlessValid", ->
+        it "will yield a value that was set immediately before", ->
+          prop.set("old value").then ->
             prop.computeUnlessValid(-> "fresh value").should.eventually.equal "old value"
 
-    describe "computeUnlessValid", ->
-      it "will yield value from computation if there is no value", ->
-        prop.computeUnlessValid(-> "value").should.eventually.equal "value"
-
-      it "will yield a value that was set immediately before", ->
-        prop.set("old value").then ->
-          prop.computeUnlessValid(-> "fresh value").should.eventually.equal "old value"
-
-      it "will yield value from computation in case existing value has ceased to be valid", ->
-        prop.set("old value").then ->
-          step()
-          prop.computeUnlessValid(-> "fresh value").should.eventually.equal "fresh value"
+        it "will yield value from computation in case existing value has exceeded its timeToLive", ->
+          prop.set("old value").then ->
+            step()
+            prop.computeUnlessValid(-> "fresh value").should.eventually.equal "fresh value"
 
