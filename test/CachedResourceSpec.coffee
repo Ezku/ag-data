@@ -140,7 +140,7 @@ describe "ag-data.cached-resource", ->
           cachedResource.findAll().then ->
             resource.findAll.should.have.been.calledTwice
 
-  describe "cache expiration", ->
+  describe.skip "cache expiration", ->
     it "is driven by an interval by default", ->
       cachedResource = createCachedResource mockResource {}
       cachedResource.expirations.toString().should.match /Bacon\.interval/
