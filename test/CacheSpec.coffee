@@ -25,14 +25,36 @@ describe "ag-data.cache", ->
     createCache("namespace", {}, time).time.should.equal time
 
   it "can create a cache prop", ->
-    createCache("namespace", {}).prop("key").should.be.an 'object'    
+    createCache("namespace", {}).prop("key").should.be.an 'object'
+
+  describe "time()", ->
+    it "is a function", ->
+      createCache("namespace", {}).time.should.be.a 'function'
+
+    it "returns a monotonically increasing number", (done) ->
+      time = createCache("namespace", {}).time
+      start = time()
+      start.should.be.a 'number'
+      setTimeout ->
+        stop = time()
+        stop.should.be.greaterThan start
+        done()
+      , 1
 
   describe "prop()", ->
     cache = null
     prop = null
+    currentTime = null
+    timeToLive = 1
+    step = (amount = 1) ->
+      currentTime = (currentTime || 0) + amount
     beforeEach ->
-      cache = createCache("namespace", asyncKeyValueStorage())
-      prop = cache.prop "key-#{Math.random()}"
+      currentTime = 0
+      cache = createCache("namespace", asyncKeyValueStorage(), -> currentTime)
+      prop = cache.prop "key-#{Math.random()}", { timeToLive }
+
+    it "optionally accepts a timeToLive argument", ->
+      prop.timeToLive.should.equal timeToLive
 
     describe "set()", ->
       it "will cause key to be present", ->
@@ -71,4 +93,9 @@ describe "ag-data.cache", ->
       it "will yield a value that was set immediately before", ->
         prop.set("old value").then ->
           prop.computeUnlessValid(-> "fresh value").should.eventually.equal "old value"
+
+      it "will yield value from computation in case existing value has ceased to be valid", ->
+        prop.set("old value").then ->
+          step()
+          prop.computeUnlessValid(-> "fresh value").should.eventually.equal "fresh value"
 

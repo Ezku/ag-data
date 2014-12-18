@@ -2,6 +2,9 @@ Promise = require 'bluebird'
 
 module.exports = (namespace, storage, time) ->
   time ?= ->
+    d = new Date()
+    d.getTime() * 1000 + d.getUTCMilliseconds()
+
   journal = []
 
   # Object -> String
@@ -38,13 +41,15 @@ module.exports = (namespace, storage, time) ->
       journal = []
       null
 
-  prop = (key) ->
+  prop = (key, options) ->
     index = keyWithNamespace key
 
+    # NOTE: Possibly smelly factoring because the only function to deal with timeToLive is computeUnlessValid
     computeIfAbsent: computeIfAbsent index
     computeUnlessValid: computeIfAbsent index
     set: set index
     invalidateIfSuccessful: invalidateIfSuccessful index
+    timeToLive: options?.timeToLive ? 10000
 
   return {
     clear
