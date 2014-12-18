@@ -54,5 +54,27 @@ describe "ag-data.model with cache", ->
           resource.findAll.should.have.been.calledOnce
           resource.find.should.not.have.been.called
 
+  describe "all()", ->
+
+    it "will use the cached value and not hit the resource twice", (done) ->
+      resource = mockResource {
+        identifier: 'id'
+        fields:
+          id: {}
+          foo: {}
+        findAll: [
+          { id: 123, foo: 'bar' }
+        ]
+      }
+      model = createModelFromResource resource, cache: enabled: true
+      # If we set the poll interval to 10, wait for an update and then a further 20ms,
+      # we should get only cache hits after the first hit to resource
+      model.all({}, { interval: 10 })
+        .updates
+        .take(1)
+        .delay(20)
+        .onValue ->
+          resource.findAll.should.have.been.calledOnce
+          done()
 
 
