@@ -15,6 +15,13 @@ asserting = require './asserting'
 
 describe "ag-data.model with cache", ->
 
+  it "can be configured with a timeToLive", ->
+    createModelFromResource((mockResource {}), {
+      cache:
+        enabled: true
+        timeToLive: 9001
+    }).cache.should.have.property('timeToLive').equal 9001
+
   describe "find()", ->
 
     it "will prevent consecutive find() calls from hitting the resource twice", ->
