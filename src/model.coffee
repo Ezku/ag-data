@@ -78,7 +78,7 @@ module.exports = (resource, defaultRequestOptions) ->
 
     # (query: Object, options: { poll: Stream? , interval: Number? }) -> { updates: Stream , whenChanged: Stream }
     all: (query = {}, options = {}) ->
-      shouldUpdate = options.poll ? Bacon.interval(options.interval ? 1000, true).startWith true
+      shouldUpdate = options.poll ? Bacon.interval(options.interval ? 10000, true).startWith true
 
       updates = shouldUpdate.flatMapConcat ->
         Bacon.fromPromise ResourceGateway.findAll(query)

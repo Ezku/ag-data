@@ -203,14 +203,13 @@ describe "ag-data.model.class", ->
         model = createModelFromResource mockResource {}
         model.all().updates.should.have.property('onValue').be.a 'function'
 
-      #TODO rehash md5 sums to new implementation
-      # it "is driven by an interval by default", ->
-      #   model = createModelFromResource mockResource {}
-      #   model.all().updates.toString().should.match /Bacon\.interval/
+      it "is driven by an interval by default", ->
+        model = createModelFromResource mockResource {}
+        model.all().updates.toString().should.match /Bacon\.interval/
 
-      # it "has a default interval of 10000 ms", ->
-      #   model = createModelFromResource mockResource {}
-      #   model.all().updates.toString().should.match /\interval\(10000/
+      it "has a default interval of 10000 ms", ->
+        model = createModelFromResource mockResource {}
+        model.all().updates.toString().should.match /\interval\(10000/
 
       it "outputs data from findAll", (done) ->
         resource = mockResource {
