@@ -77,6 +77,10 @@ module.exports = (resource, defaultRequestOptions) ->
         .then dynamifyCollection(query)
 
     # (query: Object, options: { poll: Stream? , interval: Number? }) -> { updates: Stream , whenChanged: Stream }
+    # NOTE: In case of a cached resource, this could be way more simple:
+    # skipDuplicates can be... skipped and we can rely on the timestamp
+    # instead. The poll-more-often-than-timeToLive-and-skipDuplicates way is
+    # just a simulation of the actual behavior.
     all: (query = {}, options = {}) ->
       shouldUpdate = options.poll ? Bacon.interval(options.interval ? 10000, true).startWith true
 
