@@ -77,4 +77,29 @@ describe "ag-data.model with cache", ->
           resource.findAll.should.have.been.calledOnce
           done()
 
+    it "will hit the resource again after a write has invalidated the collection cache", (done) ->
+      resource = mockResource {
+        identifier: 'id'
+        fields:
+          id: {}
+          foo: {}
+        findAll: [
+          { id: 123, foo: 'bar' }
+        ]
+        create: {}
+      }
+      model = createModelFromResource resource, cache: enabled: true
+      updates = model.all({}, { interval: 10 }).updates
+      updates
+        .take(1)
+        .onValue ->
+          # Make sure there's a listener and the poller is triggering
+          unsub = updates.onValue ->
 
+          new model()
+            .save()
+            .delay(15)
+            .then ->
+              unsub()
+              resource.findAll.should.have.been.calledTwice
+              done()
