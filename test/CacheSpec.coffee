@@ -16,7 +16,13 @@ asyncKeyValueStorage = require '../src/async-key-value-storage'
 describe "ag-data.cache", ->
 
   it "accepts a namespace and a storage", ->
-    createCache("namespace", {}).should.be.an 'object'
+    cache = createCache("namespace", {})
+    cache.should.have.property('namespace').equal('namespace')
+    cache.should.have.property('storage').deep.equal {}
+
+  it "optionally accepts a function that represents time", ->
+    time = -> 1
+    createCache("namespace", {}, time).time.should.equal time
 
   it "can create a cache prop", ->
     createCache("namespace", {}).prop("key").should.be.an 'object'    

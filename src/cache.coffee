@@ -1,6 +1,7 @@
 Promise = require 'bluebird'
 
-module.exports = (namespace, storage) ->
+module.exports = (namespace, storage, time) ->
+  time ?= ->
   journal = []
 
   # Object -> String
@@ -29,7 +30,7 @@ module.exports = (namespace, storage) ->
       storage.removeItem(index).then ->
         result
 
-  clear: ->
+  clear = ->
     Promise.all(
       for index in journal
         storage.removeItem index
@@ -37,9 +38,17 @@ module.exports = (namespace, storage) ->
       journal = []
       null
 
-  prop: (key) ->
+  prop = (key) ->
     index = keyWithNamespace key
 
     computeIfAbsent: computeIfAbsent index
     set: set index
     invalidateIfSuccessful: invalidateIfSuccessful index
+
+  return {
+    clear
+    prop
+    namespace
+    storage
+    time
+  }
