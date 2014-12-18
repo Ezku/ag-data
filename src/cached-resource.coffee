@@ -13,10 +13,6 @@ module.exports = cachedResourceFromResource = (resource, options = {}) ->
     else asyncKeyValueStorage()
   collectionCache = createCache "collections-#{resource.name}", storage
   instanceCache = createCache "records-#{resource.name}", storage
-
-  expirations.onValue ->
-    instanceCache.clear()
-    collectionCache.clear()
   
   # Decorate underlying resource by having it as the prototype
   cachedResource = Object.create resource
@@ -53,6 +49,5 @@ module.exports = cachedResourceFromResource = (resource, options = {}) ->
     collectionCache
     instanceCache
   }
-  cachedResource.expirations = expirations
 
   cachedResource

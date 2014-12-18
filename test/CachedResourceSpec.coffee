@@ -140,44 +140,6 @@ describe "ag-data.cached-resource", ->
           cachedResource.findAll().then ->
             resource.findAll.should.have.been.calledTwice
 
-  describe.skip "cache expiration", ->
-    it "is driven by an interval by default", ->
-      cachedResource = createCachedResource mockResource {}
-      cachedResource.expirations.toString().should.match /Bacon\.interval/
-
-    it "has a default interval of 10 seconds", ->
-      cachedResource = createCachedResource mockResource {}
-      cachedResource.expirations.toString().should.match /\interval\(10000/
-
-    it "can be driven by an { expire } option provided when decorating", ->
-      expire = Bacon.never()
-      cachedResource = createCachedResource (mockResource {}), {
-        expire
-      }
-      cachedResource.expirations.toString().should.match /never/
-
-    it "should clear individual record cache", ->
-      expire = new Bacon.Bus
-      resource = mockResource {
-        find: {}
-      }
-      cachedResource = createCachedResource resource, { expire }
-      cachedResource.find(123).then ->
-        expire.push true
-        cachedResource.find(123).then ->
-          resource.find.should.have.been.calledTwice
-
-    it "should clear collection record cache", ->
-      expire = new Bacon.Bus
-      resource = mockResource {
-        findAll: []
-      }
-      cachedResource = createCachedResource resource, { expire }
-      cachedResource.findAll().then ->
-        expire.push true
-        cachedResource.findAll().then ->
-          resource.findAll.should.have.been.calledTwice
-
   describe "storage injection", ->
     it "can be done with a { storage } option provided when decorating", ->
       storage =
