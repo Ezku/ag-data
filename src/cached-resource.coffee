@@ -49,6 +49,7 @@ module.exports = cachedResourceFromResource = (resource, options = {}) ->
     collectionCache
     instanceCache
     timeToLive
+    storage
   }
 
   cachedResource

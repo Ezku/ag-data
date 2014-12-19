@@ -22,6 +22,16 @@ describe "ag-data.model with cache", ->
         timeToLive: 9001
     }).cache.should.have.property('timeToLive').equal 9001
 
+  it "can be configured with a storage", ->
+    customStorage =
+      getItem: ->
+      setItem: ->
+    createModelFromResource((mockResource {}), {
+      cache:
+        enabled: true
+        storage: customStorage
+    }).cache.should.have.property('storage').equal customStorage
+
   describe "find()", ->
 
     it "will prevent consecutive find() calls from hitting the resource twice", ->
