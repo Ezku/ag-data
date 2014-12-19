@@ -5,11 +5,13 @@ chai.use(require 'sinon-chai')
 
 module.exports = mockResource = (resourceProps) ->
   resource = {
+    name: 'foos'
     schema:
       fields: {}
   }
   for key, value of resourceProps
     switch key
+      when 'name' then resource.name = value
       when 'identifier' then resource.schema.identifier = value
       when 'fields' then resource.schema.fields = value
       else

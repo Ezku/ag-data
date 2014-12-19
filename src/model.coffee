@@ -1,6 +1,7 @@
 Promise = require 'bluebird'
 Bacon = require 'baconjs'
 deepEqual = require 'deep-equal'
+cachedResource = require './cached-resource'
 
 # NOTE: It's dangerous to have lifecycle tracking, data storage, dirty state
 # tracking and identity tracking all in one place. Bundle in more concerns
@@ -75,23 +76,21 @@ module.exports = (resource, defaultRequestOptions) ->
         .then collectionFromPersistentStates
         .then dynamifyCollection(query)
 
-    # (query: Object, { poll: Stream? , interval: Number? }) -> { updates: Stream , whenChanged: Stream }
+    # (query: Object, options: { poll: Stream? , interval: Number? }) -> { updates: Stream , whenChanged: Stream }
+    # NOTE: In case of a cached resource, this could be way more simple:
+    # skipDuplicates can be... skipped and we can rely on the timestamp
+    # instead. The poll-more-often-than-timeToLive-and-skipDuplicates way is
+    # just a simulation of the actual behavior.
     all: (query = {}, options = {}) ->
-      # TODO: use .flatMapFirst to drive updates instead of Bus that's pushed manually
-      bus = new Bacon.Bus()
-      shouldUpdate = options.poll ? bus.bufferingThrottle(options.interval ? 1000)
+      shouldUpdate = options.poll ? Bacon.interval(options.interval ? 10000, true).startWith true
 
-      updates = shouldUpdate.flatMap ->
-        Bacon.fromPromise ResourceGateway.findAll(query).tap ->
-          bus.push true
+      updates = shouldUpdate.flatMapConcat ->
+        Bacon.fromPromise ResourceGateway.findAll(query)
 
       whenChanged = (f) ->
-        unsub = updates.skipDuplicates((left, right) ->
+        updates.skipDuplicates((left, right) ->
           left.equals right
         ).onValue f
-
-        bus.push true
-        unsub
 
       { updates, whenChanged }
 
@@ -205,3 +204,9 @@ module.exports = (resource, defaultRequestOptions) ->
               @__changed[key] = true
             enumerable: true
           }
+
+  if defaultRequestOptions?.cache?.enabled
+    resource = cachedResource resource, defaultRequestOptions.cache
+    Model.cache = resource.cache
+
+  Model
