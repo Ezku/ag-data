@@ -39,7 +39,7 @@ describe "ag-data.cache", ->
         stop = time()
         stop.should.be.greaterThan start
         done()
-      , 1
+      , 10
 
   describe "prop()", ->
 
