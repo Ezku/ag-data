@@ -2,8 +2,7 @@ Promise = require 'bluebird'
 
 module.exports = (namespace, storage, time) ->
   time ?= ->
-    d = new Date()
-    d.getTime() * 1000 + d.getUTCMilliseconds()
+    (new Date()).getTime()
 
   # Object -> String
   keyWithNamespace = (key) -> "#{namespace}(#{JSON.stringify (key or null)})"
