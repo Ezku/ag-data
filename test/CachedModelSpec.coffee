@@ -91,8 +91,8 @@ describe "ag-data.model with cache", ->
         .take(1)
         .delay(20)
         .onValue ->
-          resource.findAll.should.have.been.calledOnce
-          done()
+          done asserting ->
+            resource.findAll.should.have.been.calledOnce
 
     it "will hit the resource again after a write has invalidated the collection cache", (done) ->
       resource = mockResource {
@@ -118,8 +118,8 @@ describe "ag-data.model with cache", ->
             .delay(15)
             .then ->
               unsub()
-              resource.findAll.should.have.been.calledTwice
-              done()
+              done asserting ->
+                resource.findAll.should.have.been.calledTwice
 
     it "will hit the resource again after the collection cache's timeToLive has expired", (done) ->
       resource = mockResource {
@@ -147,5 +147,5 @@ describe "ag-data.model with cache", ->
             .delay(15)
             .then ->
               unsub()
-              resource.findAll.should.have.been.calledTwice
-              done()
+              done asserting ->
+                resource.findAll.should.have.been.calledTwice
