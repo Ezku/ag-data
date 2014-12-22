@@ -134,9 +134,9 @@ describe "ag-data.model with cache", ->
       model = createModelFromResource resource, {
         cache:
           enabled: true
-          timeToLive: 20
+          timeToLive: 10
       }
-      updates = model.all({}, { interval: 10 }).updates
+      updates = model.all({}, { interval: 5 }).updates
       updates
         .take(1)
         .onValue ->
