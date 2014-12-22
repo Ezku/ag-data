@@ -37,8 +37,8 @@ describe "ag-data.cache", ->
       start.should.be.a 'number'
       setTimeout ->
         stop = time()
-        stop.should.be.greaterThan start
-        done()
+        done asserting ->
+          stop.should.be.greaterThan start
       , 10
 
   describe "prop()", ->

@@ -137,8 +137,8 @@ describe "ag-data.model.class", ->
         }
         model = createModelFromResource resource
         model.all().whenChanged ->
-          resource.findAll.should.have.been.calledOnce
-          done()
+          done asserting ->
+            resource.findAll.should.have.been.calledOnce
 
       it "skips duplicates", (done) ->
         resource = mockResource {

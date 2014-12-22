@@ -47,8 +47,8 @@ describe "ag-data.model.collection", ->
         ]
       }
       model.findAll().then (collection)->
-        collection.whenChanged.should.be.a 'function'
-        done()
+        done asserting ->
+          collection.whenChanged.should.be.a 'function'
 
     it "accepts a listener to call when changes from findAll are received", (done) ->
       resource = mockResource {
@@ -60,8 +60,8 @@ describe "ag-data.model.collection", ->
       model.findAll().then (collection)->
         resource.findAll.should.have.been.calledOnce
         collection.whenChanged ->
-          resource.findAll.should.have.been.calledTwice
-          done()
+          done asserting ->
+            resource.findAll.should.have.been.calledTwice
 
     it "skips duplicates", (done) ->
       resource = mockResource {
@@ -95,8 +95,8 @@ describe "ag-data.model.collection", ->
       }
       model = createModelFromResource resource
       model.findAll().then (collection)->
-        collection.whenChanged(->).should.be.a 'function'
-        done()
+        done asserting ->
+          collection.whenChanged(->).should.be.a 'function'
 
     it "does not overfeed findAll when previous findAll takes a long time to finish", (done)->
       currentDelay = 0
