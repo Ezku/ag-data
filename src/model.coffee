@@ -43,15 +43,7 @@ module.exports = (resource, defaultRequestOptions) ->
     dynamifyCollection = (query) -> (collection) ->
 
       collection.whenChanged = (f, options = {}) ->
-        options.equals ?= (left, right) ->
-          left?.equals?(right)
-
-        followable
-          .fromPromiseF(->
-            ResourceGateway.findAll(query)
-          )
-          .follow(options)
-          .whenChanged f
+        ResourceGateway.all(query, options).whenChanged f
 
       collection
 
