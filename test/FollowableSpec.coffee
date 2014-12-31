@@ -29,13 +29,13 @@ describe "ag-data.followable", ->
     it "turns a promise-returning function into a followable object creating function", ->
       fromPromiseF(->
         Promise.resolve(true)
-      ).should.be.a 'function'
+      ).should.have.property('follow').be.a 'function'
 
-    describe "followable", ->
+    describe "follow()", ->
       it "can be observed through a raw stream or by attaching a listener", ->
         fromPromiseF(->
           Promise.resolve(true)
-        )().should.have.keys [
+        ).follow().should.have.keys [
             'updates'
             'whenChanged'
           ]
@@ -43,17 +43,17 @@ describe "ag-data.followable", ->
       describe "whenChanged()", ->
 
         it "is a function", ->
-          fromPromiseF(->)().whenChanged.should.be.a 'function'
+          fromPromiseF(->).follow().whenChanged.should.be.a 'function'
 
         it "accepts a listener to call when changes from the followed function are received", (done) ->
           followed = sinon.stub().returns Promise.resolve()
-          fromPromiseF(followed)().whenChanged ->
+          fromPromiseF(followed).follow().whenChanged ->
             done asserting ->
               followed.should.have.been.calledOnce
 
         it "skips duplicates", (done) ->
           followed = sinon.stub().returns Promise.resolve()
-          { updates, whenChanged } = fromPromiseF(followed)({
+          { updates, whenChanged } = fromPromiseF(followed).follow({
             poll: Bacon.fromArray [1, 2]
           })
           
@@ -69,7 +69,7 @@ describe "ag-data.followable", ->
 
         it "returns an unsubscribe function", ->
           followed = sinon.stub().returns Promise.resolve()
-          fromPromiseF(followed)().whenChanged(->).should.be.a 'function'
+          fromPromiseF(followed).follow().whenChanged(->).should.be.a 'function'
 
         it "does not overfeed the followed function when a previous call takes a long time to finish", (done)->
           currentDelay = 0
@@ -86,7 +86,7 @@ describe "ag-data.followable", ->
             currentDelay += delayIncrement
             Promise.resolve([{foo:currentDelay}]).delay(currentDelay).tap ->
               finding = false
-          )({ interval: 10 }).whenChanged (value) ->
+          ).follow({ interval: 10 }).whenChanged (value) ->
             if currentDelay > maxDelay
               unsub()
               done()
