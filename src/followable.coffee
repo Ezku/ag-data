@@ -1,4 +1,6 @@
+Promise = require 'bluebird'
 Bacon = require 'baconjs'
+deepEqual = require 'deep-equal'
 
 module.exports = (defaultInterval = 10000) ->
 
@@ -7,12 +9,10 @@ module.exports = (defaultInterval = 10000) ->
     shouldUpdate = options.poll ? Bacon.interval(options.interval ? defaultInterval, true).startWith true
 
     updates = shouldUpdate.flatMapConcat ->
-      Bacon.fromPromise f(args...)
+      Bacon.fromPromise Promise.resolve f(args...)
 
-    whenChanged = (f) ->
-      updates.skipDuplicates((left, right) ->
-        left.equals right
-      ).onValue f
+    whenChanged = (listen) ->
+      updates.skipDuplicates(options.equals ? deepEqual).onValue listen
 
     { updates, whenChanged }
 
