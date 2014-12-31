@@ -39,28 +39,16 @@ module.exports = (resource, defaultRequestOptions) ->
         item.toJson() for item in collection
       collection
 
-    # (collection: [Model]) -> [Model] & { whenChanged: ()->, updates: Stream }
-    dynamifyCollection = (query)-> (collection)->
-      # TODO: use .flatMapFirst to drive updates instead of Bus that's pushed manually
-      updates = new Bacon.Bus()
+    # (collection: [Model]) -> [Model] & { whenChanged: (f, options) -> unsubscribe }
+    dynamifyCollection = (query) -> (collection) ->
 
-      # ((changedValue)->, { poll: Stream? interval: Number? }) -> ()->
-      collection.whenChanged = (f, options={}) ->
-        bus = new Bacon.Bus()
-        shouldUpdate = options.poll ? bus.bufferingThrottle(options.interval ? 1000)
-
-        updates.plug shouldUpdate.flatMap ->
-          Bacon.fromPromise ResourceGateway.findAll(query).tap ->
-            bus.push true # query done -> schedule new update
-
-        unsubscribe = updates.skipDuplicates (left, right) ->
-          left.equals right
-        .onValue f
-
-        bus.push true # schedule first update
-        unsubscribe
-
-      collection.updates = updates.delay(1) # TODO: although there's no Bus.asEventStream(), expose a Stream instead of original Bus.
+      collection.whenChanged = (f, options = {}) ->
+        followable
+          .fromPromiseF(->
+            ResourceGateway.findAll(query)
+          )
+          .follow(options)
+          .whenChanged f
 
       collection
 
@@ -82,8 +70,12 @@ module.exports = (resource, defaultRequestOptions) ->
     # skipDuplicates can be... skipped and we can rely on the timestamp
     # instead. The poll-more-often-than-timeToLive-and-skipDuplicates way is
     # just a simulation of the actual behavior.
-    all: followable (query) ->
-      ResourceGateway.findAll(query)
+    all: (query, options = {}) ->
+      followable
+        .fromPromiseF(->
+          ResourceGateway.findAll(query)
+        )
+        .follow(options)
 
     # Stream
     options: do ->
