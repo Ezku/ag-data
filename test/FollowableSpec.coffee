@@ -79,7 +79,7 @@ describe "ag-data.followable", ->
 
           unsub = fromPromiseF(->
             # This assertion will fail in case the "slow" promise is still
-            # resolving and findAll is being called too early
+            # resolving and the function is being called too early
             finding.should.equal(false)
             finding = true
 
