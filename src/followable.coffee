@@ -3,7 +3,7 @@ Bacon = require 'baconjs'
 module.exports = (defaultInterval = 10000) ->
 
   # (f: (args...) -> Promise) -> (args..., options = {}) -> { updates: Stream, whenChanged: (f) -> unsubscribe }
-  return followable = (f) -> (args..., options = {}) ->
+  fromPromiseF = (f) -> (args..., options = {}) ->
     shouldUpdate = options.poll ? Bacon.interval(options.interval ? defaultInterval, true).startWith true
 
     updates = shouldUpdate.flatMapConcat ->
@@ -15,3 +15,8 @@ module.exports = (defaultInterval = 10000) ->
       ).onValue f
 
     { updates, whenChanged }
+
+  {
+    defaultInterval
+    fromPromiseF
+  }
