@@ -39,87 +39,15 @@ describe "ag-data.model.collection", ->
         { id: 123, foo: 'bar' }
       ]
 
-  describe "whenChanged(f)", ->
-    it "is a function", (done)->
-      model = createModelFromResource mockResource {
-        findAll: [
-          { id: 123, foo: 'bar' }
-        ]
-      }
-      model.findAll().then (collection)->
-        done asserting ->
-          collection.whenChanged.should.be.a 'function'
-
-    it "accepts a listener to call when changes from findAll are received", (done) ->
-      resource = mockResource {
-        findAll: [
-          { foo: 'bar' }
-        ]
-      }
-      model = createModelFromResource resource
-      model.findAll().then (collection)->
-        resource.findAll.should.have.been.calledOnce
-        collection.whenChanged ->
-          done asserting ->
-            resource.findAll.should.have.been.calledTwice
-
-    it "skips duplicates", (done) ->
-      resource = mockResource {
-        fields:
-          foo: {}
-        findAll: [
-          { foo: 'bar' }
-        ]
-      }
-      model = createModelFromResource resource
-      poll = new Bacon.Bus
-      model.findAll().then (collection)->
-        spy = sinon.stub()
-        collection.whenChanged spy, { poll }
-
-        collection.updates
-        .take(2)
-        .fold(0, (a) -> a + 1)
-        .onValue (v) ->
-          done asserting ->
-            spy.should.have.been.calledOnce
-
-        poll.push true
-        poll.push true
-
-    it "returns an unsubscribe function", (done)->
-      resource = mockResource {
-        findAll: [
-          { foo: 'bar' }
-        ]
-      }
-      model = createModelFromResource resource
-      model.findAll().then (collection)->
-        done asserting ->
-          collection.whenChanged(->).should.be.a 'function'
-
-    it "does not overfeed findAll when previous findAll takes a long time to finish", (done)->
-      currentDelay = 0
-      delayIncrement = 10
-      maxDelay = 50
-      finding = false
-
-      resource = mockResource
-        findAll: ->
-          finding.should.equal(false)
-          finding = true
-
-          currentDelay += delayIncrement
-          Promise.resolve([{foo:currentDelay}]).delay(currentDelay).tap ->
-            finding = false
-
-      model = createModelFromResource resource
-      model.findAll().then (collection)->
-        unsub = collection.whenChanged (value)->
-          if currentDelay > maxDelay
-            unsub()
-            done()
-        , interval: 10
+  it "is a followable on the corresponding findAll", (done) ->
+    model = createModelFromResource mockResource {
+      findAll: [
+        { id: 123, foo: 'bar' }
+      ]
+    }
+    model.findAll().then (collection)->
+      done asserting ->
+        collection.whenChanged.should.be.a 'function'
 
   describe "save()", ->
     it "delegates save to individual model instances", ->
