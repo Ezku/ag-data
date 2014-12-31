@@ -43,6 +43,9 @@ module.exports = (resource, defaultRequestOptions) ->
     dynamifyCollection = (query) -> (collection) ->
 
       collection.whenChanged = (f, options = {}) ->
+        options.equals ?= (left, right) ->
+          left?.equals?(right)
+
         followable
           .fromPromiseF(->
             ResourceGateway.findAll(query)
@@ -71,6 +74,9 @@ module.exports = (resource, defaultRequestOptions) ->
     # instead. The poll-more-often-than-timeToLive-and-skipDuplicates way is
     # just a simulation of the actual behavior.
     all: (query, options = {}) ->
+      options.equals ?= (left, right) ->
+        left?.equals?(right)
+
       followable
         .fromPromiseF(->
           ResourceGateway.findAll(query)
