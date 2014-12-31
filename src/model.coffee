@@ -2,6 +2,7 @@ Promise = require 'bluebird'
 Bacon = require 'baconjs'
 deepEqual = require 'deep-equal'
 cachedResource = require './cached-resource'
+followable = require('./followable')(defaultInterval = 10000)
 
 # NOTE: It's dangerous to have lifecycle tracking, data storage, dirty state
 # tracking and identity tracking all in one place. Bundle in more concerns
@@ -81,18 +82,8 @@ module.exports = (resource, defaultRequestOptions) ->
     # skipDuplicates can be... skipped and we can rely on the timestamp
     # instead. The poll-more-often-than-timeToLive-and-skipDuplicates way is
     # just a simulation of the actual behavior.
-    all: (query = {}, options = {}) ->
-      shouldUpdate = options.poll ? Bacon.interval(options.interval ? 10000, true).startWith true
-
-      updates = shouldUpdate.flatMapConcat ->
-        Bacon.fromPromise ResourceGateway.findAll(query)
-
-      whenChanged = (f) ->
-        updates.skipDuplicates((left, right) ->
-          left.equals right
-        ).onValue f
-
-      { updates, whenChanged }
+    all: followable (query) ->
+      ResourceGateway.findAll(query)
 
     # Stream
     options: do ->
