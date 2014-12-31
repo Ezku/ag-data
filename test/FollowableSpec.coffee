@@ -21,7 +21,7 @@ describe "ag-data.followable", ->
   describe "fromPromiseF()", ->
     fromPromiseF = null
     before ->
-      { fromPromiseF } = followable(123)
+      { fromPromiseF } = followable()
 
     it "is a function", ->
       fromPromiseF.should.be.a 'function'
@@ -91,3 +91,47 @@ describe "ag-data.followable", ->
               unsub()
               done()
 
+      describe "updates", ->
+        it "is a stream", ->
+          followed = sinon.stub().returns Promise.resolve()
+          fromPromiseF(followed).follow().updates.should.have.property('onValue').be.a 'function'
+
+        it "is driven by an interval by default", ->
+          followed = sinon.stub().returns Promise.resolve()
+          fromPromiseF(followed).follow().updates.toString().should.match /Bacon\.interval/
+
+        it "has a default interval of 10000 ms", ->
+          followed = sinon.stub().returns Promise.resolve()
+          fromPromiseF(followed).follow().updates.toString().should.match /\interval\(10000/
+
+        it "outputs data from the followed function", (done) ->
+          followed = sinon.stub().returns Promise.resolve [
+            { foo: 'bar' }
+          ]
+          fromPromiseF(followed)
+            .follow()
+            .updates
+            .take(1)
+            .onValue (v) ->
+              done asserting ->
+                followed.should.have.been.calledOnce
+                v[0].foo.should.equal 'bar'
+
+        it "can be driven by a { poll } option to follow()", (done) ->
+          followed = sinon.stub().returns Promise.resolve [
+            { foo: 'bar' }
+          ]
+          poll = new Bacon.Bus
+
+          fromPromiseF(followed)
+            .follow({ poll })
+            .updates
+            .take(2)
+            .fold(0, (a) -> a + 1)
+            .onValue (v) ->
+              done asserting ->
+                v.should.equal 2
+                followed.should.have.been.calledTwice
+
+          poll.push true
+          poll.push true
