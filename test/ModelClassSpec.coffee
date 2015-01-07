@@ -134,3 +134,12 @@ describe "ag-data.model.class", ->
       model = createModelFromResource mockResource {}
       model.should.have.property('one').be.a 'function'
 
+    it "returns a followable on find()", ->
+      model = createModelFromResource mockResource {}
+      model.one().should.include.keys [
+        'target'
+        'updates'
+        'whenChanged'
+      ]
+      model.one().target.toString().should.match /\bfind\b/
+
