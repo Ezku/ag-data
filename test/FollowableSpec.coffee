@@ -124,7 +124,7 @@ describe "ag-data.followable", ->
           poll = new Bacon.Bus
 
           fromPromiseF(followed)
-            .follow({ poll })
+            .follow({ poll: poll.bufferingThrottle(10) })
             .updates
             .take(2)
             .fold(0, (a) -> a + 1)
