@@ -15,15 +15,6 @@ asserting = require './asserting'
 itSupportsWhenChanged = require './it-supports-when-changed'
 
 describe "ag-data.model.instance", ->
-  ###
-  NOTE: Code smell, tests are copy-paste from collection.whenChanged
-  ###
-  it "is a followable on the corresponding find", ->
-    model = createModelFromResource mockResource {
-      find: { id: 123, foo: 'bar' }
-    }
-    model.find(123).then (record) ->
-      record.should.have.property('whenChanged').be.a 'function'
 
   itSupportsWhenChanged ->
     resource = mockResource {

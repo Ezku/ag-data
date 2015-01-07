@@ -40,15 +40,6 @@ describe "ag-data.model.collection", ->
         { id: 123, foo: 'bar' }
       ]
 
-  it "is a followable on the corresponding findAll", ->
-    model = createModelFromResource mockResource {
-      findAll: [
-        { id: 123, foo: 'bar' }
-      ]
-    }
-    model.findAll().then (collection) ->
-      collection.whenChanged.should.be.a 'function'
-
   itSupportsWhenChanged ->
     resource = mockResource {
       findAll: [
