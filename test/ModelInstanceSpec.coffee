@@ -18,13 +18,12 @@ describe "ag-data.model.instance", ->
   NOTE: Code smell, tests are copy-paste from collection.whenChanged
   ###
   describe "whenChanged()", ->
-    it "is a followable on the corresponding find", (done) ->
+    it "is a followable on the corresponding find", ->
       model = createModelFromResource mockResource {
         find: { id: 123, foo: 'bar' }
       }
       model.find(123).then (record) ->
-        done asserting ->
-          record.should.have.property('whenChanged').be.a 'function'
+        record.should.have.property('whenChanged').be.a 'function'
 
   describe "lifetime", ->
 
