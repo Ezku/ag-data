@@ -12,6 +12,7 @@ chai.use(require 'sinon-chai')
 
 mockResource = require './mock-resource'
 asserting = require './asserting'
+itSupportsWhenChanged = require './it-supports-when-changed'
 
 describe "ag-data.model.class", ->
   describe "metadata", ->
@@ -120,132 +121,49 @@ describe "ag-data.model.class", ->
       model = createModelFromResource mockResource {}
       model.all.should.be.a 'function'
 
-    it "returns a collection gateway", ->
+    it "returns a followable on findAll()", ->
       model = createModelFromResource mockResource {}
-      model.all().should.be.an 'object'
+      model.all().should.include.keys [
+        'target'
+        'updates'
+        'whenChanged'
+      ]
+      model.all().target.toString().should.match /\bfindAll\b/
 
-    describe "whenChanged()", ->
-      it "is a function", ->
-        model = createModelFromResource mockResource {}
-        model.all().whenChanged.should.be.a 'function'
+    itSupportsWhenChanged ->
+      resource = mockResource {
+        findAll: [
+          {}
+        ]
+      }
+      model = createModelFromResource resource
 
-      it "accepts a listener to call when changes from findAll are received", (done) ->
-        resource = mockResource {
-          findAll: [
-            { foo: 'bar' }
-          ]
-        }
-        model = createModelFromResource resource
-        model.all().whenChanged ->
-          done asserting ->
-            resource.findAll.should.have.been.calledOnce
+      {
+        followable: model.all()
+        followed: resource.findAll
+      }
 
-      it "skips duplicates", (done) ->
-        resource = mockResource {
-          fields:
-            foo: {}
-          findAll: [
-            { foo: 'bar' }
-          ]
-        }
-        model = createModelFromResource resource
-        poll = new Bacon.Bus
-        all = model.all({}, { poll })
+  describe "one()", ->
+    it "is a function", ->
+      model = createModelFromResource mockResource {}
+      model.should.have.property('one').be.a 'function'
 
-        spy = sinon.stub()
-        all.whenChanged spy
-        all
-          .updates
-          .take(2)
-          .fold(0, (a) -> a + 1)
-          .onValue (v) ->
-            done asserting ->
-              spy.should.have.been.calledOnce
+    it "returns a followable on find()", ->
+      model = createModelFromResource mockResource {}
+      model.one().should.include.keys [
+        'target'
+        'updates'
+        'whenChanged'
+      ]
+      model.one().target.toString().should.match /\bfind\b/
 
-        poll.push true
-        poll.push true
+    itSupportsWhenChanged ->
+      resource = mockResource {
+        find: {}
+      }
+      model = createModelFromResource resource
 
-      it "returns an unsubscribe function", ->
-        resource = mockResource {
-          findAll: [
-            { foo: 'bar' }
-          ]
-        }
-        model = createModelFromResource resource
-        model.all().whenChanged(->).should.be.a 'function'
-
-      it "does not overfeed findAll when previous findAll takes a long time to finish", (done)->
-        currentDelay = 0
-        delayIncrement = 10
-        maxDelay = 50
-        finding = false
-
-        resource = mockResource
-          findAll: ->
-            # This assertion will fail in case the "slow" promise is still
-            # resolving and findAll is being called too early
-            finding.should.equal(false)
-            finding = true
-
-            currentDelay += delayIncrement
-            Promise.resolve([{foo:currentDelay}]).delay(currentDelay).tap ->
-              finding = false
-
-        model = createModelFromResource resource
-
-        unsub = model.all({}, interval: 10).whenChanged (value)->
-          if currentDelay > maxDelay
-            unsub()
-            done()
-
-    describe "updates", ->
-      it "is a stream", ->
-        model = createModelFromResource mockResource {}
-        model.all().updates.should.have.property('onValue').be.a 'function'
-
-      it "is driven by an interval by default", ->
-        model = createModelFromResource mockResource {}
-        model.all().updates.toString().should.match /Bacon\.interval/
-
-      it "has a default interval of 10000 ms", ->
-        model = createModelFromResource mockResource {}
-        model.all().updates.toString().should.match /\interval\(10000/
-
-      it "outputs data from findAll", (done) ->
-        resource = mockResource {
-          fields:
-            foo: {}
-          findAll: [
-            { foo: 'bar' }
-          ]
-        }
-        model = createModelFromResource resource
-        poll = new Bacon.Bus
-        model.all({}, { poll })
-        .updates
-        .onValue (v) ->
-          done asserting ->
-            resource.findAll.should.have.been.calledOnce
-            v[0].foo.should.equal 'bar'
-
-        poll.push true
-
-      it "can be driven by a { poll } option to all()", (done) ->
-        resource = mockResource {
-          findAll: [
-            { foo: 'bar' }
-          ]
-        }
-        model = createModelFromResource resource
-        poll = new Bacon.Bus
-        model.all({}, { poll })
-          .updates
-          .take(2)
-          .fold(0, (a) -> a + 1)
-          .onValue (v) ->
-            done asserting ->
-              v.should.equal 2
-              resource.findAll.should.have.been.calledTwice
-
-        poll.push true
-        poll.push true
+      {
+        followable: model.one()
+        followed: resource.find
+      }

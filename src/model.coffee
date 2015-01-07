@@ -1,7 +1,9 @@
 Promise = require 'bluebird'
 Bacon = require 'baconjs'
-deepEqual = require 'deep-equal'
+
 cachedResource = require './cached-resource'
+jsonableEquality = require './jsonable-equality'
+followable = require('./followable')(defaultInterval = 10000)
 
 # NOTE: It's dangerous to have lifecycle tracking, data storage, dirty state
 # tracking and identity tracking all in one place. Bundle in more concerns
@@ -21,8 +23,13 @@ module.exports = (resource, defaultRequestOptions) ->
         else true
       instance
 
-    # (states: [Object]) -> [Model] & { save: () -> Promise }
+    # (states: [Object]) -> [Model] & { save: () -> Promise, equals: (Object) -> Boolean, toJson: () -> Object }
     collectionFromPersistentStates = (states) ->
+      ###
+      NOTE: Have to do manual decoration instead of extend/mixin because the signature is "array and then some"
+      Subclassing array to extend behavior does not seem feasible, see e.g.
+      http://perfectionkills.com/how-ecmascript-5-still-does-not-allow-to-subclass-an-array/
+      ###
       collection = (
         for state in states
           instanceFromPersistentState state
@@ -32,34 +39,16 @@ module.exports = (resource, defaultRequestOptions) ->
           for item in this
             item.save()
         )
-      collection.equals = (other) ->
-        deepEqual collection.toJson(), other.toJson()
+      collection.equals = jsonableEquality(collection)
       collection.toJson = ->
         item.toJson() for item in collection
       collection
 
-    # (collection: [Model]) -> [Model] & { whenChanged: ()->, updates: Stream }
-    dynamifyCollection = (query)-> (collection)->
-      # TODO: use .flatMapFirst to drive updates instead of Bus that's pushed manually
-      updates = new Bacon.Bus()
+    # (collection: [Model]) -> [Model] & { whenChanged: (f, options) -> unsubscribe }
+    dynamifyCollection = (query) -> (collection) ->
 
-      # ((changedValue)->, { poll: Stream? interval: Number? }) -> ()->
-      collection.whenChanged = (f, options={}) ->
-        bus = new Bacon.Bus()
-        shouldUpdate = options.poll ? bus.bufferingThrottle(options.interval ? 1000)
-
-        updates.plug shouldUpdate.flatMap ->
-          Bacon.fromPromise ResourceGateway.findAll(query).tap ->
-            bus.push true # query done -> schedule new update
-
-        unsubscribe = updates.skipDuplicates (left, right) ->
-          left.equals right
-        .onValue f
-
-        bus.push true # schedule first update
-        unsubscribe
-
-      collection.updates = updates.delay(1) # TODO: although there's no Bus.asEventStream(), expose a Stream instead of original Bus.
+      collection.whenChanged = (f, options = {}) ->
+        ResourceGateway.all(query, options).whenChanged f
 
       collection
 
@@ -81,18 +70,28 @@ module.exports = (resource, defaultRequestOptions) ->
     # skipDuplicates can be... skipped and we can rely on the timestamp
     # instead. The poll-more-often-than-timeToLive-and-skipDuplicates way is
     # just a simulation of the actual behavior.
-    all: (query = {}, options = {}) ->
-      shouldUpdate = options.poll ? Bacon.interval(options.interval ? 10000, true).startWith true
+    all: (query, options = {}) ->
+      options.equals ?= (left, right) ->
+        left?.equals?(right)
 
-      updates = shouldUpdate.flatMapConcat ->
-        Bacon.fromPromise ResourceGateway.findAll(query)
+      followable
+        .fromPromiseF(->
+          ResourceGateway.findAll(query)
+        )
+        .follow(options)
 
-      whenChanged = (f) ->
-        updates.skipDuplicates((left, right) ->
-          left.equals right
-        ).onValue f
+    ###
+    NOTE: Code smell, looks like copy paste from all()
+    ###
+    one: (id, options = {}) ->
+      options.equals ?= (left, right) ->
+        left?.equals?(right)
 
-      { updates, whenChanged }
+      followable
+        .fromPromiseF(->
+          ResourceGateway.find(id)
+        )
+        .follow(options)
 
     # Stream
     options: do ->
@@ -111,6 +110,9 @@ module.exports = (resource, defaultRequestOptions) ->
 
 
   ModelOps =
+    whenChanged: (f, options = {}) ->
+      ResourceGateway.one(@__identity, options).whenChanged f
+
     save: ->
       (switch @__state
         when 'deleted' then Promise.reject new Error "Will not save a deleted instance"
@@ -146,12 +148,7 @@ module.exports = (resource, defaultRequestOptions) ->
           @__identity = null
           this
 
-  class Model
-    @find: ResourceGateway.find
-    @findAll: ResourceGateway.findAll
-    @all: ResourceGateway.all
-    @options: ResourceGateway.options
-    @fromJson: ResourceGateway.fromJson
+  class Model extends ResourceGateway
 
     @schema:
       fields: resource.schema.fields
@@ -165,6 +162,12 @@ module.exports = (resource, defaultRequestOptions) ->
       delete:
         enumerable: false
         get: -> ModelOps.delete
+      whenChanged:
+        enumerable: false
+        get: -> ModelOps.whenChanged
+      equals:
+        enumerable: false
+        get: -> jsonableEquality(this)
       toJson:
         enumerable: false
         get: -> => @__data
