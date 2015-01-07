@@ -1,7 +1,8 @@
 Promise = require 'bluebird'
 Bacon = require 'baconjs'
-deepEqual = require 'deep-equal'
+
 cachedResource = require './cached-resource'
+jsonableEquality = require './jsonable-equality'
 followable = require('./followable')(defaultInterval = 10000)
 
 # NOTE: It's dangerous to have lifecycle tracking, data storage, dirty state
@@ -33,8 +34,7 @@ module.exports = (resource, defaultRequestOptions) ->
           for item in this
             item.save()
         )
-      collection.equals = (other) ->
-        deepEqual collection.toJson(), other.toJson()
+      collection.equals = jsonableEquality(collection)
       collection.toJson = ->
         item.toJson() for item in collection
       collection
@@ -146,6 +146,9 @@ module.exports = (resource, defaultRequestOptions) ->
       delete:
         enumerable: false
         get: -> ModelOps.delete
+      equals:
+        enumerable: false
+        get: -> jsonableEquality(this)
       toJson:
         enumerable: false
         get: -> => @__data
