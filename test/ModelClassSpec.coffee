@@ -128,3 +128,9 @@ describe "ag-data.model.class", ->
         'whenChanged'
       ]
       model.all().target.toString().should.match /findAll/
+
+  describe "one()", ->
+    it "is a function", ->
+      model = createModelFromResource mockResource {}
+      model.should.have.property('one').be.a 'function'
+
