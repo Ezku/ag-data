@@ -122,7 +122,9 @@ describe "ag-data.model.class", ->
 
     it "returns a followable on findAll()", ->
       model = createModelFromResource mockResource {}
-      model.all().should.have.keys [
+      model.all().should.include.keys [
+        'target'
         'updates'
         'whenChanged'
       ]
+      model.all().target.toString().should.match /findAll/
