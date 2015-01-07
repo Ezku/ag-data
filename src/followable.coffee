@@ -9,7 +9,7 @@ module.exports = (defaultInterval = 10000) ->
     follow: (args..., options = {}) ->
       shouldUpdate = options.poll ? Bacon.interval(options.interval ? defaultInterval, true).startWith true
 
-      updates = shouldUpdate.flatMapConcat ->
+      updates = shouldUpdate.flatMapFirst ->
         Bacon.fromPromise Promise.resolve f(args...)
 
       whenChanged = (listen) ->
