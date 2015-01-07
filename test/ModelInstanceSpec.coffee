@@ -89,6 +89,9 @@ describe "ag-data.model.instance", ->
       instance = new model foo: 'bar'
       instance.toJson().should.deep.equal foo: 'bar'
 
+    ###
+    NOTE: Code smell, tests are copy-paste from collection.equals
+    ###
     describe "equals()", ->
       record = null
 
@@ -108,6 +111,14 @@ describe "ag-data.model.instance", ->
 
       it "is a function", ->
         record.should.have.property('equals').be.a 'function'
+
+      it "returns true when passed the same record", ->
+        record.equals(record).should.be.true
+
+      it "returns false when the .toJson output on the other object differs", ->
+        record.equals({
+          toJson: -> {}
+        }).should.be.false
 
     describe "serialization", ->
       it "preserves identity", ->

@@ -84,6 +84,9 @@ describe "ag-data.model.collection", ->
             foo: 'bar'
           }
 
+  ###
+  NOTE: Code smell, tests are duplicated in model.equals
+  ###
   describe "equals()", ->
 
     collection = null
