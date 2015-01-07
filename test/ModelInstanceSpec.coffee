@@ -77,7 +77,7 @@ describe "ag-data.model.instance", ->
       }
       instance = new model foo: 'bar'
       properties = {}
-      for key, value of instance
+      for own key, value of instance
         properties[key] = value
       properties.should.deep.equal foo: 'bar'
 

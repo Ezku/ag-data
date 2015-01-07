@@ -140,12 +140,7 @@ module.exports = (resource, defaultRequestOptions) ->
           @__identity = null
           this
 
-  class Model
-    @find: ResourceGateway.find
-    @findAll: ResourceGateway.findAll
-    @all: ResourceGateway.all
-    @options: ResourceGateway.options
-    @fromJson: ResourceGateway.fromJson
+  class Model extends ResourceGateway
 
     @schema:
       fields: resource.schema.fields
