@@ -10,6 +10,7 @@ chai.use(require 'sinon-chai')
 
 asserting = require './asserting'
 followable = require '../src/followable'
+itSupportsWhenChanged = require './it-supports-when-changed'
 
 describe "ag-data.followable", ->
   it "is a function", ->
@@ -40,56 +41,47 @@ describe "ag-data.followable", ->
             'whenChanged'
           ]
 
-      describe "whenChanged()", ->
-
-        it "is a function", ->
-          fromPromiseF(->).follow().whenChanged.should.be.a 'function'
-
-        it "accepts a listener to call when changes from the followed function are received", (done) ->
-          followed = sinon.stub().returns Promise.resolve()
-          fromPromiseF(followed).follow().whenChanged ->
+      it "knows how to skip duplicates", (done) ->
+        followed = sinon.stub().returns Promise.resolve()
+        { updates, whenChanged } = fromPromiseF(followed).follow({
+          poll: Bacon.fromArray [1, 2]
+        })
+        
+        spy = sinon.stub()
+        unsub = whenChanged spy
+        updates
+          .take(2)
+          .fold(0, (a) -> a + 1)
+          .onValue (v) ->
             done asserting ->
-              followed.should.have.been.calledOnce
-
-        it "skips duplicates", (done) ->
-          followed = sinon.stub().returns Promise.resolve()
-          { updates, whenChanged } = fromPromiseF(followed).follow({
-            poll: Bacon.fromArray [1, 2]
-          })
-          
-          spy = sinon.stub()
-          unsub = whenChanged spy
-          updates
-            .take(2)
-            .fold(0, (a) -> a + 1)
-            .onValue (v) ->
-              done asserting ->
-                unsub()
-                spy.should.have.been.calledOnce
-
-        it "returns an unsubscribe function", ->
-          followed = sinon.stub().returns Promise.resolve()
-          fromPromiseF(followed).follow().whenChanged(->).should.be.a 'function'
-
-        it "does not overfeed the followed function when a previous call takes a long time to finish", (done)->
-          currentDelay = 0
-          delayIncrement = 10
-          maxDelay = 50
-          finding = false
-
-          unsub = fromPromiseF(->
-            # This assertion will fail in case the "slow" promise is still
-            # resolving and the function is being called too early
-            finding.should.equal(false)
-            finding = true
-
-            currentDelay += delayIncrement
-            Promise.resolve([{foo:currentDelay}]).delay(currentDelay).tap ->
-              finding = false
-          ).follow({ interval: 10 }).whenChanged (value) ->
-            if currentDelay > maxDelay
               unsub()
-              done()
+              spy.should.have.been.calledOnce
+
+      it "knows how to not overfeed the followed function when a previous call takes a long time to finish", (done) ->
+        currentDelay = 0
+        delayIncrement = 10
+        maxDelay = 50
+        finding = false
+
+        unsub = fromPromiseF(->
+          # This assertion will fail in case the "slow" promise is still
+          # resolving and the function is being called too early
+          finding.should.equal(false)
+          finding = true
+
+          currentDelay += delayIncrement
+          Promise.resolve([{foo:currentDelay}]).delay(currentDelay).tap ->
+            finding = false
+        ).follow({ interval: 10 }).whenChanged (value) ->
+          if currentDelay > maxDelay
+            unsub()
+            done()
+
+      itSupportsWhenChanged ->
+        followed = sinon.stub().returns Promise.resolve()
+        followable = fromPromiseF(followed).follow()
+
+        { followed, followable }
 
       describe "updates", ->
         it "is a stream", ->
