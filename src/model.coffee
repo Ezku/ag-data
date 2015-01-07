@@ -111,8 +111,7 @@ module.exports = (resource, defaultRequestOptions) ->
 
   ModelOps =
     whenChanged: (f, options = {}) ->
-      # NOTE: Passes test but is acually borken
-      ResourceGateway.one(@__identity)
+      ResourceGateway.one(@__identity, options).whenChanged f
 
     save: ->
       (switch @__state
