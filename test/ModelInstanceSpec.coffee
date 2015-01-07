@@ -89,6 +89,26 @@ describe "ag-data.model.instance", ->
       instance = new model foo: 'bar'
       instance.toJson().should.deep.equal foo: 'bar'
 
+    describe "equals()", ->
+      record = null
+
+      beforeEach ->
+        model = createModelFromResource mockResource {
+          identifier: 'id'
+          fields:
+            id: {}
+            foo: {}
+          find: {
+            id: 123
+            foo: 'bar'
+          }
+        }
+        model.find(123).then (foundRecord) ->
+          record = foundRecord
+
+      it "is a function", ->
+        record.should.have.property('equals').be.a 'function'
+
     describe "serialization", ->
       it "preserves identity", ->
         model = createModelFromResource mockResource {
