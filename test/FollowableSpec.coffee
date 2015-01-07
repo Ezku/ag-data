@@ -35,7 +35,7 @@ describe "ag-data.followable", ->
       it "can be observed through a raw stream or by attaching a listener", ->
         fromPromiseF(->
           Promise.resolve(true)
-        ).follow().should.have.keys [
+        ).follow().should.include.keys [
             'updates'
             'whenChanged'
           ]
@@ -131,4 +131,13 @@ describe "ag-data.followable", ->
             .onValue (v) ->
               done asserting ->
                 followed.should.have.been.calledTwice
+
+      describe "target", ->
+        it "refers to the original wrapped function", ->
+          followed = -> 'foo'
+          fromPromiseF(followed)
+            .follow()
+            .target
+            .toString()
+            .should.match /foo/
 
