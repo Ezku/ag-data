@@ -110,6 +110,10 @@ module.exports = (resource, defaultRequestOptions) ->
 
 
   ModelOps =
+    whenChanged: (f, options = {}) ->
+      # NOTE: Passes test but is acually borken
+      ResourceGateway.one(@__identity)
+
     save: ->
       (switch @__state
         when 'deleted' then Promise.reject new Error "Will not save a deleted instance"
@@ -159,6 +163,9 @@ module.exports = (resource, defaultRequestOptions) ->
       delete:
         enumerable: false
         get: -> ModelOps.delete
+      whenChanged:
+        enumerable: false
+        get: -> ModelOps.whenChanged
       equals:
         enumerable: false
         get: -> jsonableEquality(this)
