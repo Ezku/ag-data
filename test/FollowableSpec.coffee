@@ -121,7 +121,7 @@ describe "ag-data.followable", ->
           followed = sinon.stub().returns Promise.resolve [
             { foo: 'bar' }
           ]
-          poll = new Bacon.Bus
+          poll = Bacon.fromArray [1, 2]
 
           fromPromiseF(followed)
             .follow({ poll: poll.bufferingThrottle(10) })
@@ -130,8 +130,5 @@ describe "ag-data.followable", ->
             .fold(0, (a) -> a + 1)
             .onValue (v) ->
               done asserting ->
-                v.should.equal 2
                 followed.should.have.been.calledTwice
 
-          poll.push true
-          poll.push true
