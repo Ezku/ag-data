@@ -23,8 +23,13 @@ module.exports = (resource, defaultRequestOptions) ->
         else true
       instance
 
-    # (states: [Object]) -> [Model] & { save: () -> Promise }
+    # (states: [Object]) -> [Model] & { save: () -> Promise, equals: (Object) -> Boolean, toJson: () -> Object }
     collectionFromPersistentStates = (states) ->
+      ###
+      NOTE: Have to do manual decoration instead of extend/mixin because the signature is "array and then some"
+      Subclassing array to extend behavior does not seem feasible, see e.g.
+      http://perfectionkills.com/how-ecmascript-5-still-does-not-allow-to-subclass-an-array/
+      ###
       collection = (
         for state in states
           instanceFromPersistentState state
