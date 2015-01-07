@@ -12,6 +12,7 @@ chai.use(require 'sinon-chai')
 
 mockResource = require './mock-resource'
 asserting = require './asserting'
+itSupportsWhenChanged = require './it-supports-when-changed'
 
 describe "ag-data.model.collection", ->
   it "should be iterable", ->
@@ -39,15 +40,27 @@ describe "ag-data.model.collection", ->
         { id: 123, foo: 'bar' }
       ]
 
-  describe "whenChanged()", ->
-    it "is a followable on the corresponding findAll", ->
-      model = createModelFromResource mockResource {
-        findAll: [
-          { id: 123, foo: 'bar' }
-        ]
-      }
-      model.findAll().then (collection) ->
-        collection.whenChanged.should.be.a 'function'
+  it "is a followable on the corresponding findAll", ->
+    model = createModelFromResource mockResource {
+      findAll: [
+        { id: 123, foo: 'bar' }
+      ]
+    }
+    model.findAll().then (collection) ->
+      collection.whenChanged.should.be.a 'function'
+
+  itSupportsWhenChanged ->
+    resource = mockResource {
+      findAll: [
+        { id: 123, foo: 'bar' }
+      ]
+    }
+    model = createModelFromResource resource
+
+    {
+      followed: resource.findAll
+      followable: model.findAll()
+    }
 
   describe "save()", ->
     it "delegates save to individual model instances", ->

@@ -12,6 +12,7 @@ chai.use(require 'sinon-chai')
 
 mockResource = require './mock-resource'
 asserting = require './asserting'
+itSupportsWhenChanged = require './it-supports-when-changed'
 
 describe "ag-data.model.class", ->
   describe "metadata", ->
@@ -129,6 +130,19 @@ describe "ag-data.model.class", ->
       ]
       model.all().target.toString().should.match /\bfindAll\b/
 
+    itSupportsWhenChanged ->
+      resource = mockResource {
+        findAll: [
+          {}
+        ]
+      }
+      model = createModelFromResource resource
+
+      {
+        followable: model.all()
+        followed: resource.findAll
+      }
+
   describe "one()", ->
     it "is a function", ->
       model = createModelFromResource mockResource {}
@@ -143,3 +157,13 @@ describe "ag-data.model.class", ->
       ]
       model.one().target.toString().should.match /\bfind\b/
 
+    itSupportsWhenChanged ->
+      resource = mockResource {
+        find: {}
+      }
+      model = createModelFromResource resource
+
+      {
+        followable: model.one()
+        followed: resource.find
+      }
