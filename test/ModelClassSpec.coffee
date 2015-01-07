@@ -127,7 +127,7 @@ describe "ag-data.model.class", ->
         'updates'
         'whenChanged'
       ]
-      model.all().target.toString().should.match /findAll/
+      model.all().target.toString().should.match /\bfindAll\b/
 
   describe "one()", ->
     it "is a function", ->
