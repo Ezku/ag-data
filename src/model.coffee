@@ -75,6 +75,19 @@ module.exports = (resource, defaultRequestOptions) ->
         )
         .follow(options)
 
+    ###
+    NOTE: Code smell, looks like copy paste from all()
+    ###
+    one: (id, options = {}) ->
+      options.equals ?= (left, right) ->
+        left?.equals?(right)
+
+      followable
+        .fromPromiseF(->
+          ResourceGateway.find(id)
+        )
+        .follow(options)
+
     # Stream
     options: do ->
       requestOptionUpdates = Bacon.combineTemplate(defaultRequestOptions || {})
