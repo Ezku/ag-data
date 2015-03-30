@@ -17,7 +17,7 @@ module.exports = cachedResourceFromResource = (resource, options = {}) ->
   collectionCache = createCache "collections-#{resource.name}", storage
   instanceCache = createCache "records-#{resource.name}", storage
 
-  debug "Resource '#{resource}' cache configured:", {
+  debug "Resource '#{resource.name}' cache configured:", {
     timeToLive
     collectionCacheNamespace: collectionCache.namespace
     instanceCacheNamespace: instanceCache.namespace
