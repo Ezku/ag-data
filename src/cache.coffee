@@ -1,7 +1,8 @@
 Promise = require 'bluebird'
-debug = require('debug')('ag-data:cached-property')
 
 module.exports = (namespace, storage, time) ->
+  debug = require('debug')("ag-data:cached-property:#{namespace}")
+
   time ?= ->
     (new Date()).getTime()
 
