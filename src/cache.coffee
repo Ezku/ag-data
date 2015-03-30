@@ -1,4 +1,5 @@
 Promise = require 'bluebird'
+debug = require('debug')('ag-data:cached-property')
 
 module.exports = (namespace, storage, time) ->
   time ?= ->
@@ -14,7 +15,7 @@ module.exports = (namespace, storage, time) ->
   isValidMeta = (metadata, options) ->
     return false unless options?.timeToLive?
     return false unless metadata?.lastUpdated?
-    
+
     lifetime = time() - metadata.lastUpdated
     return lifetime < options.timeToLive
 
@@ -24,6 +25,7 @@ module.exports = (namespace, storage, time) ->
       if value?
         value
       else
+        debug "#{index} is absent, computing..."
         Promise.resolve(compute()).then set(index)
 
   # (index: String, timeToLive: Integer) -> (compute: () -> Promise) -> Promise
@@ -32,6 +34,7 @@ module.exports = (namespace, storage, time) ->
       if isValidMeta metadata, { timeToLive }
         storage.getItem(index)
       else
+        debug "#{index} is invalid, computing..."
         Promise.resolve(compute()).then set(index)
 
   # (index: String) -> (value: Object) -> Promise
@@ -40,12 +43,14 @@ module.exports = (namespace, storage, time) ->
       storage.setItem((metadataKeyForIndex index), {
         lastUpdated: time()
       }).then ->
+        debug "#{index} written with value:", value
         value
 
   # (index: String) -> (operation: () -> Promise) -> Promise
   invalidateIfSuccessful = (index) -> (operation) ->
     Promise.resolve(operation()).then (result) ->
       storage.removeItem(metadataKeyForIndex index).then ->
+        debug "#{index} invalidated"
         result
 
   prop = (key, options) ->
