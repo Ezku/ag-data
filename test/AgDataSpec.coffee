@@ -14,6 +14,18 @@ describe "ag-data", ->
     options: baseUrl: "http://example.com"
     resources: foo: schema: fields: bar: 'string'
 
+  describe "storage", ->
+    describe "memory", ->
+      it "is a function", ->
+        data.storages.memory.should.be.a 'function'
+
+      it "creates a cache adapter", ->
+        data.storages.memory().should.include.keys [
+          'getItem'
+          'setItem'
+          'removeItem'
+        ]
+
   describe "loadResourceBundle", ->
     it "is a function", ->
       data.loadResourceBundle.should.be.a 'function'

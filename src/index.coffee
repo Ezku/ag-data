@@ -3,6 +3,9 @@ defaultLoader = require('ag-resource-loader-json')(restful)
 createModelFromResource = require './model'
 
 module.exports = data =
+  storages:
+    memory: require './async-key-value-storage'
+
   loadResourceBundle: (object) ->
     bundle = defaultLoader.loadResourceBundle object
     # TODO: What about just loading up all resources at once?
