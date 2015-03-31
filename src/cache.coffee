@@ -44,7 +44,6 @@ module.exports = (namespace, storage, time) ->
       storage.setItem((metadataKeyForIndex index), {
         lastUpdated: time()
       }).then ->
-        debug "#{index} written with value:", value
         value
 
   # (index: String) -> (operation: () -> Promise) -> Promise
