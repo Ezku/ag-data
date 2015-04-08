@@ -98,9 +98,7 @@ module.exports = (resource, defaultRequestOptions) ->
     # (json: Object) -> Model
     fromJson: (json) ->
       instance = instanceFromPersistentState json
-      instance.__dirty = true
-      for key, value of instance.__data when (key isnt Model.schema.identifier)
-        instance.__changed[key] = true
+      ModelOps.markAsDirty(instance)
       instance
 
   if defaultRequestOptions?.cache?.enabled

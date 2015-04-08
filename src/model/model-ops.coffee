@@ -57,6 +57,12 @@ module.exports = (resource) ->
       instance.__identity = instance.id ? true
       null
 
+    markAsDirty: (instance) ->
+      instance.__dirty = true
+      for key, value of instance.__data when (key isnt resource.schema.identifier)
+        instance.__changed[key] = true
+      null
+
     save: ->
       (switch @__state
         when 'deleted' then Promise.reject new Error "Will not save a deleted instance"
