@@ -2,6 +2,42 @@ Promise = require 'bluebird'
 
 module.exports = (resource) ->
   ModelOps =
+    initialize: (instance, properties) ->
+      # Define non-enumerable metadata for this model instance
+      metadata =
+        __state: 'new'
+        __data: properties
+        __changed: {}
+        __dirty: (true for key, value of properties).length > 0
+        __identity: null
+
+      for key, value of metadata then do (key) ->
+        Object.defineProperty instance, key, {
+          enumerable: false
+          get: -> metadata[key]
+          set: (v) -> metadata[key] = v
+        }
+
+      # Define enumerable properties based on schema
+      # Don't make identifier settable
+      # NOTE: this is in the constructor to make these properties owned by the object
+      if resource.schema.identifier?
+        Object.defineProperty instance, 'id', {
+          get: -> @__data?[resource.schema.identifier]
+          enumerable: true
+        }
+      for key, value of resource.schema.fields when (key isnt resource.schema.identifier)
+        do (key) ->
+          Object.defineProperty instance, key, {
+            get: -> @__data[key]
+            set: (v) ->
+              @__data[key] = v
+              @__dirty = true
+              @__changed[key] = true
+            enumerable: true
+          }
+      null
+
     save: ->
       (switch @__state
         when 'deleted' then Promise.reject new Error "Will not save a deleted instance"
