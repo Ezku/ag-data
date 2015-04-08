@@ -107,15 +107,10 @@ module.exports = (resource, defaultRequestOptions) ->
   ModelOps = require('./model/model-ops')(resource)
 
   class Model extends ResourceGateway
-
-    @schema:
-      fields: resource.schema.fields
-      identifier: resource.schema.identifier
-
-    ModelOps.declareGatewayClassProperties @prototype, ResourceGateway
-
-    constructor: (properties) ->
-      ModelOps.initialize(this, properties)
+    Object.defineProperties @, ModelOps.modelClassProperties ResourceGateway
+    Object.defineProperties @prototype, ModelOps.modelPrototypeProperties ResourceGateway
+    constructor: (data) ->
+      Object.defineProperties this, ModelOps.modelInstanceProperties data
 
   if defaultRequestOptions?.cache?.enabled
     Model.cache = resource.cache

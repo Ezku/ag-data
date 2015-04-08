@@ -3,75 +3,77 @@ jsonableEquality = require '../jsonable-equality'
 
 module.exports = (resource) ->
   ModelOps =
-    # Define non-enumerable methods on model class
-    declareGatewayClassProperties: (prototype, ResourceGateway) ->
-      Object.defineProperties prototype, {
-        save:
-          enumerable: false
-          get: -> ModelOps.save
-        delete:
-          enumerable: false
-          get: -> ModelOps.delete
-        whenChanged:
-          enumerable: false
-          get: -> (f, options = {}) ->
-            ResourceGateway.one(@__identity, options).whenChanged f
-        equals:
-          enumerable: false
-          get: -> jsonableEquality(this)
-        toJson:
-          enumerable: false
-          get: -> => @__data
-      }
+    modelClassProperties: (ResourceGateway) ->
+      schema:
+        enumerable: true
+        get: ->
+          fields: resource.schema.fields
+          identifier: resource.schema.identifier
 
-    initialize: do ->
-      createMetadata = (properties) ->
+    modelPrototypeProperties: (ResourceGateway) ->
+      save:
+        enumerable: false
+        get: -> ModelOps.save
+      delete:
+        enumerable: false
+        get: -> ModelOps.delete
+      whenChanged:
+        enumerable: false
+        get: -> (f, options = {}) ->
+          ResourceGateway.one(@__identity, options).whenChanged f
+      equals:
+        enumerable: false
+        get: -> jsonableEquality(this)
+      toJson:
+        enumerable: false
+        get: -> => @__data
+
+    modelInstanceProperties: do ->
+      createMetadata = (data) ->
         __state: 'new'
-        __data: properties
+        __data: data
         __changed: {}
-        __dirty: (true for key, value of properties).length > 0
+        __dirty: (true for key, value of data).length > 0
         __identity: null
 
-      makeAccessibleNonEnumerableProperties = (metadata, instance) ->
+      makeMetadataProperties = (metadata) ->
+        props = {}
         for key, value of metadata then do (key) ->
-          Object.defineProperty instance, key, {
+          props[key] = {
             enumerable: false
             get: -> metadata[key]
             set: (v) -> metadata[key] = v
           }
+        props
 
-      makeIdentifierAccessible = (instance, identifierFieldName) ->
-        Object.defineProperty instance, 'id', {
-          get: -> @__data?[identifierFieldName]
-          enumerable: true
-        }
+      makeIdentifierProperty = (identifierFieldName) ->
+        get: -> @__data?[identifierFieldName]
+        enumerable: true
 
-      makeNonIdentifierFieldsAccessible = (instance, fields, identifierFieldName) ->
-        for key, value of fields when (key isnt identifierFieldName)
-          do (key) ->
-            Object.defineProperty instance, key, {
-              get: -> @__data[key]
-              set: (v) ->
-                @__data[key] = v
-                @__dirty = true
-                @__changed[key] = true
-              enumerable: true
-            }
+      addNonIdentifierProperties = (props, fields, identifierFieldName) ->
+        for key, value of fields when (key isnt identifierFieldName) then do (key) ->
+          props[key] ?= {
+            get: -> @__data[key]
+            set: (v) ->
+              @__data[key] = v
+              @__dirty = true
+              @__changed[key] = true
+            enumerable: true
+          }
+        props
 
-      (instance, properties) ->
+      (data) ->
         # Expose metadata on the object as properties but prevent iterating through them
-        metadata = createMetadata(properties)
-        makeAccessibleNonEnumerableProperties(metadata, instance)
+        metadata = createMetadata(data)
+        props = makeMetadataProperties(metadata)
 
         # Make .id a read-only accessor for the identifier field
         if resource.schema.identifier?
-          makeIdentifierAccessible instance, resource.schema.identifier
+          props.id = makeIdentifierProperty resource.schema.identifier
 
         # Regular object fields should be accessible, but we'll also hook up
         # on writes for dirty state tracking
-        makeNonIdentifierFieldsAccessible instance, resource.schema.fields, resource.schema.identifier
-
-        null
+        addNonIdentifierProperties props, resource.schema.fields, resource.schema.identifier
 
     markAsPersisted: (instance) ->
       instance.__dirty = false
