@@ -4,11 +4,19 @@ jsonableEquality = require '../jsonable-equality'
 module.exports = (resource) ->
   ModelOps =
     modelClassProperties: (ResourceGateway) ->
-      schema:
-        enumerable: true
-        get: ->
-          fields: resource.schema.fields
-          identifier: resource.schema.identifier
+      props =
+        schema:
+          enumerable: true
+          get: ->
+            fields: resource.schema.fields
+            identifier: resource.schema.identifier
+
+      for key, value of ResourceGateway then do (key, value) ->
+        props[key] =
+          enumerable: true
+          get: -> value
+
+      props
 
     modelPrototypeProperties: (ResourceGateway) ->
       save:

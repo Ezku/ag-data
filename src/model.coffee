@@ -106,7 +106,7 @@ module.exports = (resource, defaultRequestOptions) ->
 
   ModelOps = require('./model/model-ops')(resource)
 
-  class Model extends ResourceGateway
+  class Model
     Object.defineProperties @, ModelOps.modelClassProperties ResourceGateway
     Object.defineProperties @prototype, ModelOps.modelPrototypeProperties ResourceGateway
     constructor: (data) ->
