@@ -172,3 +172,8 @@ describe "ag-data.model.class", ->
     it "should be a function", ->
       model = createModelFromResource mockResource {}
       model.should.have.property('create').be.a 'function'
+
+  describe "update()", ->
+    it "should be a function", ->
+      model = createModelFromResource mockResource {}
+      model.should.have.property('update').be.a 'function'
