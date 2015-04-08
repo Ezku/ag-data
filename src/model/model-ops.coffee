@@ -2,41 +2,52 @@ Promise = require 'bluebird'
 
 module.exports = (resource) ->
   ModelOps =
-    initialize: (instance, properties) ->
-      # Define non-enumerable metadata for this model instance
-      metadata =
+    initialize: do ->
+      createMetadata = (properties) ->
         __state: 'new'
         __data: properties
         __changed: {}
         __dirty: (true for key, value of properties).length > 0
         __identity: null
 
-      for key, value of metadata then do (key) ->
-        Object.defineProperty instance, key, {
-          enumerable: false
-          get: -> metadata[key]
-          set: (v) -> metadata[key] = v
-        }
+      makeAccessibleNonEnumerableProperties = (metadata, instance) ->
+        for key, value of metadata then do (key) ->
+          Object.defineProperty instance, key, {
+            enumerable: false
+            get: -> metadata[key]
+            set: (v) -> metadata[key] = v
+          }
 
-      # Define enumerable properties based on schema
-      # Don't make identifier settable
-      # NOTE: this is in the constructor to make these properties owned by the object
-      if resource.schema.identifier?
+      makeIdentifierAccessible = (instance, identifierFieldName) ->
         Object.defineProperty instance, 'id', {
-          get: -> @__data?[resource.schema.identifier]
+          get: -> @__data?[identifierFieldName]
           enumerable: true
         }
-      for key, value of resource.schema.fields when (key isnt resource.schema.identifier)
-        do (key) ->
-          Object.defineProperty instance, key, {
-            get: -> @__data[key]
-            set: (v) ->
-              @__data[key] = v
-              @__dirty = true
-              @__changed[key] = true
-            enumerable: true
-          }
-      null
+
+      makeNonIdentifierFieldsAccessible = (instance, fields, identifierFieldName) ->
+        for key, value of fields when (key isnt identifierFieldName)
+          do (key) ->
+            Object.defineProperty instance, key, {
+              get: -> @__data[key]
+              set: (v) ->
+                @__data[key] = v
+                @__dirty = true
+                @__changed[key] = true
+              enumerable: true
+            }
+
+      (instance, properties) ->
+        # Expose metadata on the object as properties but prevent iterating through them
+        metadata = createMetadata(properties)
+        makeAccessibleNonEnumerableProperties(metadata, instance)
+
+        # Make .id a read-only accessor for the identifier field
+        if resource.schema.identifier?
+          makeIdentifierAccessible instance, resource.schema.identifier
+
+        # Regular object fields should be accessible, but we'll also hook up
+        # on writes for dirty state tracking
+        makeNonIdentifierFieldsAccessible instance, resource.schema.fields, resource.schema.identifier
 
     save: ->
       (switch @__state
