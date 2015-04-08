@@ -167,3 +167,8 @@ describe "ag-data.model.class", ->
         followable: model.one()
         followed: resource.find
       }
+
+  describe "create()", ->
+    it "should be a function", ->
+      model = createModelFromResource mockResource {}
+      model.should.have.property('create').be.a 'function'
