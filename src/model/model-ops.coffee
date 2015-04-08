@@ -1,7 +1,29 @@
 Promise = require 'bluebird'
+jsonableEquality = require '../jsonable-equality'
 
 module.exports = (resource) ->
   ModelOps =
+    # Define non-enumerable methods on model class
+    declareGatewayClassProperties: (prototype, ResourceGateway) ->
+      Object.defineProperties prototype, {
+        save:
+          enumerable: false
+          get: -> ModelOps.save
+        delete:
+          enumerable: false
+          get: -> ModelOps.delete
+        whenChanged:
+          enumerable: false
+          get: -> (f, options = {}) ->
+            ResourceGateway.one(@__identity, options).whenChanged f
+        equals:
+          enumerable: false
+          get: -> jsonableEquality(this)
+        toJson:
+          enumerable: false
+          get: -> => @__data
+      }
+
     initialize: do ->
       createMetadata = (properties) ->
         __state: 'new'

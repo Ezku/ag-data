@@ -112,25 +112,7 @@ module.exports = (resource, defaultRequestOptions) ->
       fields: resource.schema.fields
       identifier: resource.schema.identifier
 
-    # Define non-enumerable methods on model instances
-    Object.defineProperties @prototype, {
-      save:
-        enumerable: false
-        get: -> ModelOps.save
-      delete:
-        enumerable: false
-        get: -> ModelOps.delete
-      whenChanged:
-        enumerable: false
-        get: -> (f, options = {}) ->
-          ResourceGateway.one(@__identity, options).whenChanged f
-      equals:
-        enumerable: false
-        get: -> jsonableEquality(this)
-      toJson:
-        enumerable: false
-        get: -> => @__data
-    }
+    ModelOps.declareGatewayClassProperties @prototype, ResourceGateway
 
     constructor: (properties) ->
       ModelOps.initialize(this, properties)
