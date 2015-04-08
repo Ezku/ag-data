@@ -49,6 +49,14 @@ module.exports = (resource) ->
         # on writes for dirty state tracking
         makeNonIdentifierFieldsAccessible instance, resource.schema.fields, resource.schema.identifier
 
+        null
+
+    markAsPersisted: (instance) ->
+      instance.__dirty = false
+      instance.__state = 'persisted'
+      instance.__identity = instance.id ? true
+      null
+
     save: ->
       (switch @__state
         when 'deleted' then Promise.reject new Error "Will not save a deleted instance"

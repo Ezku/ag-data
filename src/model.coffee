@@ -15,12 +15,7 @@ module.exports = (resource, defaultRequestOptions) ->
     # (state: Object) -> Model
     instanceFromPersistentState = (state) ->
       instance = new Model state
-      instance.__dirty = false
-      instance.__state = 'persisted'
-      instance.__identity = switch
-        when Model.schema.identifier? then state[Model.schema.identifier]
-        # TODO: what happens on save and delete for an instance where this holds?
-        else true
+      ModelOps.markAsPersisted(instance)
       instance
 
     # (states: [Object]) -> [Model] & { save: () -> Promise, equals: (Object) -> Boolean, toJson: () -> Object }
