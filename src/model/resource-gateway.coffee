@@ -94,3 +94,11 @@ module.exports = (resource, ModelOps, Model, defaultRequestOptions) ->
       instance = instanceFromPersistentState json
       ModelOps.markAsDirty(instance)
       instance
+
+    # (data: Object) -> Promise Model
+    create: (data) ->
+      resource.create(data).then(instanceFromPersistentState)
+
+    # (id, data: Object) -> Promise Model
+    update: (id, data) ->
+      resource.update(id, data).then(instanceFromPersistentState)
