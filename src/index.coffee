@@ -1,6 +1,7 @@
 restful = require('ag-restful')(require 'bluebird')
 defaultLoader = require('ag-resource-loader-json')(restful)
 buildModelClass = require './model/build-model-class'
+cachedResource = require './resource/cached-resource'
 
 module.exports = data =
   storages:
@@ -14,4 +15,8 @@ module.exports = data =
       data.createModel(resource, options)
 
   createModel: (resource, options = {}) ->
+    if options?.cache?.enabled
+      resource = cachedResource resource, options.cache
+      delete options.cache
+
     buildModelClass resource, options

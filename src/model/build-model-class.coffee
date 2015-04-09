@@ -1,10 +1,5 @@
-cachedResource = require '../resource/cached-resource'
 
 module.exports = (resource, defaultRequestOptions) ->
-
-  if defaultRequestOptions?.cache?.enabled
-    resource = cachedResource resource, defaultRequestOptions.cache
-
   ModelOps = require('./model-ops')(resource)
 
   class Model
