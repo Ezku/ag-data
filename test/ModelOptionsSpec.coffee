@@ -87,3 +87,11 @@ describe "ag-data.createModel", ->
         }
       ).resource.should.have.property('cache').exist
 
+  describe "enabling file field support", ->
+    it "is done by passing in a resource with file fields", ->
+      data.createModel(mockResource {
+        fields:
+          file:
+            type: 'file'
+      }).resource.should.have.property('upload').be.a 'function'
+
