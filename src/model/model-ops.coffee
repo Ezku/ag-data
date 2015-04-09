@@ -99,14 +99,20 @@ module.exports = (resource) ->
         delete instance[resource.schema.identifier]
       null
 
+    markAsNewed: (instance, data) ->
+      instance.__data = data
+      instance.__dirty = false
+      instance.__changed = {}
+      instance.__state = 'persisted'
+      null
+
     save: ->
       (switch @__state
         when 'deleted' then Promise.reject new Error "Will not save a deleted instance"
-        when 'new' then resource.create(@__data).then (result) =>
-          @__data = result
-          @__dirty = false
-          @__changed = {}
-          @__state = 'persisted'
+        when 'new' then resource.create(@__data).then (data) =>
+          ModelOps.markAsNewed(this, data)
+          this
+
         when 'persisted'
           if @__dirty
             changes = {}
