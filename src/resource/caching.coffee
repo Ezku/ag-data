@@ -4,7 +4,7 @@ Promise = require 'bluebird'
 asyncKeyValueStorage = require '../cache/async-key-value-storage'
 propertyCache = require '../cache/property-cache'
 
-module.exports = cachedResourceFromResource = (resource, options = {}) ->
+module.exports = decorateWithCaching = (resource, options = {}) ->
   debug = require('debug')("ag-data:cached-resource:#{resource.name}")
 
   # Setup caches

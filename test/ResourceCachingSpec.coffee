@@ -1,7 +1,7 @@
 Promise = require 'bluebird'
 Bacon = require 'baconjs'
 
-createCachedResource = require('../src/resource/cached-resource')
+decorateWithCaching = require('../src/resource/caching')
 
 chai = require('chai')
 chai.should()
@@ -13,7 +13,7 @@ chai.use(require 'sinon-chai')
 mockResource = require './helpers/mock-resource'
 asserting = require './helpers/asserting'
 
-describe "ag-data.cached-resource", ->
+describe "ag-data.resource.caching", ->
 
   describe "find()", ->
 
@@ -21,7 +21,7 @@ describe "ag-data.cached-resource", ->
       resource = mockResource {
         find: {}
       }
-      cachedResource = createCachedResource resource
+      cachedResource = decorateWithCaching resource
       cachedResource.find(123).then ->
         cachedResource.find(123).then ->
           resource.find.should.have.been.calledOnce
@@ -32,7 +32,7 @@ describe "ag-data.cached-resource", ->
       resource = mockResource {
         findAll: []
       }
-      cachedResource = createCachedResource resource
+      cachedResource = decorateWithCaching resource
       cachedResource.findAll().then ->
         cachedResource.findAll().then ->
           resource.findAll.should.have.been.calledOnce
@@ -48,7 +48,7 @@ describe "ag-data.cached-resource", ->
         ]
         find: {}
       }
-      cachedResource = createCachedResource resource
+      cachedResource = decorateWithCaching resource
       cachedResource.findAll().then (collection) ->
         cachedResource.find(123).then ->
           resource.findAll.should.have.been.calledOnce
@@ -65,7 +65,7 @@ describe "ag-data.cached-resource", ->
           id: 123, foo: 'bar'
         }
         update: {}
-      cachedResource = createCachedResource resource
+      cachedResource = decorateWithCaching resource
       cachedResource.find(123).then (record) ->
         record.foo = 'qux'
         cachedResource.update(123, record).then ->
@@ -83,7 +83,7 @@ describe "ag-data.cached-resource", ->
           { id: 123, foo: 'bar' }
         ]
 
-      cachedResource = createCachedResource resource
+      cachedResource = decorateWithCaching resource
       cachedResource.findAll().then (record) ->
         record.foo = 'qux'
         cachedResource.update(123, record).then ->
@@ -100,7 +100,7 @@ describe "ag-data.cached-resource", ->
         create: {}
         findAll: {}
 
-      cachedResource = createCachedResource resource
+      cachedResource = decorateWithCaching resource
       cachedResource.findAll().then ->
         cachedResource.create({}).then ->
           cachedResource.findAll().then ->
@@ -117,7 +117,7 @@ describe "ag-data.cached-resource", ->
           id: 123, foo: 'bar'
         }
         delete: {}
-      cachedResource = createCachedResource resource
+      cachedResource = decorateWithCaching resource
       cachedResource.find(123).then (record) ->
         cachedResource.delete(123).then ->
           cachedResource.find(123).then ->
@@ -134,7 +134,7 @@ describe "ag-data.cached-resource", ->
           { id: 123, foo: 'bar' }
         ]
 
-      cachedResource = createCachedResource resource
+      cachedResource = decorateWithCaching resource
       cachedResource.findAll().then ->
         cachedResource.delete(123).then ->
           cachedResource.findAll().then ->
@@ -151,7 +151,7 @@ describe "ag-data.cached-resource", ->
           foo: 'bar'
         }
       }
-      cachedResource = createCachedResource resource, { storage }
+      cachedResource = decorateWithCaching resource, { storage }
       cachedResource.find(123).then ->
         storage.getItem.should.have.been.called
         storage.setItem.should.have.been.called

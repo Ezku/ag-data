@@ -1,8 +1,8 @@
-cachedResource = require './cached-resource'
+decorateWithCaching = require './caching'
 
 module.exports = (resource, options) ->
   if options?.cache?.enabled
-    resource = cachedResource resource, options.cache
+    resource = decorateWithCaching resource, options.cache
     delete options.cache
 
   resource
