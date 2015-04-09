@@ -1,5 +1,5 @@
 Promise = require 'bluebird'
-jsonableEquality = require '../jsonable-equality'
+jsonableEquality = require './jsonable-equality'
 
 objectSize = (o) -> Object.keys(o || {}).length
 

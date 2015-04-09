@@ -1,7 +1,7 @@
 Promise = require 'bluebird'
 Bacon = require 'baconjs'
 
-createModelFromResource = require('../src/model')
+buildModel = require('../src/model/build-model-class')
 
 chai = require('chai')
 chai.should()
@@ -15,10 +15,10 @@ asserting = require './helpers/asserting'
 
 describe "ag-data.model", ->
   it "is a function", ->
-    createModelFromResource.should.be.a 'function'
+    buildModel.should.be.a 'function'
 
   it "accepts a resource and returns a model class", ->
-    createModelFromResource(mockResource {}).should.be.a 'function'
+    buildModel(mockResource {}).should.be.a 'function'
 
   it "optionally accepts an options object", ->
-    createModelFromResource(mockResource({}), {}).options.should.be.an 'object'
+    buildModel(mockResource({}), {}).options.should.be.an 'object'

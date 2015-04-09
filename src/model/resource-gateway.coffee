@@ -1,8 +1,8 @@
 Promise = require 'bluebird'
 Bacon = require 'baconjs'
 
-jsonableEquality = require '../jsonable-equality'
-followable = require('../followable')(defaultInterval = 10000)
+jsonableEquality = require './jsonable-equality'
+followable = require('./followable')(defaultInterval = 10000)
 
 module.exports = (resource, ModelOps, Model, defaultRequestOptions) ->
   ResourceGateway = do ->

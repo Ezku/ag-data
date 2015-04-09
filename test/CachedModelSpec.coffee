@@ -1,7 +1,7 @@
 Promise = require 'bluebird'
 Bacon = require 'baconjs'
 
-createModelFromResource = require('../src/model')
+buildModel = require('../src/model/build-model-class')
 
 chai = require('chai')
 chai.should()
@@ -16,7 +16,7 @@ asserting = require './helpers/asserting'
 describe "ag-data.model with cache", ->
 
   it "can be configured with a timeToLive", ->
-    createModelFromResource((mockResource {}), {
+    buildModel((mockResource {}), {
       cache:
         enabled: true
         timeToLive: 9001
@@ -26,7 +26,7 @@ describe "ag-data.model with cache", ->
     customStorage =
       getItem: ->
       setItem: ->
-    createModelFromResource((mockResource {}), {
+    buildModel((mockResource {}), {
       cache:
         enabled: true
         storage: customStorage
@@ -38,7 +38,7 @@ describe "ag-data.model with cache", ->
       resource = mockResource {
         find: {}
       }
-      model = createModelFromResource resource, cache: enabled: true
+      model = buildModel resource, cache: enabled: true
       model.find(123).then ->
         model.find(123).then ->
           resource.find.should.have.been.calledOnce
@@ -49,7 +49,7 @@ describe "ag-data.model with cache", ->
       resource = mockResource {
         findAll: []
       }
-      model = createModelFromResource resource, cache: enabled: true
+      model = buildModel resource, cache: enabled: true
       model.findAll().then ->
         model.findAll().then ->
           resource.findAll.should.have.been.calledOnce
@@ -65,7 +65,7 @@ describe "ag-data.model with cache", ->
         ]
         find: {}
       }
-      model = createModelFromResource resource, cache: enabled: true
+      model = buildModel resource, cache: enabled: true
       model.findAll().then (collection) ->
         model.find(123).then ->
           resource.findAll.should.have.been.calledOnce
@@ -83,7 +83,7 @@ describe "ag-data.model with cache", ->
           { id: 123, foo: 'bar' }
         ]
       }
-      model = createModelFromResource resource, cache: enabled: true
+      model = buildModel resource, cache: enabled: true
       # If we set the poll interval to 10, wait for an update and then a further 20ms,
       # we should get only cache hits after the first hit to resource
       model.all({}, { interval: 10 })
@@ -105,7 +105,7 @@ describe "ag-data.model with cache", ->
         ]
         create: {}
       }
-      model = createModelFromResource resource, cache: enabled: true
+      model = buildModel resource, cache: enabled: true
       updates = model.all({}, { interval: 10 }).updates
       updates
         .take(1)
@@ -131,7 +131,7 @@ describe "ag-data.model with cache", ->
           { id: 123, foo: 'bar' }
         ]
       }
-      model = createModelFromResource resource, {
+      model = buildModel resource, {
         cache:
           enabled: true
           timeToLive: 10

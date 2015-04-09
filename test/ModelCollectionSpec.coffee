@@ -1,7 +1,7 @@
 Promise = require 'bluebird'
 Bacon = require 'baconjs'
 
-createModelFromResource = require('../src/model')
+buildModel = require('../src/model/build-model-class')
 
 chai = require('chai')
 chai.should()
@@ -26,7 +26,7 @@ describe "ag-data.model.collection", ->
         { id: 123, foo: 'bar' }
       ]
     }
-    model = createModelFromResource resource
+    model = buildModel resource
     model.findAll().then (collection) ->
       # NOTE: equality is wonky because of all the defineProperty shenanigans on Model.
 
@@ -47,7 +47,7 @@ describe "ag-data.model.collection", ->
         { id: 123, foo: 'bar' }
       ]
     }
-    model = createModelFromResource resource
+    model = buildModel resource
 
     {
       followed: resource.findAll
@@ -66,7 +66,7 @@ describe "ag-data.model.collection", ->
         ]
         update: {}
       }
-      model = createModelFromResource resource
+      model = buildModel resource
       model.findAll().then (collection) ->
         collection[0].foo = 'qux'
         collection.save().then ->
@@ -79,7 +79,7 @@ describe "ag-data.model.collection", ->
         findAll: []
         create: {}
       }
-      model = createModelFromResource resource
+      model = buildModel resource
       model.findAll().then (collection) ->
         collection.push new model {
           foo: 'bar'
@@ -99,7 +99,7 @@ describe "ag-data.model.collection", ->
         { id: 123, foo: 'bar' }
       ]
     }
-    model = createModelFromResource resource
+    model = buildModel resource
     model.findAll()
 
   describe "toJson()", ->
@@ -116,7 +116,7 @@ describe "ag-data.model.collection", ->
           { id: 123, foo: 'bar' }
         ]
       }
-      model = createModelFromResource resource
+      model = buildModel resource
       model.findAll().then (all) ->
         collection = all
 

@@ -9,7 +9,7 @@ sinon = require 'sinon'
 chai.use(require 'sinon-chai')
 
 asserting = require './helpers/asserting'
-followable = require '../src/followable'
+followable = require '../src/model/followable'
 itSupportsWhenChanged = require './properties/it-supports-when-changed'
 
 describe "ag-data.followable", ->

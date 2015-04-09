@@ -1,7 +1,7 @@
 Promise = require 'bluebird'
 Bacon = require 'baconjs'
 
-createModelFromResource = require('../src/model')
+buildModel = require('../src/model/build-model-class')
 
 chai = require('chai')
 chai.should()
@@ -21,7 +21,7 @@ describe "ag-data.model.instance", ->
     resource = mockResource {
       find: { id: 123, foo: 'bar' }
     }
-    model = createModelFromResource resource
+    model = buildModel resource
 
     {
       followable: model.find(123)
@@ -34,13 +34,13 @@ describe "ag-data.model.instance", ->
     describe "save()", ->
       describe "with a new instance", ->
         it "creates the instance through the resource", ->
-          model = createModelFromResource mockResource create: {}
+          model = buildModel mockResource create: {}
           instance = new model
           instance.save().should.be.resolved
 
       describe "with a persistent instance", ->
         it "updates the instance through the resource", ->
-          model = createModelFromResource mockResource {
+          model = buildModel mockResource {
             find: {}
             update: {}
           }
@@ -53,7 +53,7 @@ describe "ag-data.model.instance", ->
             find: {}
             delete: {}
           }
-          model = createModelFromResource resource
+          model = buildModel resource
           model.find(1).then (instance) ->
             instance.delete().then ->
               instance.save().should.be.rejected
@@ -61,13 +61,13 @@ describe "ag-data.model.instance", ->
     describe "delete()", ->
       describe "when the instance is new", ->
         it "fails because there is nothing to delete in the resource", ->
-          model = createModelFromResource mockResource {}
+          model = buildModel mockResource {}
           instance = new model
           instance.delete().should.be.rejected
 
       describe "when the instance is already persistent", ->
         it "succeeds if the resource deletion succeeds", ->
-          model = createModelFromResource mockResource {
+          model = buildModel mockResource {
             find: {}
             delete: {}
           }
@@ -76,7 +76,7 @@ describe "ag-data.model.instance", ->
 
       describe "when the instance is already deleted", ->
         it "fails because there is nothing to delete", ->
-          model = createModelFromResource mockResource {
+          model = buildModel mockResource {
             find: {}
             delete: {}
           }
@@ -86,7 +86,7 @@ describe "ag-data.model.instance", ->
 
   describe "data", ->
     it "should be iterable", ->
-      model = createModelFromResource mockResource {
+      model = buildModel mockResource {
         fields:
           foo: {}
       }
@@ -97,7 +97,7 @@ describe "ag-data.model.instance", ->
       properties.should.deep.equal foo: 'bar'
 
     it "can be accessed as a plain old js object", ->
-      model = createModelFromResource mockResource {
+      model = buildModel mockResource {
         fields:
           foo: {}
       }
@@ -105,7 +105,7 @@ describe "ag-data.model.instance", ->
       instance.toJson().should.deep.equal foo: 'bar'
 
     itSupportsEquals ->
-      model = createModelFromResource mockResource {
+      model = buildModel mockResource {
         identifier: 'id'
         fields:
           id: {}
@@ -119,7 +119,7 @@ describe "ag-data.model.instance", ->
 
     describe "serialization", ->
       it "preserves identity", ->
-        model = createModelFromResource mockResource {
+        model = buildModel mockResource {
           identifier: 'uid'
           fields:
             uid: {}
@@ -133,7 +133,7 @@ describe "ag-data.model.instance", ->
 
     describe "with a new instance", ->
       it "should have the properties passed to it on new", ->
-        model = createModelFromResource mockResource {
+        model = buildModel mockResource {
           fields:
             foo: {}
         }
@@ -141,7 +141,7 @@ describe "ag-data.model.instance", ->
         instance.should.have.property('foo').equal 'bar'
 
       it "should not have properties that do not belong to the schema", ->
-        model = createModelFromResource mockResource {
+        model = buildModel mockResource {
           fields:
             foo: {}
         }
@@ -149,7 +149,7 @@ describe "ag-data.model.instance", ->
         instance.should.not.have.property('qux')
 
       it "should not have property in __proto__", ->
-        model = createModelFromResource mockResource {
+        model = buildModel mockResource {
           fields:
             foo: {}
         }
@@ -157,7 +157,7 @@ describe "ag-data.model.instance", ->
         Object.keys(instance.__proto__).should.not.include('foo')
 
       it "should have properties in root", ->
-        model = createModelFromResource mockResource {
+        model = buildModel mockResource {
           fields:
             foo: {}
         }
@@ -174,7 +174,7 @@ describe "ag-data.model.instance", ->
               foo: {}
             create: {}
           }
-          model = createModelFromResource resource
+          model = buildModel resource
           instance = new model foo: 'bar'
           instance.save().then ->
             resource.create.should.have.been.calledWith {
@@ -190,7 +190,7 @@ describe "ag-data.model.instance", ->
             create: { id: 123, foo: 'bar' }
             update: {}
           }
-          model = createModelFromResource resource
+          model = buildModel resource
 
           instance = new model foo: 'bar'
           instance.save().then ->
@@ -207,7 +207,7 @@ describe "ag-data.model.instance", ->
               foo: 'bar'
             update: {}
           }
-          model = createModelFromResource resource
+          model = buildModel resource
 
           model.find(1).then (instance) ->
             instance.foo = 'qux'
@@ -226,7 +226,7 @@ describe "ag-data.model.instance", ->
               something: 'else'
             update: {}
           }
-          model = createModelFromResource resource
+          model = buildModel resource
 
           model.find(1).then (instance) ->
             instance.foo = 'qux'
@@ -246,7 +246,7 @@ describe "ag-data.model.instance", ->
             }
             update: {}
           }
-          model = createModelFromResource resource
+          model = buildModel resource
 
           model.find(1).then (instance) ->
             instance.foo = 'qux'
@@ -266,7 +266,7 @@ describe "ag-data.model.instance", ->
               foo: 'bar'
             update: {}
           }
-          model = createModelFromResource resource
+          model = buildModel resource
 
           model.find(1).then (instance) ->
             instance.save().then ->
@@ -275,7 +275,7 @@ describe "ag-data.model.instance", ->
   describe "identity", ->
 
     it "can be accessed from .id", ->
-      model = createModelFromResource mockResource {
+      model = buildModel mockResource {
         identifier: 'foo'
         fields:
           foo: {}
@@ -289,12 +289,12 @@ describe "ag-data.model.instance", ->
 
     describe "a new instance", ->
       it "has no identity", ->
-        model = createModelFromResource mockResource {}
+        model = buildModel mockResource {}
         instance = new model
         instance.should.not.have.property('id')
 
       it "gains an identity from the resource when saved", ->
-        model = createModelFromResource mockResource {
+        model = buildModel mockResource {
           identifier: 'uid'
           fields:
             uid: {}
@@ -308,7 +308,7 @@ describe "ag-data.model.instance", ->
 
     describe "a persisted instance", ->
       it "has an identity from the resource", ->
-        model = createModelFromResource mockResource {
+        model = buildModel mockResource {
           identifier: 'foo'
           fields:
             foo: {}
@@ -321,7 +321,7 @@ describe "ag-data.model.instance", ->
         model.find(1).should.eventually.have.property('id').equal 123
 
       it "maintains identity when saved", ->
-        model = createModelFromResource mockResource {
+        model = buildModel mockResource {
           identifier: 'uid'
           fields:
             uid: {}
@@ -340,7 +340,7 @@ describe "ag-data.model.instance", ->
             instance.id.should.equal identity
 
       it "loses its identity when deleted", ->
-        model = createModelFromResource mockResource {
+        model = buildModel mockResource {
           find: {}
           delete: {}
         }
@@ -363,7 +363,7 @@ describe "ag-data.model.instance", ->
           }
           update: {}
         }
-        model = createModelFromResource resource
+        model = buildModel resource
         model.find(1).then (instance) ->
           instance.bar = 'baz'
           instance.save().then ->
@@ -383,7 +383,7 @@ describe "ag-data.model.instance", ->
           }
           delete: {}
         }
-        model = createModelFromResource resource
+        model = buildModel resource
         model.find(123).then (instance) ->
           instance.delete().then ->
             resource.delete.should.have.been.calledWith 123
