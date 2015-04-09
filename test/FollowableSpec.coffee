@@ -8,7 +8,7 @@ chai.use(require 'chai-as-promised')
 sinon = require 'sinon'
 chai.use(require 'sinon-chai')
 
-asserting = require './asserting'
+asserting = require './helpers/asserting'
 followable = require '../src/followable'
 itSupportsWhenChanged = require './properties/it-supports-when-changed'
 

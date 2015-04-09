@@ -10,8 +10,8 @@ chai.use(require 'chai-as-promised')
 sinon = require 'sinon'
 chai.use(require 'sinon-chai')
 
-mockResource = require './mock-resource'
-asserting = require './asserting'
+mockResource = require './helpers/mock-resource'
+asserting = require './helpers/asserting'
 itSupportsWhenChanged = require './properties/it-supports-when-changed'
 itSupportsEquals = require './properties/it-supports-equals'
 

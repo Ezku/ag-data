@@ -6,7 +6,7 @@ chai.use(require 'chai-as-promised')
 sinon = require 'sinon'
 chai.use(require 'sinon-chai')
 
-asserting = require '../asserting'
+asserting = require '../helpers/asserting'
 
 module.exports = itSupportsWhenChanged = (defs) ->
   describe "whenChanged()", ->
