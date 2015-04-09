@@ -16,7 +16,4 @@ module.exports = (resource, defaultRequestOptions) ->
   Object.defineProperties Model, ModelOps.modelClassProperties ResourceGateway
   Object.defineProperties Model.prototype, ModelOps.modelPrototypeProperties ResourceGateway
 
-  if defaultRequestOptions?.cache?.enabled
-    Model.cache = resource.cache
-
   Model
