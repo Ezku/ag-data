@@ -7,6 +7,9 @@ module.exports = (resource) ->
   ModelOps =
     modelClassProperties: (ResourceGateway) ->
       props =
+        resource:
+          enumerable: true
+          get: -> resource
         schema:
           enumerable: true
           get: ->
