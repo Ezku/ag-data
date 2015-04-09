@@ -12,7 +12,7 @@ chai.use(require 'sinon-chai')
 
 mockResource = require './mock-resource'
 asserting = require './asserting'
-itSupportsWhenChanged = require './it-supports-when-changed'
+itSupportsWhenChanged = require './properties/it-supports-when-changed'
 
 describe "ag-data.model.class", ->
   describe "metadata", ->

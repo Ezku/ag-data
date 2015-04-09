@@ -10,7 +10,7 @@ chai.use(require 'sinon-chai')
 
 asserting = require './asserting'
 followable = require '../src/followable'
-itSupportsWhenChanged = require './it-supports-when-changed'
+itSupportsWhenChanged = require './properties/it-supports-when-changed'
 
 describe "ag-data.followable", ->
   it "is a function", ->
@@ -46,7 +46,7 @@ describe "ag-data.followable", ->
         { updates, whenChanged } = fromPromiseF(followed).follow({
           poll: Bacon.fromArray [1, 2]
         })
-        
+
         spy = sinon.stub()
         unsub = whenChanged spy
         updates
