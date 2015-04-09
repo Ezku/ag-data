@@ -82,5 +82,5 @@ describe "ag-data.model.options", ->
           cache:
             enabled: true
         }
-      ).should.have.property('cache').exist
+      ).resource.should.have.property('cache').exist
 

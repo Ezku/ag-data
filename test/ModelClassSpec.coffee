@@ -18,7 +18,7 @@ describe "ag-data.model.class", ->
 
   it "exposes its backing resource object", ->
     resource = mockResource {}
-    buildModel(resource).resource.should.equal resource
+    buildModel(resource).should.have.property('resource').equal resource
 
   describe "metadata", ->
     it "should have supported field names available", ->

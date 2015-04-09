@@ -15,22 +15,30 @@ asserting = require './helpers/asserting'
 
 describe "ag-data.model with cache", ->
 
-  it "can be configured with a timeToLive", ->
-    buildModel((mockResource {}), {
-      cache:
-        enabled: true
-        timeToLive: 9001
-    }).cache.should.have.property('timeToLive').equal 9001
+  describe "cache", ->
+    it "is accessible as a property on the model's resource when enabled", ->
+      buildModel((mockResource {}), {
+        cache:
+          enabled: true
+      }).resource.should.have.property('cache').be.an 'object'
 
-  it "can be configured with a storage", ->
-    customStorage =
-      getItem: ->
-      setItem: ->
-    buildModel((mockResource {}), {
-      cache:
-        enabled: true
-        storage: customStorage
-    }).cache.should.have.property('storage').equal customStorage
+  describe "options", ->
+    it "can be configured with a timeToLive", ->
+      buildModel((mockResource {}), {
+        cache:
+          enabled: true
+          timeToLive: 9001
+      }).resource.cache.should.have.property('timeToLive').equal 9001
+
+    it "can be configured with a storage", ->
+      customStorage =
+        getItem: ->
+        setItem: ->
+      buildModel((mockResource {}), {
+        cache:
+          enabled: true
+          storage: customStorage
+      }).resource.cache.should.have.property('storage').equal customStorage
 
   describe "find()", ->
 
