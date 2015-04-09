@@ -1,7 +1,7 @@
 Promise = require 'bluebird'
 Bacon = require 'baconjs'
 
-createCachedResource = require('../src/cached-resource')
+createCachedResource = require('../src/resource/cached-resource')
 
 chai = require('chai')
 chai.should()

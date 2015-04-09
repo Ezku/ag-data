@@ -1,8 +1,8 @@
 Bacon = require 'baconjs'
 Promise = require 'bluebird'
 
-asyncKeyValueStorage = require './async-key-value-storage'
-createCache = require './cache'
+asyncKeyValueStorage = require '../cache/async-key-value-storage'
+propertyCache = require '../cache/property-cache'
 
 module.exports = cachedResourceFromResource = (resource, options = {}) ->
   debug = require('debug')("ag-data:cached-resource:#{resource.name}")
@@ -14,8 +14,8 @@ module.exports = cachedResourceFromResource = (resource, options = {}) ->
   storage = switch
     when options.storage? then options.storage
     else asyncKeyValueStorage()
-  collectionCache = createCache "collections-#{resource.name}", storage
-  instanceCache = createCache "records-#{resource.name}", storage
+  collectionCache = propertyCache "collections-#{resource.name}", storage
+  instanceCache = propertyCache "records-#{resource.name}", storage
 
   debug "Resource '#{resource.name}' cache configured:", {
     timeToLive

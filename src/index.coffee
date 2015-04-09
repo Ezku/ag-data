@@ -4,7 +4,7 @@ createModelFromResource = require './model'
 
 module.exports = data =
   storages:
-    memory: require './async-key-value-storage'
+    memory: require './cache/async-key-value-storage'
 
   loadResourceBundle: (object) ->
     bundle = defaultLoader.loadResourceBundle object

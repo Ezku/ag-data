@@ -1,4 +1,4 @@
-cachedResource = require './cached-resource'
+cachedResource = require './resource/cached-resource'
 
 module.exports = modelClassBuilder = (resource, defaultRequestOptions) ->
 

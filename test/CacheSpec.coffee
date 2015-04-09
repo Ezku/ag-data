@@ -10,8 +10,8 @@ chai.use(require 'sinon-chai')
 
 asserting = require './asserting'
 
-createCache = require '../src/cache'
-asyncKeyValueStorage = require '../src/async-key-value-storage'
+createCache = require '../src/cache/property-cache'
+asyncKeyValueStorage = require '../src/cache/async-key-value-storage'
 
 describe "ag-data.cache", ->
 
