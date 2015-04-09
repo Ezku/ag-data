@@ -302,7 +302,7 @@ describe "ag-data.model.instance", ->
       it "has no identity", ->
         model = createModelFromResource mockResource {}
         instance = new model
-        instance.should.have.property('__identity').not.exist
+        instance.should.not.have.property('id')
 
       it "gains an identity from the resource when saved", ->
         model = createModelFromResource mockResource {
@@ -315,8 +315,7 @@ describe "ag-data.model.instance", ->
         }
         instance = new model
         instance.save().then ->
-          instance.should.have.property('__identity').equal 123
-          instance.id.should.equal 123
+          instance.should.have.property('id').equal 123
 
     describe "a persisted instance", ->
       it "has an identity from the resource", ->
@@ -330,7 +329,7 @@ describe "ag-data.model.instance", ->
             bar: 'qux'
           }
         }
-        model.find(1).should.eventually.have.property('__identity').equal 123
+        model.find(1).should.eventually.have.property('id').equal 123
 
       it "maintains identity when saved", ->
         model = createModelFromResource mockResource {
@@ -344,10 +343,9 @@ describe "ag-data.model.instance", ->
           update: {}
         }
         model.find(1).then (instance) ->
-          identity = instance.__identity
+          identity = instance.id
           instance.foo = 'qux'
           instance.save().then ->
-            instance.__identity.should.equal identity
             instance.id.should.equal identity
 
       it "loses its identity when deleted", ->
@@ -357,7 +355,7 @@ describe "ag-data.model.instance", ->
         }
         model.find(1).then (instance) ->
           instance.delete().then ->
-            instance.should.have.property('__identity').not.exist
+            instance.should.not.have.property('id')
 
   describe "identity tracking", ->
 

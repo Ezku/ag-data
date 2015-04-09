@@ -42,7 +42,6 @@ module.exports = (resource) ->
         __data: data
         __changed: {}
         __dirty: (true for key, value of data).length > 0
-        __identity: null
 
       makeMetadataProperties = (metadata) ->
         props = {}
@@ -86,13 +85,18 @@ module.exports = (resource) ->
     markAsPersisted: (instance) ->
       instance.__dirty = false
       instance.__state = 'persisted'
-      instance.__identity = instance.id ? true
       null
 
     markAsDirty: (instance) ->
       instance.__dirty = true
       for key, value of instance.__data when (key isnt resource.schema.identifier)
         instance.__changed[key] = true
+      null
+
+    markAsDeleted: (instance) ->
+      instance.__state = 'deleted'
+      if resource.schema.identifier?
+        delete instance[resource.schema.identifier]
       null
 
     save: ->
@@ -103,17 +107,13 @@ module.exports = (resource) ->
           @__dirty = false
           @__changed = {}
           @__state = 'persisted'
-          @__identity = switch
-            when resource.schema.identifier? then result[resource.schema.identifier]
-            # TODO: what happens on save and delete for an instance where this holds?
-            else true
         when 'persisted'
           if @__dirty
             changes = {}
             for key, value of @__changed when value
               changes[key] = @__data[key]
 
-            resource.update(@__identity, changes).then =>
+            resource.update(@id, changes).then =>
               @__changed = {}
               @__dirty = false
           else
@@ -125,7 +125,6 @@ module.exports = (resource) ->
       switch @__state
         when 'deleted' then Promise.reject new Error "Will not delete an instance that is already deleted"
         when 'new' then Promise.reject new Error "Will not delete an instance that is not persistent"
-        when 'persisted' then resource.delete(@__identity).then =>
-          @__state = 'deleted'
-          @__identity = null
+        when 'persisted' then resource.delete(@id).then =>
+          ModelOps.markAsDeleted(this)
           this
