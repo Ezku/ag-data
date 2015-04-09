@@ -13,6 +13,7 @@ chai.use(require 'sinon-chai')
 mockResource = require './mock-resource'
 asserting = require './asserting'
 itSupportsWhenChanged = require './properties/it-supports-when-changed'
+itSupportsEquals = require './properties/it-supports-equals'
 
 describe "ag-data.model.instance", ->
 
@@ -103,36 +104,18 @@ describe "ag-data.model.instance", ->
       instance = new model foo: 'bar'
       instance.toJson().should.deep.equal foo: 'bar'
 
-    ###
-    NOTE: Code smell, tests are copy-paste from collection.equals
-    ###
-    describe "equals()", ->
-      record = null
-
-      beforeEach ->
-        model = createModelFromResource mockResource {
-          identifier: 'id'
-          fields:
-            id: {}
-            foo: {}
-          find: {
-            id: 123
-            foo: 'bar'
-          }
+    itSupportsEquals ->
+      model = createModelFromResource mockResource {
+        identifier: 'id'
+        fields:
+          id: {}
+          foo: {}
+        find: {
+          id: 123
+          foo: 'bar'
         }
-        model.find(123).then (foundRecord) ->
-          record = foundRecord
-
-      it "is a function", ->
-        record.should.have.property('equals').be.a 'function'
-
-      it "returns true when passed the same record", ->
-        record.equals(record).should.be.true
-
-      it "returns false when the .toJson output on the other object differs", ->
-        record.equals({
-          toJson: -> {}
-        }).should.be.false
+      }
+      model.find(123)
 
     describe "serialization", ->
       it "preserves identity", ->

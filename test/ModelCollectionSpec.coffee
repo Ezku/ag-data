@@ -13,6 +13,7 @@ chai.use(require 'sinon-chai')
 mockResource = require './mock-resource'
 asserting = require './asserting'
 itSupportsWhenChanged = require './properties/it-supports-when-changed'
+itSupportsEquals = require './properties/it-supports-equals'
 
 describe "ag-data.model.collection", ->
   it "should be iterable", ->
@@ -88,37 +89,18 @@ describe "ag-data.model.collection", ->
             foo: 'bar'
           }
 
-  ###
-  NOTE: Code smell, tests are duplicated in model.equals
-  ###
-  describe "equals()", ->
-
-    collection = null
-
-    beforeEach ->
-      resource = mockResource {
-        identifier: 'id'
-        fields:
-          id: {}
-          foo: {}
-        findAll: [
-          { id: 123, foo: 'bar' }
-        ]
-      }
-      model = createModelFromResource resource
-      model.findAll().then (all) ->
-        collection = all
-
-    it "is a function", ->
-      collection.equals.should.be.a 'function'
-
-    it "returns true when passed the same collection", ->
-      collection.equals(collection).should.be.true
-
-    it "returns false when the .toJson output on the other object differs", ->
-      collection.equals({
-        toJson: -> {}
-      }).should.be.false
+  itSupportsEquals ->
+    resource = mockResource {
+      identifier: 'id'
+      fields:
+        id: {}
+        foo: {}
+      findAll: [
+        { id: 123, foo: 'bar' }
+      ]
+    }
+    model = createModelFromResource resource
+    model.findAll()
 
   describe "toJson()", ->
 
