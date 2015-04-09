@@ -173,7 +173,41 @@ describe "ag-data.model.class", ->
       model = createModelFromResource mockResource {}
       model.should.have.property('create').be.a 'function'
 
+    it "creates a new instance with properties from the resource", ->
+      model = createModelFromResource mockResource {
+        identity: 'id'
+        fields:
+          id: {}
+          foo: {}
+        create:
+          id: 123
+          foo: 'bar'
+      }
+      model.create().then (instance) ->
+        instance.should.be.an.instanceof model
+        instance.should.deep.equal {
+          id: 123
+          foo: 'bar'
+        }
+
   describe "update()", ->
     it "should be a function", ->
       model = createModelFromResource mockResource {}
       model.should.have.property('update').be.a 'function'
+
+    it "gets an instance with updated properties from the resource", ->
+      model = createModelFromResource mockResource {
+        identity: 'id'
+        fields:
+          id: {}
+          foo: {}
+        update:
+          id: 123
+          foo: 'qux'
+      }
+      model.update(123, foo: 'qux').then (instance) ->
+        instance.should.be.an.instanceof model
+        instance.should.deep.equal {
+          id: 123
+          foo: 'qux'
+        }
