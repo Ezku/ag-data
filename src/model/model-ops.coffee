@@ -33,7 +33,8 @@ module.exports = (resource) ->
       whenChanged:
         enumerable: false
         get: -> (f, options = {}) ->
-          ResourceGateway.one(@__identity, options).whenChanged f
+          # NOTE: Apparently this isn't tested for anywhere
+          ResourceGateway.one(@id, options).whenChanged f
       equals:
         enumerable: false
         get: -> jsonableEquality(this)
