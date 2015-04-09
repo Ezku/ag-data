@@ -23,42 +23,38 @@ module.exports = cachedResourceFromResource = (resource, options = {}) ->
     instanceCacheNamespace: instanceCache.namespace
   }
 
-  # Decorate underlying resource by having it as the prototype
-  cachedResource = Object.create resource
+  # Decorate the incoming resource object.
+  # Anything we don't override here will be exposed through the prototype.
+  class CachedResource extends resource
+    @find: (id) ->
+      instanceCache.prop(id, { timeToLive }).computeUnlessValid ->
+        resource.find(id)
 
-  # Decorate resource
-  cachedResource.find = (id) ->
-    instanceCache.prop(id, { timeToLive }).computeUnlessValid ->
-      resource.find(id)
+    @findAll: (query = {}) ->
+      collectionCache.prop(query, { timeToLive }).computeUnlessValid ->
+        resource.findAll(query).then (collection) ->
+          if resource.schema.identifier?
+            for item in collection when item[resource.schema.identifier]?
+              instanceCache.prop(item[resource.schema.identifier]).set item
+          collection
 
-  cachedResource.findAll = (query = {}) ->
-    collectionCache.prop(query, { timeToLive }).computeUnlessValid ->
-      resource.findAll(query).then (collection) ->
-        if resource.schema.identifier?
-          for item in collection when item[resource.schema.identifier]?
-            instanceCache.prop(item[resource.schema.identifier]).set item
-        collection
+    @update: (id, rest...) ->
+      collectionCache.prop({}).invalidateIfSuccessful ->
+        instanceCache.prop(id).invalidateIfSuccessful ->
+          resource.update(id, rest...)
 
-  cachedResource.update = (id, rest...) ->
-    collectionCache.prop({}).invalidateIfSuccessful ->
-      instanceCache.prop(id).invalidateIfSuccessful ->
-        resource.update(id, rest...)
+    @create: (args...) ->
+      collectionCache.prop({}).invalidateIfSuccessful ->
+        resource.create(args...)
 
-  cachedResource.create = (args...) ->
-    collectionCache.prop({}).invalidateIfSuccessful ->
-      resource.create(args...)
+    @delete: (id) ->
+      collectionCache.prop({}).invalidateIfSuccessful ->
+        instanceCache.prop(id).invalidateIfSuccessful ->
+          resource.delete id
 
-  cachedResource.delete = (id) ->
-    collectionCache.prop({}).invalidateIfSuccessful ->
-      instanceCache.prop(id).invalidateIfSuccessful ->
-        resource.delete id
-
-  # Extend with some properties
-  cachedResource.cache = {
-    collectionCache
-    instanceCache
-    timeToLive
-    storage
-  }
-
-  cachedResource
+    @cache: {
+      collectionCache
+      instanceCache
+      timeToLive
+      storage
+    }
