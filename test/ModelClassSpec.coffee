@@ -15,6 +15,11 @@ asserting = require './helpers/asserting'
 itSupportsWhenChanged = require './properties/it-supports-when-changed'
 
 describe "ag-data.model.class", ->
+
+  it "exposes its backing resource object", ->
+    resource = mockResource {}
+    buildModel(resource).resource.should.equal resource
+
   describe "metadata", ->
     it "should have supported field names available", ->
       model = buildModel mockResource {
