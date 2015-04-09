@@ -1,7 +1,7 @@
 Promise = require 'bluebird'
 Bacon = require 'baconjs'
 
-buildModel = require('../src/model/build-model-class')
+data = require('../src')
 
 chai = require('chai')
 chai.should()
@@ -13,7 +13,10 @@ chai.use(require 'sinon-chai')
 mockResource = require './helpers/mock-resource'
 asserting = require './helpers/asserting'
 
-describe "ag-data.model.options", ->
+describe "ag-data.createModel", ->
+
+  it "is a function", ->
+    data.createModel.should.be.a 'function'
 
   describe "passing options when constructing model", ->
 
@@ -26,14 +29,14 @@ describe "ag-data.model.options", ->
           foo: 'bar'
         }
       }
-      buildModel(resource, options)
+      data.createModel(resource, options)
       resource.setOptions.should.have.been.calledWith options
 
     it "may have streams as option values", ->
       resource = mockResource {
         setOptions: {}
       }
-      buildModel(resource, {
+      data.createModel(resource, {
         headers: {
           foo: Bacon.once 'bar'
         }
@@ -49,7 +52,7 @@ describe "ag-data.model.options", ->
         resource = mockResource {
           setOptions: {}
         }
-        buildModel(resource, {
+        data.createModel(resource, {
           headers: {
             foo: Bacon.never()
           }
@@ -62,7 +65,7 @@ describe "ag-data.model.options", ->
           setOptions: {}
         }
         foo = new Bacon.Bus
-        buildModel(resource, {
+        data.createModel(resource, {
           headers: {
             foo
           }
@@ -76,7 +79,7 @@ describe "ag-data.model.options", ->
 
   describe "enabling caching", ->
     it "is done by a passing a boolean option", ->
-      buildModel(
+      data.createModel(
         mockResource {}
         {
           cache:

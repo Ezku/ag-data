@@ -11,4 +11,7 @@ module.exports = data =
 
     createModel: (resourceName, options = {}) ->
       resource = bundle.createResource resourceName
-      buildModelClass resource, options
+      data.createModel(resource, options)
+
+  createModel: (resource, options = {}) ->
+    buildModelClass resource, options
