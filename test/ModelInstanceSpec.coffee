@@ -181,11 +181,13 @@ describe "ag-data.model.instance", ->
               foo: 'bar'
             }
 
-        it "re-saving with no changes should have no effect", ->
+        it "re-saving with no changes should yield empty changeset", ->
           resource = mockResource {
+            identity: 'id'
             fields:
+              id: {}
               foo: {}
-            create: { foo: 'bar' }
+            create: { id: 123, foo: 'bar' }
             update: {}
           }
           model = createModelFromResource resource
@@ -194,7 +196,7 @@ describe "ag-data.model.instance", ->
           instance.save().then ->
             instance.save().then ->
               resource.create.should.have.been.calledOnce
-              resource.update.should.not.have.been.called
+              resource.update.should.have.been.calledWith 123, {}
 
       describe "with a persistent instance", ->
         it "sends updated properties to the resource", ->
@@ -253,11 +255,14 @@ describe "ag-data.model.instance", ->
                 foo: 'qux'
               }
 
-        it "saving with no changes should have no effect", ->
+        it "saving with no changes should yield an empty changeset", ->
           resource = mockResource {
+            identity: 'id'
             fields:
+              id: {}
               foo: {}
             find:
+              id: 1
               foo: 'bar'
             update: {}
           }
@@ -265,23 +270,7 @@ describe "ag-data.model.instance", ->
 
           model.find(1).then (instance) ->
             instance.save().then ->
-              resource.update.should.not.have.been.called
-
-        it "subsequent saves after initial save should have no effect", ->
-          resource = mockResource {
-            fields:
-              foo: {}
-            find:
-              foo: 'bar'
-            update: {}
-          }
-          model = createModelFromResource resource
-
-          model.find(1).then (instance) ->
-            instance.foo = 'qux'
-            instance.save().then ->
-              instance.save().then ->
-                resource.update.should.have.been.calledOnce
+              resource.update.should.have.been.calledWith 1, {}
 
   describe "identity", ->
 
@@ -340,7 +329,9 @@ describe "ag-data.model.instance", ->
           find:
             uid: 123
             foo: 'bar'
-          update: {}
+          update:
+            uid: 123
+            foo: 'bar'
         }
         model.find(1).then (instance) ->
           identity = instance.id

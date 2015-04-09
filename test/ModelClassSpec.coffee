@@ -68,7 +68,10 @@ describe "ag-data.model.class", ->
         fields:
           id: {}
           foo: {}
-        update: {}
+        update: {
+          id: 123
+          foo: 'something else'
+        }
         delete: {}
       }
       model = createModelFromResource resource

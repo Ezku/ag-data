@@ -108,34 +108,31 @@ module.exports = (resource) ->
       instance.__state = 'persisted'
       null
 
-    markAsSynced: (instance, changes) ->
-      for key, value of changes
-        delete instance.__changed[key]
-
-      if objectSize(instance.__changed) is 0
-        instance.__dirty = false
-
+    markAsSynced: (instance, data) ->
+      instance.__data = data
+      instance.__dirty = false
+      instance.__changed = {}
       null
 
+    collectChanges: (instance) ->
+      changes = {}
+      for key, didChange of instance.__changed when didChange
+        changes[key] = instance.__data[key]
+      changes
+
     save: ->
-      (switch @__state
+      switch @__state
         when 'deleted' then Promise.reject new Error "Will not save a deleted instance"
         when 'new' then resource.create(@__data).then (data) =>
           ModelOps.markAsNewed(this, data)
           this
 
         when 'persisted'
-          if @__dirty
-            changes = {}
-            for key, value of @__changed when value
-              changes[key] = @__data[key]
+          changes = if @__dirty then ModelOps.collectChanges(this) else {}
 
-            resource.update(@id, changes).then =>
-              ModelOps.markAsSynced(this, changes)
-          else
-            Promise.resolve {}
-      ).then (result) =>
-        this
+          resource.update(@id, changes).then (data) =>
+            ModelOps.markAsSynced(this, data)
+            this
 
     delete: ->
       switch @__state
