@@ -1,6 +1,8 @@
 Promise = require 'bluebird'
 jsonableEquality = require '../jsonable-equality'
 
+objectSize = (o) -> Object.keys(o || {}).length
+
 module.exports = (resource) ->
   ModelOps =
     modelClassProperties: (ResourceGateway) ->
@@ -41,7 +43,7 @@ module.exports = (resource) ->
         __state: 'new'
         __data: data
         __changed: {}
-        __dirty: (true for key, value of data).length > 0
+        __dirty: objectSize(data) > 0
 
       makeMetadataProperties = (metadata) ->
         props = {}
@@ -106,9 +108,13 @@ module.exports = (resource) ->
       instance.__state = 'persisted'
       null
 
-    markAsSynced: (instance) ->
-      instance.__changed = {}
-      instance.__dirty = false
+    markAsSynced: (instance, changes) ->
+      for key, value of changes
+        delete instance.__changed[key]
+
+      if objectSize(instance.__changed) is 0
+        instance.__dirty = false
+
       null
 
     save: ->
@@ -125,7 +131,7 @@ module.exports = (resource) ->
               changes[key] = @__data[key]
 
             resource.update(@id, changes).then =>
-              ModelOps.markAsSynced(this)
+              ModelOps.markAsSynced(this, changes)
           else
             Promise.resolve {}
       ).then (result) =>
