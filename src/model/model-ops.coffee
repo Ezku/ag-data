@@ -106,6 +106,11 @@ module.exports = (resource) ->
       instance.__state = 'persisted'
       null
 
+    markAsSynced: (instance) ->
+      instance.__changed = {}
+      instance.__dirty = false
+      null
+
     save: ->
       (switch @__state
         when 'deleted' then Promise.reject new Error "Will not save a deleted instance"
@@ -120,8 +125,7 @@ module.exports = (resource) ->
               changes[key] = @__data[key]
 
             resource.update(@id, changes).then =>
-              @__changed = {}
-              @__dirty = false
+              ModelOps.markAsSynced(this)
           else
             Promise.resolve {}
       ).then (result) =>
