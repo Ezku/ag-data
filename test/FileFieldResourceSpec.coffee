@@ -13,25 +13,31 @@ chai.use(require 'sinon-chai')
 mockResource = require './helpers/mock-resource'
 asserting = require './helpers/asserting'
 uploadableBuffer = require './helpers/uploadable-buffer'
+withServer = require './helpers/with-server'
 
 describe "ag-data.resource.file-fields", ->
   describe "create()", ->
     it "should handle a three-stage file upload transaction", ->
-      resource = decorateWithFileFieldSupport mockResource {
-        fields:
-          file:
-            type: 'file'
-        create:
-          # TODO: should yield upload advice
-          file:
-            uploaded: false
-        update:
-          file:
-            uploaded: true
-      }
-      resource.create(file: uploadableBuffer()).then (fileResource) ->
-        # TODO: "server" should have received the file
-        fileResource.file.should.have.property('uploaded').equal true
+      withServer (app, host) ->
+        resource = decorateWithFileFieldSupport mockResource {
+          fields:
+            file:
+              type: 'file'
+          create:
+            file:
+              upload_url: "#{host}/arbitrary-endpoint"
+              uploaded: false
+          update:
+            file:
+              uploaded: true
+        }
+        fileUploadRequest = new Promise (resolve) ->
+          app.put "/arbitrary-endpoint", (req, res) ->
+            resolve req
+            res.status(200).end()
+        resource.create(file: uploadableBuffer()).then (fileResource) ->
+          fileResource.file.should.have.property('uploaded').equal true
+          fileUploadRequest.should.be.fulfilled
 
     it "accepts an optional transaction handler that can abort the upload", ->
       resource = decorateWithFileFieldSupport mockResource {
