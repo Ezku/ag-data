@@ -5,7 +5,7 @@ asyncKeyValueStorage = require '../cache/async-key-value-storage'
 propertyCache = require '../cache/property-cache'
 
 module.exports = decorateWithCaching = (resource, options = {}) ->
-  debug = require('debug')("ag-data:cached-resource:#{resource.name}")
+  debug = require('debug')("ag-data:resource:caching:#{resource.name}")
 
   # Setup caches
   timeToLive = switch
