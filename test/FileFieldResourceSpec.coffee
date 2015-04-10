@@ -1,5 +1,6 @@
 Promise = require 'bluebird'
 Bacon = require 'baconjs'
+bodyParser = require 'body-parser'
 
 decorateWithFileFieldSupport = require('../src/resource/file-fields')
 
@@ -31,6 +32,7 @@ describe "ag-data.resource.file-fields", ->
             file:
               uploaded: true
         }
+        app.use bodyParser.raw()
         fileUploadRequest = new Promise (resolve) ->
           app.put "/arbitrary-endpoint", (req, res) ->
             resolve req
