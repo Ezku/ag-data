@@ -1,2 +1,4 @@
 module.exports = decorateWithFileFieldSupport = (resource, options = {}) ->
-  resource
+  class FileFieldSupport extends resource
+    @create: (args...) ->
+      resource.create(args...)
