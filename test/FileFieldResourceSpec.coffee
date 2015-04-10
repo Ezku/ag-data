@@ -44,6 +44,7 @@ describe "ag-data.resource.file-fields", ->
     it "accepts an optional transaction handler that can abort the upload", ->
       resource = decorateWithFileFieldSupport mockResource {
         create: {}
+        update: {}
       }
       resource.create({}, (t) ->
         t.abort()
