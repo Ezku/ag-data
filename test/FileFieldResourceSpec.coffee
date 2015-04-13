@@ -42,10 +42,23 @@ describe "ag-data.resource.file-fields", ->
           fileUploadRequest.should.be.fulfilled
 
     it "accepts an optional transaction handler that can abort the upload", ->
-      resource = decorateWithFileFieldSupport mockResource {
-        create: {}
-        update: {}
-      }
-      resource.create({}, (t) ->
-        t.abort()
-      ).should.be.rejected
+      withServer (app, host) ->
+        resource = decorateWithFileFieldSupport mockResource {
+            fields:
+              file:
+                type: 'file'
+            create:
+              file:
+                upload_url: "#{host}/arbitrary-endpoint"
+                uploaded: false
+            update:
+              file:
+                uploaded: true
+        }
+        app.put "/arbitrary-endpoint", (req, res) ->
+          Promise.delay(1000).then ->
+            res.status(200).end()
+
+        resource.create(file: uploadableBuffer(), (t) ->
+          t.abort()
+        ).should.be.rejected
