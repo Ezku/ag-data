@@ -40,7 +40,8 @@ describe "ag-data.resource.file-fields", ->
             res.status(200).end()
         resource.create(file: uploadableBuffer()).then (fileResource) ->
           fileResource.file.should.have.property('uploaded').equal true
-          fileUploadRequest.should.be.fulfilled
+          fileUploadRequest.then (req) ->
+            req.body.toString().should.equal uploadableBuffer().toString()
 
     it "accepts an optional transaction handler that can abort the upload", ->
       withServer (app, host) ->
