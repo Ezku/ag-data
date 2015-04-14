@@ -62,5 +62,6 @@ describe "ag-data.resource.file-fields", ->
             res.status(200).end()
 
         resource.create(file: uploadableBuffer(), (t) ->
-          t.abort()
-        ).should.be.rejected
+          Promise.delay(10).then ->
+            t.abort()
+        ).should.be.rejectedWith /aborted/
