@@ -44,8 +44,8 @@
   },
   "dependencies": {
     "ag-resource-loader-json": "0.4.3",
-    "ag-restful": "0.6.4",
-    "ag-transaction": "0.1.1",
+    "ag-restful": "^0.8.0",
+    "ag-transaction": "^0.1.1",
     "baconjs": "0.7.34",
     "bluebird": "2.9.14",
     "debug": "^2.1.3",
