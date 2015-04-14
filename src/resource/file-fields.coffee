@@ -78,17 +78,17 @@ module.exports = (http) ->
       return (data, fieldsToUpload) -> (resultWithUploadInstructions) ->
         uploadUrlsByField = extractFileUploadUrls fieldsToUpload, resultWithUploadInstructions
 
-        uploads = Transaction.empty
+        uploads = Transaction.unit resultWithUploadInstructions
         for fileFieldName, uploadUrl of uploadUrlsByField
-          uploads = uploads.flatMapDone ->
-            uploadTransaction(uploadUrl, data[fileFieldName], ->
+          uploads = uploads.flatMapDone (result) ->
+            uploadTransaction(uploadUrl, data[fileFieldName]).flatMapDone ->
               debug "Completed upload for #{fileFieldName}"
               # Mark the file as having been uploaded for the backend
-              resultWithUploadInstructions[fileFieldName].uploaded = true
-            )
+              result[fileFieldName].uploaded = true
 
-        uploads.flatMapDone ->
-          Transaction.unit resultWithUploadInstructions
+              Transaction.unit result
+
+        uploads
 
     updateFinalState = (result) ->
       Transaction.step ->
