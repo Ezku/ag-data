@@ -56,6 +56,14 @@ module.exports = (http) ->
       Transaction.step ->
         resource.create(dataWithUploadUrlRequests)
 
+    uploadTransaction = (uploadUrl, file) ->
+      http.transactional.request 'put', uploadUrl, {
+        type: 'application/octet-stream'
+        data: switch true
+          when Buffer.isBuffer file then file.toString()
+          else file
+      }
+
     doUploadsByInstructions = do ->
       extractFileUploadUrls = (fieldsToUpload, resultWithUploadInstructions) ->
         uploadUrls = {}
@@ -66,13 +74,6 @@ module.exports = (http) ->
           uploadUrls[fieldName] = value.upload_url
 
         uploadUrls
-
-      uploadTransaction = (uploadUrl, fileFieldContent, after) ->
-        Transaction.step ({ abort }) ->
-          startedUpload = FileFieldSupport.upload(uploadUrl, fileFieldContent)
-          abort ->
-            startedUpload.abort()
-          startedUpload.done.then(after)
 
       return (data, fieldsToUpload) -> (resultWithUploadInstructions) ->
         uploadUrlsByField = extractFileUploadUrls fieldsToUpload, resultWithUploadInstructions
@@ -94,10 +95,10 @@ module.exports = (http) ->
         resource.update(result.id, result)
 
     class FileFieldSupport extends resource
-      @upload: (uploadUrl, file) ->
-
-        abort: -> Promise.resolve()
-        done: Promise.reject new Error "not implemented"
+      @upload: (uploadUrl, file, transactionHandler = null) ->
+        uploadTransaction(uploadUrl, file).run (t) ->
+          transactionHandler?(t)
+          t.done
 
       @create: (data, transactionHandler = null) ->
         createTransaction(data).run (t) ->
