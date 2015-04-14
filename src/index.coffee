@@ -1,7 +1,7 @@
 restful = require('ag-restful')(require 'bluebird')
 defaultLoader = require('ag-resource-loader-json')(restful)
 buildModelClass = require './model/build-model-class'
-configureResourceFeatures = require './resource/configure-features'
+configureResourceFeatures = require('./resource/configure-features')(restful)
 
 module.exports = data =
   storages:
