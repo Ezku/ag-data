@@ -101,4 +101,49 @@ describe "ag-data.resource.file-fields", ->
         fileResource.update(123, record).then ->
           resource.update.should.have.been.calledOnce
 
+    cycle = (fs) -> (args...) ->
+      f = fs.shift()
+      fs.push f
+      f(args...)
 
+    it "should handle a three-stage file upload transaction", ->
+      withServer (app, host) ->
+        resource = mockResource {
+          identifier: 'id'
+          fields:
+            id: {}
+            file:
+              type: 'file'
+          find:
+            file:
+              uploaded: false
+            id: 123
+          update: cycle [
+            ->
+              Promise.resolve
+                file:
+                  upload_url: "#{host}/arbitrary-endpoint"
+                  uploaded: false
+                id: 123
+            ->
+              Promise.resolve
+                file:
+                  uploaded: true
+                id: 123
+
+          ]
+        }
+        fileResource = decorateWithFileFieldSupport resource
+
+        app.use bodyParser.raw()
+        fileUploadRequest = new Promise (resolve) ->
+          app.put "/arbitrary-endpoint", (req, res) ->
+            resolve req
+            res.status(200).end()
+
+        fileResource.find(123).then (record) ->
+          record.file = uploadableBuffer()
+          fileResource.update(record.id, record).then (record) ->
+            record.file.should.have.property('uploaded').equal true
+            fileUploadRequest.then (req) ->
+              req.body.toString().should.equal uploadableBuffer().toString()
