@@ -43,6 +43,18 @@ describe "ag-data.resource.file-fields", ->
           fileUploadRequest.then (req) ->
             req.body.toString().should.equal uploadableBuffer().toString()
 
+    it "will do a single-stage create in case there are no files to upload", ->
+        resource = mockResource {
+          fields:
+            file:
+              type: 'file'
+          create:
+            file:
+              uploaded: false
+        }
+        decorateWithFileFieldSupport(resource).create({}).then (fileResource) ->
+          resource.create.should.have.been.calledOnce
+
     it "accepts an optional transaction handler that can abort the upload", ->
       withServer (app, host) ->
         resource = decorateWithFileFieldSupport mockResource {
