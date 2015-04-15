@@ -12,11 +12,16 @@ module.exports = (http) ->
 
     createTransaction = (data) ->
       fieldsToUpload = discoverUnuploadedFileFields data
-      dataWithUploadUrlRequests = amendDataWithFileUploadUrlRequests data, fieldsToUpload
 
-      requestUploadInstructions(dataWithUploadUrlRequests)
-        .flatMapDone(doUploadsByInstructions data, fieldsToUpload)
-        .flatMapDone(updateFinalState)
+      if fieldsToUpload.length is 0
+        Transaction.step ->
+          resource.create(data)
+      else
+        dataWithUploadUrlRequests = amendDataWithFileUploadUrlRequests data, fieldsToUpload
+
+        requestUploadInstructions(dataWithUploadUrlRequests)
+          .flatMapDone(doUploadsByInstructions data, fieldsToUpload)
+          .flatMapDone(updateFinalState)
 
     discoverUnuploadedFileFields = do ->
       getFileFieldNames = (fields) ->
