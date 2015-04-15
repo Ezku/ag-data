@@ -77,3 +77,28 @@ describe "ag-data.resource.file-fields", ->
           Promise.delay(10).then ->
             t.abort()
         ).should.be.rejectedWith /aborted/
+
+  describe "update()", ->
+    it "will do a single-stage update in case there are no files to upload", ->
+      resource = mockResource {
+        identifier: 'id'
+        fields:
+          id: {}
+          description: {}
+          file:
+            type: 'file'
+        find:
+          file:
+            uploaded: false
+          id: 123
+        update:
+          file:
+            uploaded: false
+      }
+      fileResource = decorateWithFileFieldSupport resource
+      fileResource.find(123).then (record) ->
+        record.description = 'foo'
+        fileResource.update(123, record).then ->
+          resource.update.should.have.been.calledOnce
+
+
