@@ -1,7 +1,7 @@
 Promise = require 'bluebird'
 Bacon = require 'baconjs'
 
-createModelFromResource = require('../src/model')
+data = require('../src')
 
 chai = require('chai')
 chai.should()
@@ -10,10 +10,13 @@ chai.use(require 'chai-as-promised')
 sinon = require 'sinon'
 chai.use(require 'sinon-chai')
 
-mockResource = require './mock-resource'
-asserting = require './asserting'
+mockResource = require './helpers/mock-resource'
+asserting = require './helpers/asserting'
 
-describe "ag-data.model.options", ->
+describe "ag-data.createModel", ->
+
+  it "is a function", ->
+    data.createModel.should.be.a 'function'
 
   describe "passing options when constructing model", ->
 
@@ -26,14 +29,14 @@ describe "ag-data.model.options", ->
           foo: 'bar'
         }
       }
-      createModelFromResource(resource, options)
+      data.createModel(resource, options)
       resource.setOptions.should.have.been.calledWith options
 
     it "may have streams as option values", ->
       resource = mockResource {
         setOptions: {}
       }
-      createModelFromResource(resource, {
+      data.createModel(resource, {
         headers: {
           foo: Bacon.once 'bar'
         }
@@ -49,7 +52,7 @@ describe "ag-data.model.options", ->
         resource = mockResource {
           setOptions: {}
         }
-        createModelFromResource(resource, {
+        data.createModel(resource, {
           headers: {
             foo: Bacon.never()
           }
@@ -62,7 +65,7 @@ describe "ag-data.model.options", ->
           setOptions: {}
         }
         foo = new Bacon.Bus
-        createModelFromResource(resource, {
+        data.createModel(resource, {
           headers: {
             foo
           }
@@ -76,11 +79,19 @@ describe "ag-data.model.options", ->
 
   describe "enabling caching", ->
     it "is done by a passing a boolean option", ->
-      createModelFromResource(
+      data.createModel(
         mockResource {}
         {
           cache:
             enabled: true
         }
-      ).should.have.property('cache').exist
+      ).resource.should.have.property('cache').exist
+
+  describe "enabling file field support", ->
+    it "is done by passing in a resource with file fields", ->
+      data.createModel(mockResource {
+        fields:
+          file:
+            type: 'file'
+      }).resource.should.have.property('upload').be.a 'function'
 

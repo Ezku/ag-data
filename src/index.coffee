@@ -1,13 +1,19 @@
 restful = require('ag-restful')(require 'bluebird')
 defaultLoader = require('ag-resource-loader-json')(restful)
-createModelFromResource = require './model'
+buildModelClass = require './model/build-model-class'
+configureResourceFeatures = require('./resource/configure-features')(restful)
 
 module.exports = data =
   storages:
-    memory: require './async-key-value-storage'
+    memory: require './cache/async-key-value-storage'
 
   loadResourceBundle: (object) ->
     bundle = defaultLoader.loadResourceBundle object
-    # TODO: What about just loading up all resources at once?
+
     createModel: (resourceName, options = {}) ->
-      createModelFromResource (bundle.createResource resourceName), options
+      resource = bundle.createResource resourceName
+      data.createModel(resource, options)
+
+  createModel: (resource, options = {}) ->
+    resource = configureResourceFeatures resource, options
+    buildModelClass resource, options

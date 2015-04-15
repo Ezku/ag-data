@@ -1,7 +1,7 @@
 Promise = require 'bluebird'
 Bacon = require 'baconjs'
 
-createModelFromResource = require('../src/model')
+buildModel = require('../src/model/build-model-class')
 
 chai = require('chai')
 chai.should()
@@ -10,14 +10,19 @@ chai.use(require 'chai-as-promised')
 sinon = require 'sinon'
 chai.use(require 'sinon-chai')
 
-mockResource = require './mock-resource'
-asserting = require './asserting'
-itSupportsWhenChanged = require './it-supports-when-changed'
+mockResource = require './helpers/mock-resource'
+asserting = require './helpers/asserting'
+itSupportsWhenChanged = require './properties/it-supports-when-changed'
 
 describe "ag-data.model.class", ->
+
+  it "exposes its backing resource object", ->
+    resource = mockResource {}
+    buildModel(resource).should.have.property('resource').equal resource
+
   describe "metadata", ->
     it "should have supported field names available", ->
-      model = createModelFromResource mockResource {
+      model = buildModel mockResource {
         fields:
           foo: {}
           bar: {}
@@ -25,7 +30,7 @@ describe "ag-data.model.class", ->
       model.schema.fields.should.have.keys ['foo', 'bar']
 
     it "should have the identifier field name available", ->
-      model = createModelFromResource mockResource {
+      model = buildModel mockResource {
         identifier: 'id'
         fields:
           id: {}
@@ -35,18 +40,18 @@ describe "ag-data.model.class", ->
   describe "find()", ->
     it "accepts an identifier and passes it to the resource", ->
       resource = mockResource find: {}
-      model = createModelFromResource resource
+      model = buildModel resource
       model.find(1).then (instance) ->
         resource.find.should.have.been.calledWith 1
 
     it "promises a model instance", ->
       resource = mockResource find: {}
-      model = createModelFromResource resource
+      model = buildModel resource
       model.find(1).then (instance) ->
         instance.should.be.an.instanceof model
 
     it "sets object properties from the resource on the instance", ->
-      model = createModelFromResource mockResource {
+      model = buildModel mockResource {
         fields:
           foo: {}
         find:
@@ -56,7 +61,7 @@ describe "ag-data.model.class", ->
 
   describe "fromJson()", ->
     it "accepts an object and returns a model instance", ->
-      model = createModelFromResource mockResource {
+      model = buildModel mockResource {
         fields:
           foo: {}
       }
@@ -68,10 +73,13 @@ describe "ag-data.model.class", ->
         fields:
           id: {}
           foo: {}
-        update: {}
+        update: {
+          id: 123
+          foo: 'something else'
+        }
         delete: {}
       }
-      model = createModelFromResource resource
+      model = buildModel resource
       instance = model.fromJson(id: 123, foo: 'something')
       instance.foo = 'something else'
       instance.save().then ->
@@ -89,7 +97,7 @@ describe "ag-data.model.class", ->
           foo: {}
         update: {}
       }
-      model = createModelFromResource resource
+      model = buildModel resource
       instance = model.fromJson(id: 123, foo: 'something')
       instance.save().then ->
         resource.update.should.have.been.calledWith 123, {
@@ -99,7 +107,7 @@ describe "ag-data.model.class", ->
   describe "findAll()", ->
     it "accepts query options and passes them to the resource", ->
       resource = mockResource findAll: {}
-      model = createModelFromResource resource
+      model = buildModel resource
       model.findAll(limit: 123).then ->
         resource.findAll.should.have.been.calledWith limit: 123
 
@@ -110,7 +118,7 @@ describe "ag-data.model.class", ->
           { foo: 'qux' }
         ]
       }
-      model = createModelFromResource resource
+      model = buildModel resource
       model.findAll().then (collection) ->
         (for instance in collection
           instance.should.be.an.instanceof model
@@ -118,11 +126,11 @@ describe "ag-data.model.class", ->
 
   describe "all()", ->
     it "is a function", ->
-      model = createModelFromResource mockResource {}
+      model = buildModel mockResource {}
       model.all.should.be.a 'function'
 
     it "returns a followable on findAll()", ->
-      model = createModelFromResource mockResource {}
+      model = buildModel mockResource {}
       model.all().should.include.keys [
         'target'
         'updates'
@@ -136,7 +144,7 @@ describe "ag-data.model.class", ->
           {}
         ]
       }
-      model = createModelFromResource resource
+      model = buildModel resource
 
       {
         followable: model.all()
@@ -145,11 +153,11 @@ describe "ag-data.model.class", ->
 
   describe "one()", ->
     it "is a function", ->
-      model = createModelFromResource mockResource {}
+      model = buildModel mockResource {}
       model.should.have.property('one').be.a 'function'
 
     it "returns a followable on find()", ->
-      model = createModelFromResource mockResource {}
+      model = buildModel mockResource {}
       model.one().should.include.keys [
         'target'
         'updates'
@@ -161,9 +169,53 @@ describe "ag-data.model.class", ->
       resource = mockResource {
         find: {}
       }
-      model = createModelFromResource resource
+      model = buildModel resource
 
       {
         followable: model.one()
         followed: resource.find
       }
+
+  describe "create()", ->
+    it "should be a function", ->
+      model = buildModel mockResource {}
+      model.should.have.property('create').be.a 'function'
+
+    it "creates a new instance with properties from the resource", ->
+      model = buildModel mockResource {
+        identity: 'id'
+        fields:
+          id: {}
+          foo: {}
+        create:
+          id: 123
+          foo: 'bar'
+      }
+      model.create().then (instance) ->
+        instance.should.be.an.instanceof model
+        instance.should.deep.equal {
+          id: 123
+          foo: 'bar'
+        }
+
+  describe "update()", ->
+    it "should be a function", ->
+      model = buildModel mockResource {}
+      model.should.have.property('update').be.a 'function'
+
+    it "gets an instance with updated properties from the resource", ->
+      model = buildModel mockResource {
+        identity: 'id'
+        fields:
+          id: {}
+          foo: {}
+        update:
+          id: 123
+          foo: 'qux'
+      }
+      model.update(123, foo: 'qux').then (instance) ->
+        instance.should.be.an.instanceof model
+        instance.should.deep.equal {
+          id: 123
+          foo: 'qux'
+        }
