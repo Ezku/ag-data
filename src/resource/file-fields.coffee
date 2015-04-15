@@ -10,16 +10,35 @@ module.exports = (http) ->
   decorateWithFileFieldSupport = (resource) ->
     debug = require('debug')("ag-data:resource:file-fields:#{resource.name}")
 
+    transactional =
+      create: (data) ->
+        Transaction.step ->
+          resource.create(data)
+      update: (id, data) ->
+        Transaction.step ->
+          resource.update(id, data)
+
     createTransaction = (data) ->
       fieldsToUpload = discoverUnuploadedFileFields data
 
       if fieldsToUpload.length is 0
-        Transaction.step ->
-          resource.create(data)
+        transactional.create(data)
       else
         dataWithUploadUrlRequests = amendDataWithFileUploadUrlRequests data, fieldsToUpload
 
-        requestUploadInstructions(dataWithUploadUrlRequests)
+        transactional.create(dataWithUploadUrlRequests)
+          .flatMapDone(doUploadsByInstructions data, fieldsToUpload)
+          .flatMapDone(updateFinalState)
+
+    updateTransaction = (id, data) ->
+      fieldsToUpload = discoverUnuploadedFileFields data
+
+      if fieldsToUpload.length is 0
+        transactional.update(id, data)
+      else
+        dataWithUploadUrlRequests = amendDataWithFileUploadUrlRequests data, fieldsToUpload
+
+        transactional.update(id, dataWithUploadUrlRequests)
           .flatMapDone(doUploadsByInstructions data, fieldsToUpload)
           .flatMapDone(updateFinalState)
 
@@ -57,10 +76,6 @@ module.exports = (http) ->
 
         data
 
-    requestUploadInstructions = (dataWithUploadUrlRequests) ->
-      Transaction.step ->
-        resource.create(dataWithUploadUrlRequests)
-
     uploadTransaction = (uploadUrl, file) ->
       http.transactional.request 'put', uploadUrl, {
         type: 'application/octet-stream'
@@ -96,8 +111,7 @@ module.exports = (http) ->
         uploads
 
     updateFinalState = (result) ->
-      Transaction.step ->
-        resource.update(result.id, result)
+      transactional.update(result.id, result)
 
     class FileFieldSupport extends resource
       @upload: (uploadUrl, file, transactionHandler = null) ->
@@ -107,5 +121,10 @@ module.exports = (http) ->
 
       @create: (data, transactionHandler = null) ->
         createTransaction(data).run (t) ->
+          transactionHandler?(t)
+          t.done
+
+      @update: (id, data, transactionHandler = null) ->
+        updateTransaction(id, data).run (t) ->
           transactionHandler?(t)
           t.done
