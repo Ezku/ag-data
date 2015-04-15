@@ -18,29 +18,27 @@ module.exports = (http) ->
         Transaction.step ->
           resource.update(id, data)
 
-    createTransaction = (data) ->
+    withFileFieldSupport = (f) -> (args...) ->
+      { data, run } = f(args...)
+
       fieldsToUpload = discoverUnuploadedFileFields data
 
       if fieldsToUpload.length is 0
-        transactional.create(data)
+        run(data)
       else
         dataWithUploadUrlRequests = amendDataWithFileUploadUrlRequests data, fieldsToUpload
 
-        transactional.create(dataWithUploadUrlRequests)
+        run(dataWithUploadUrlRequests)
           .flatMapDone(doUploadsByInstructions data, fieldsToUpload)
           .flatMapDone(updateFinalState)
 
-    updateTransaction = (id, data) ->
-      fieldsToUpload = discoverUnuploadedFileFields data
+    createTransaction = withFileFieldSupport (data) ->
+      data: data
+      run: transactional.create
 
-      if fieldsToUpload.length is 0
-        transactional.update(id, data)
-      else
-        dataWithUploadUrlRequests = amendDataWithFileUploadUrlRequests data, fieldsToUpload
-
-        transactional.update(id, dataWithUploadUrlRequests)
-          .flatMapDone(doUploadsByInstructions data, fieldsToUpload)
-          .flatMapDone(updateFinalState)
+    updateTransaction = withFileFieldSupport (id, data) ->
+      data: data
+      run: (data) -> transactional.update(id, data)
 
     discoverUnuploadedFileFields = do ->
       getFileFieldNames = (fields) ->
