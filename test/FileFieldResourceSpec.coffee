@@ -38,8 +38,8 @@ describe "ag-data.resource.file-fields", ->
           app.put "/arbitrary-endpoint", (req, res) ->
             resolve req
             res.status(200).end()
-        resource.create(file: uploadableBuffer()).then (fileResource) ->
-          fileResource.file.should.have.property('uploaded').equal true
+        resource.create(file: uploadableBuffer()).then (record) ->
+          record.file.should.have.property('uploaded').equal true
           fileUploadRequest.then (req) ->
             req.body.toString().should.equal uploadableBuffer().toString()
 
@@ -52,7 +52,7 @@ describe "ag-data.resource.file-fields", ->
           file:
             uploaded: false
       }
-      decorateWithFileFieldSupport(resource).create({}).then (fileResource) ->
+      decorateWithFileFieldSupport(resource).create({}).then (record) ->
         resource.create.should.have.been.calledOnce
 
     it "accepts an optional transaction handler that can abort the upload", ->
