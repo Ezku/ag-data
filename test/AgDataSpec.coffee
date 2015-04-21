@@ -55,6 +55,5 @@ describe "ag-data", ->
           .createModel('foo', { headers })
 
         fooModel.options.should.be.an 'object'
-        new Promise((resolve) ->
-          fooModel.options.onValue resolve
-        ).should.eventually.have.property('headers').deep.equal headers
+
+        fooModel.options.should.have.property('headers').deep.equal headers
