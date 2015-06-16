@@ -301,6 +301,22 @@ describe "ag-data.model.instance", ->
               instance.save().then ->
                 instance.foo.should.equal 'qux'
 
+          it "retains current values if not set in update result", ->
+            model = buildModel mockResource {
+              fields:
+                foo: {}
+                bar: {}
+              find:
+                {}
+              update:
+                bar: 'baz'
+            }
+            model.find(1).then (instance) ->
+              instance.foo = 'qux'
+              instance.save().then ->
+                instance.foo.should.equal 'qux'
+                instance.bar.should.equal 'baz'
+
   describe "identity", ->
 
     it "can be accessed from .id", ->
