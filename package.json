@@ -20,7 +20,7 @@
   "homepage": "https://github.com/AppGyver/ag-data",
   "devDependencies": {
     "body-parser": "^1.12.2",
-    "chai-as-promised": "^4.1.1",
+    "chai-as-promised": "^5.1.0",
     "coffee-script": "^1.8.0",
     "express": "^4.12.3",
     "grunt": "^0.4.5",
@@ -33,7 +33,7 @@
     "load-grunt-config": "^0.14.0",
     "load-grunt-tasks": "^0.6.0",
     "sinon": "^1.10.3",
-    "sinon-chai": "^2.6.0"
+    "sinon-chai": "^2.8.0"
   },
   "config": {
     "blanket": {
