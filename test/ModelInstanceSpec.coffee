@@ -272,6 +272,35 @@ describe "ag-data.model.instance", ->
             instance.save().then ->
               resource.update.should.have.been.calledWith 1, {}
 
+        describe "state synchronization", ->
+
+          it "accepts an updated value different to what was sent", ->
+            model = buildModel mockResource {
+              fields:
+                foo: {}
+              find:
+                foo: 'bar'
+              update:
+                foo: 'baz'
+            }
+            model.find(1).then (instance) ->
+              instance.foo = 'qux'
+              instance.save().then ->
+                instance.foo.should.equal 'baz'
+
+          it "accepts an updated value for a field that was not set", ->
+            model = buildModel mockResource {
+              fields:
+                foo: {}
+              find:
+                {}
+              update:
+                foo: 'qux'
+            }
+            model.find(1).then (instance) ->
+              instance.save().then ->
+                instance.foo.should.equal 'qux'
+
   describe "identity", ->
 
     it "can be accessed from .id", ->
