@@ -1,4 +1,8 @@
 Promise = require 'bluebird'
+_ = {
+  defaults: require 'lodash-node/modern/object/defaults'
+}
+
 jsonableEquality = require './jsonable-equality'
 
 objectSize = (o) -> Object.keys(o || {}).length
@@ -113,7 +117,7 @@ module.exports = (resource) ->
       null
 
     markAsSynced: (instance, data) ->
-      instance.__data = data
+      instance.__data = _.defaults(data, instance.__data)
       instance.__dirty = false
       instance.__changed = {}
       null
