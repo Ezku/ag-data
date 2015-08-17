@@ -12,8 +12,15 @@ module.exports = (http) ->
 
     transactional =
       create: (data) ->
-        Transaction.step ->
+        Transaction.step ({rollback}) ->
+          # Delete the created record if this transaction needs to be rolled back
+          rollback (createdRecord) ->
+            # NOTE: We don't actually know that there's an id field - resource.schema would have the necessary information
+            resource.delete(createdRecord.id)
+
+          # Here's what the step tries to do
           resource.create(data)
+
       update: (id, data) ->
         Transaction.step ->
           resource.update(id, data)
@@ -120,7 +127,12 @@ module.exports = (http) ->
       @create: (data, transactionHandler = null) ->
         createTransaction(data).run (t) ->
           transactionHandler?(t)
-          t.done
+          # Catch failures in the transaction. If a part of the transaction, say the file upload, fails, it will be reflected here.
+          t.done.catch (e) ->
+            # Order a rollback on failure
+            t.rollback().then ->
+              # Yield the original failure after successful rollback
+              throw e
 
       @update: (id, data, transactionHandler = null) ->
         updateTransaction(id, data).run (t) ->
