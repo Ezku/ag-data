@@ -77,6 +77,10 @@ module.exports = (http) ->
     uploadTransaction = (uploadUrl, file) ->
       http.transactional.request 'put', uploadUrl, {
         type: 'application/octet-stream'
+        headers:
+          "X-AG-Image-Uploader": "on"
+          "X-AG-Image-Uploader-JPG-Quality": 0.8
+          "X-AG-Image-Uploader-Width": 1024
         data: switch true
           when Buffer.isBuffer file then file.toString()
           else file
