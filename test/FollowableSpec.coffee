@@ -103,9 +103,7 @@ describe "ag-data.followable", ->
           fromPromiseF(followed)
             .follow({ poll: poll.bufferingThrottle(10) })
             .updates
-            .take(2)
-            .fold(0, (a) -> a + 1)
-            .onValue (v) ->
+            .onEnd (v) ->
               done asserting ->
                 followed.should.have.been.calledTwice
 
@@ -125,19 +123,17 @@ describe "ag-data.followable", ->
             .should.have.property('onValue').be.a 'function'
 
         it "knows how to skip duplicates", (done) ->
-          followed = sinon.stub().returns Promise.resolve()
-          { updates, changes } = fromPromiseF(followed).follow({
-            poll: Bacon.fromArray [1, 2]
-          })
-
+          followed = sinon.stub().returns Promise.resolve {}
           spy = sinon.stub()
-          unsub = changes.onValue spy
-          updates
-            .take(2)
-            .fold(0, (a) -> a + 1)
-            .onValue (v) ->
+
+          fromPromiseF(followed)
+            .follow({
+              poll: Bacon.fromArray [1, 2]
+            })
+            .changes
+            .doAction(spy)
+            .onEnd ->
               done asserting ->
-                unsub()
                 spy.should.have.been.calledOnce
 
       describe "target", ->
