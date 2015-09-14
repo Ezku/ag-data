@@ -12,6 +12,10 @@ asserting = require './helpers/asserting'
 followable = require '../src/model/followable'
 itSupportsWhenChanged = require './properties/it-supports-when-changed'
 
+times = (n) ->
+  # NOTE: Poller events need to be asynchronous, not resolve immediately. Why?
+  Bacon.interval(1, true).take(n)
+
 describe "ag-data.followable", ->
   it "is a function", ->
     followable.should.be.a 'function'
@@ -41,22 +45,6 @@ describe "ag-data.followable", ->
             'whenChanged'
           ]
 
-      it "knows how to skip duplicates", (done) ->
-        followed = sinon.stub().returns Promise.resolve()
-        { updates, whenChanged } = fromPromiseF(followed).follow({
-          poll: Bacon.fromArray [1, 2]
-        })
-
-        spy = sinon.stub()
-        unsub = whenChanged spy
-        updates
-          .take(2)
-          .fold(0, (a) -> a + 1)
-          .onValue (v) ->
-            done asserting ->
-              unsub()
-              spy.should.have.been.calledOnce
-
       it "knows how to not overfeed the followed function when a previous call takes a long time to finish", (done) ->
         currentDelay = 0
         delayIncrement = 10
@@ -84,6 +72,7 @@ describe "ag-data.followable", ->
         { followed, followable }
 
       describe "updates", ->
+
         it "is a stream", ->
           followed = sinon.stub().returns Promise.resolve()
           fromPromiseF(followed).follow().updates.should.have.property('onValue').be.a 'function'
@@ -97,9 +86,10 @@ describe "ag-data.followable", ->
           fromPromiseF(followed).follow().updates.toString().should.match /\interval\(10000/
 
         it "outputs data from the followed function", (done) ->
-          followed = sinon.stub().returns Promise.resolve [
+          output = [
             { foo: 'bar' }
           ]
+          followed = sinon.stub().returns Promise.resolve output
           fromPromiseF(followed)
             .follow()
             .updates
@@ -107,22 +97,66 @@ describe "ag-data.followable", ->
             .onValue (v) ->
               done asserting ->
                 followed.should.have.been.calledOnce
-                v[0].foo.should.equal 'bar'
+                v.should.equal output
 
         it "can be driven by a { poll } option to follow()", (done) ->
           followed = sinon.stub().returns Promise.resolve [
             { foo: 'bar' }
           ]
-          poll = Bacon.fromArray [1, 2]
 
           fromPromiseF(followed)
-            .follow({ poll: poll.bufferingThrottle(10) })
+            .follow({
+              poll: times 2
+            })
             .updates
-            .take(2)
-            .fold(0, (a) -> a + 1)
-            .onValue (v) ->
+            .onEnd (v) ->
               done asserting ->
                 followed.should.have.been.calledTwice
+
+        it "ends when the { poll } stream ends", (done) ->
+          followed = sinon.stub().returns Promise.resolve()
+          fromPromiseF(followed)
+            .follow({
+              poll: times 0
+            })
+            .updates
+            .onEnd(done)
+
+      describe "changes", ->
+        it "is a stream", ->
+          followed = sinon.stub().returns Promise.resolve()
+          fromPromiseF(followed)
+            .follow()
+            .changes
+            .should.have.property('onValue').be.a 'function'
+
+        it "knows how to skip duplicates", (done) ->
+          followed = sinon.stub().returns Promise.resolve {}
+          spy = sinon.stub()
+
+          fromPromiseF(followed)
+            .follow({
+              poll: times 2
+            })
+            .changes
+            .doAction(spy)
+            .onEnd ->
+              done asserting ->
+                spy.should.have.been.calledOnce
+
+        it "will not trigger if output object is changed", (done) ->
+          spy = sinon.stub()
+
+          fromPromiseF(-> new Object)
+            .follow(
+              poll: times 2
+            )
+            .changes
+            .doAction((object) -> object['change'] = 'effect')
+            .doAction(spy)
+            .onEnd ->
+              done asserting ->
+                spy.should.have.been.calledOnce
 
       describe "target", ->
         it "refers to the original wrapped function", ->
