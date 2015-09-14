@@ -108,6 +108,13 @@ describe "ag-data.followable", ->
               done asserting ->
                 followed.should.have.been.calledTwice
 
+        it "ends when the { poll } stream ends", (done) ->
+          followed = sinon.stub().returns Promise.resolve()
+          { updates } = fromPromiseF(followed).follow {
+            poll: Bacon.never()
+          }
+          updates.onEnd(done)
+
       describe "changes", ->
         it "is a stream", ->
           followed = sinon.stub().returns Promise.resolve()
