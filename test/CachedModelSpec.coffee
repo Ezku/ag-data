@@ -94,6 +94,33 @@ describe "ag-data.model with cache", ->
                 done asserting ->
                   resource.findAll.should.have.been.calledTwice
 
+      it "will invalidate the collection cache for a query", (done) ->
+        resource = mockResource {
+          identifier: 'id'
+          fields:
+            id: {}
+            foo: {}
+          findAll: [
+            { id: 123, foo: 'bar' }
+          ]
+          create: {}
+        }
+        model = data.createModel resource, cache: enabled: true
+        updates = model.all({ filter: "only the good stuff" }, { interval: 10 }).updates
+        updates
+          .take(1)
+          .onValue ->
+            # Make sure there's a listener and the poller is triggering
+            unsub = updates.onValue ->
+
+            new model()
+              .save()
+              .delay(15)
+              .then ->
+                unsub()
+                done asserting ->
+                  resource.findAll.should.have.been.calledTwice
+
     describe "after collection cache's timeToLive expires", ->
 
       it "will hit the resource again", (done) ->
