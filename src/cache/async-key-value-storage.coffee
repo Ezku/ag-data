@@ -11,3 +11,5 @@ module.exports = ->
   removeItem: (key) ->
     storage[key] = null
     Promise.resolve()
+  keys: ->
+    Promise.resolve Object.keys storage

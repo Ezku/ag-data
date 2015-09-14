@@ -42,79 +42,112 @@ describe "ag-data.model with cache", ->
 
   describe "all()", ->
 
-    it "will use the cached value and not hit the resource twice", (done) ->
-      resource = mockResource {
-        identifier: 'id'
-        fields:
-          id: {}
-          foo: {}
-        findAll: [
-          { id: 123, foo: 'bar' }
-        ]
-      }
-      model = data.createModel resource, cache: enabled: true
-      # If we set the poll interval to 10, wait for an update and then a further 20ms,
-      # we should get only cache hits after the first hit to resource
-      model.all({}, { interval: 10 })
-        .updates
-        .take(1)
-        .delay(20)
-        .onValue ->
-          done asserting ->
-            resource.findAll.should.have.been.calledOnce
+    describe "after the first poll", ->
 
-    it "will hit the resource again after a write has invalidated the collection cache", (done) ->
-      resource = mockResource {
-        identifier: 'id'
-        fields:
-          id: {}
-          foo: {}
-        findAll: [
-          { id: 123, foo: 'bar' }
-        ]
-        create: {}
-      }
-      model = data.createModel resource, cache: enabled: true
-      updates = model.all({}, { interval: 10 }).updates
-      updates
-        .take(1)
-        .onValue ->
-          # Make sure there's a listener and the poller is triggering
-          unsub = updates.onValue ->
+      it "will use the cached value and not hit the resource twice", (done) ->
+        resource = mockResource {
+          identifier: 'id'
+          fields:
+            id: {}
+            foo: {}
+          findAll: [
+            { id: 123, foo: 'bar' }
+          ]
+        }
+        model = data.createModel resource, cache: enabled: true
+        # If we set the poll interval to 10, wait for an update and then a further 20ms,
+        # we should get only cache hits after the first hit to resource
+        model.all({}, { interval: 10 })
+          .updates
+          .take(1)
+          .delay(20)
+          .onValue ->
+            done asserting ->
+              resource.findAll.should.have.been.calledOnce
 
-          new model()
-            .save()
-            .delay(15)
-            .then ->
-              unsub()
-              done asserting ->
-                resource.findAll.should.have.been.calledTwice
+    describe "after collection write", ->
 
-    it "will hit the resource again after the collection cache's timeToLive has expired", (done) ->
-      resource = mockResource {
-        identifier: 'id'
-        fields:
-          id: {}
-          foo: {}
-        findAll: [
-          { id: 123, foo: 'bar' }
-        ]
-      }
-      model = data.createModel resource, {
-        cache:
-          enabled: true
-          timeToLive: 10
-      }
-      updates = model.all({}, { interval: 5 }).updates
-      updates
-        .take(1)
-        .onValue ->
-          # Make sure there's a listener and the poller is triggering
-          unsub = updates.onValue ->
+      it "will invalidate the collection cache", (done) ->
+        resource = mockResource {
+          identifier: 'id'
+          fields:
+            id: {}
+            foo: {}
+          findAll: [
+            { id: 123, foo: 'bar' }
+          ]
+          create: {}
+        }
+        model = data.createModel resource, cache: enabled: true
+        updates = model.all({}, { interval: 10 }).updates
+        updates
+          .take(1)
+          .onValue ->
+            # Make sure there's a listener and the poller is triggering
+            unsub = updates.onValue ->
 
-          Promise.resolve()
-            .delay(15)
-            .then ->
-              unsub()
-              done asserting ->
-                resource.findAll.should.have.been.calledTwice
+            new model()
+              .save()
+              .delay(15)
+              .then ->
+                unsub()
+                done asserting ->
+                  resource.findAll.should.have.been.calledTwice
+
+      it "will invalidate the collection cache for a query", (done) ->
+        resource = mockResource {
+          identifier: 'id'
+          fields:
+            id: {}
+            foo: {}
+          findAll: [
+            { id: 123, foo: 'bar' }
+          ]
+          create: {}
+        }
+        model = data.createModel resource, cache: enabled: true
+        updates = model.all({ filter: "only the good stuff" }, { interval: 10 }).updates
+        updates
+          .take(1)
+          .onValue ->
+            # Make sure there's a listener and the poller is triggering
+            unsub = updates.onValue ->
+
+            new model()
+              .save()
+              .delay(15)
+              .then ->
+                unsub()
+                done asserting ->
+                  resource.findAll.should.have.been.calledTwice
+
+    describe "after collection cache's timeToLive expires", ->
+
+      it "will hit the resource again", (done) ->
+        resource = mockResource {
+          identifier: 'id'
+          fields:
+            id: {}
+            foo: {}
+          findAll: [
+            { id: 123, foo: 'bar' }
+          ]
+        }
+        model = data.createModel resource, {
+          cache:
+            enabled: true
+            timeToLive: 10
+        }
+        updates = model.all({}, { interval: 5 }).updates
+        updates
+          .take(1)
+          .onValue ->
+            # Make sure there's a listener and the poller is triggering
+            unsub = updates.onValue ->
+
+            Promise.resolve()
+              .delay(15)
+              .then ->
+                unsub()
+                done asserting ->
+                  resource.findAll.should.have.been.calledTwice

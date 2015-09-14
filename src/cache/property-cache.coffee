@@ -53,6 +53,20 @@ module.exports = (namespace, storage, time) ->
         debug "#{index} invalidated"
         result
 
+  # (operation: () -> Promise) -> Promise
+  invalidateAllIfSuccessful = (operation) ->
+    Promise.resolve(operation()).then (result) ->
+      storage.keys().then (keys) ->
+        Promise.all(
+          for key in keys when belongsToNamespace key
+            storage.removeItem key
+        ).then ->
+          result
+
+  # (key: String) -> boolean
+  belongsToNamespace = (key) ->
+    (key || "").indexOf("#{namespace}(", 0) is 0
+
   prop = (key, options) ->
     index = keyWithNamespace key
     timeToLive = options?.timeToLive ? 10000
@@ -69,4 +83,5 @@ module.exports = (namespace, storage, time) ->
     namespace
     storage
     time
+    invalidateAllIfSuccessful
   }

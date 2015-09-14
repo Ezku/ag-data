@@ -13,6 +13,9 @@ asserting = require './helpers/asserting'
 createCache = require '../src/cache/property-cache'
 asyncKeyValueStorage = require '../src/cache/async-key-value-storage'
 
+willFail = -> Promise.reject(new Error "nope")
+willSucceed = -> Promise.resolve()
+
 describe "ag-data.cache", ->
 
   it "accepts a namespace and a storage", ->
@@ -41,6 +44,55 @@ describe "ag-data.cache", ->
           stop.should.be.greaterThan start
       , 10
 
+  describe "invalidateAllIfSuccessful", ->
+    it "is a function", ->
+      createCache("namespace", {}).invalidateAllIfSuccessful.should.be.a 'function'
+
+    it 'does nothing after failure', ->
+      cache = createCache("namespace", asyncKeyValueStorage())
+      prop = cache.prop("key-#{Math.random()}")
+
+      prop.set("old value").then ->
+        cache.invalidateAllIfSuccessful(willFail).error ->
+          prop.computeUnlessValid(-> "fresh value").should.eventually.equal "old value"
+
+    it "invalidates all known keys in the namespace", ->
+      cache = createCache("namespace", asyncKeyValueStorage())
+      propOne = cache.prop("key-#{Math.random()}")
+      propTwo = cache.prop("key-#{Math.random()}")
+      Promise.all([
+        propOne.set('one')
+        propTwo.set('two')
+      ]).then ->
+        cache.invalidateAllIfSuccessful(willSucceed).then ->
+          Promise.all([
+            propOne.computeUnlessValid(-> 'fresh one')
+            propTwo.computeUnlessValid(-> 'fresh two')
+          ]).spread (one, two) ->
+            one.should.equal 'fresh one'
+            two.should.equal 'fresh two'
+
+    it "does not invalidate other keys in the storage belonging to a different namespace", ->
+      storage = asyncKeyValueStorage()
+
+      cacheOne = createCache("namespace-#{Math.random()}", storage)
+      cacheTwo = createCache("namespace-#{Math.random()}", storage)
+
+      propOne = cacheOne.prop("key-#{Math.random()}")
+      propTwo = cacheTwo.prop("key-#{Math.random()}")
+
+      Promise.all([
+        propOne.set('one')
+        propTwo.set('two')
+      ]).then ->
+        cacheTwo.invalidateAllIfSuccessful(willSucceed).then ->
+          Promise.all([
+            propOne.computeUnlessValid(-> 'fresh one')
+            propTwo.computeUnlessValid(-> 'fresh two')
+          ]).spread (one, two) ->
+            one.should.equal 'one'
+            two.should.equal 'fresh two'
+
   describe "prop()", ->
 
     it "optionally accepts a timeToLive argument", ->
@@ -50,14 +102,14 @@ describe "ag-data.cache", ->
         .timeToLive.should.equal timeToLive
 
     describe "time-invariant behavior", ->
-      cache = null
-      prop = null
-      beforeEach ->
+
+      getRandomCacheProp = ->
         cache = createCache("namespace", asyncKeyValueStorage(), -> 1)
         prop = cache.prop "key-#{Math.random()}"
 
       describe "set()", ->
         it "will cause key to be present", ->
+          prop = getRandomCacheProp()
           prop.set("key", "value").then ->
             whenAbsent = sinon.stub()
             prop.computeIfAbsent(whenAbsent).then ->
@@ -65,50 +117,56 @@ describe "ag-data.cache", ->
 
       describe "computeIfAbsent()", ->
         it "will yield existing value if there is one", ->
+          prop = getRandomCacheProp()
           prop.set("value").then ->
             prop.computeIfAbsent(->).should.eventually.equal "value"
 
         it "will yield value from computation if there is no value", ->
+          prop = getRandomCacheProp()
           prop.computeIfAbsent(-> "value").should.eventually.equal "value"
 
         it "will set value after computing it", ->
+          prop = getRandomCacheProp()
           prop.computeIfAbsent(-> "value").then ->
             prop.computeIfAbsent(->).should.eventually.equal "value"
 
       describe "invalidateIfSuccessful()", ->
         it "will invalidate an existing value after success", ->
+          prop = getRandomCacheProp()
           prop.set("old value").then ->
-            prop.invalidateIfSuccessful(-> Promise.resolve()).then ->
+            prop.invalidateIfSuccessful(willSucceed).then ->
               prop.computeUnlessValid(-> "fresh value").should.eventually.equal "fresh value"
 
         it "will do nothing after failure", ->
+          prop = getRandomCacheProp()
           prop.set("old value").then ->
-            prop.invalidateIfSuccessful(-> Promise.reject(new Error "nope")).error ->
+            prop.invalidateIfSuccessful(willFail).error ->
               prop.computeUnlessValid(-> "fresh value").should.eventually.equal "old value"
 
-      describe "computeUnlessValid", ->
+      describe "computeUnlessValid()", ->
         it "will yield value from computation if there is no value", ->
+          prop = getRandomCacheProp()
           prop.computeUnlessValid(-> "value").should.eventually.equal "value"
 
-    describe "with time", ->
-      cache = null
-      prop = null
-      currentTime = null
-      timeToLive = 1
-      step = (amount = 1) ->
-        currentTime = (currentTime || 0) + amount
-      beforeEach ->
+    describe "time-dependent behavior", ->
+      getRandomCachePropWithTime = ->
+        timeToLive = 1
         currentTime = 0
         cache = createCache("namespace", asyncKeyValueStorage(), -> currentTime)
         prop = cache.prop "key-#{Math.random()}", { timeToLive }
+        prop.incrementTime = (amount = 1) ->
+          currentTime = (currentTime || 0) + amount
+        prop
 
-      describe "computeUnlessValid", ->
+      describe "computeUnlessValid()", ->
         it "will yield a value that was set immediately before", ->
+          prop = getRandomCachePropWithTime()
           prop.set("old value").then ->
             prop.computeUnlessValid(-> "fresh value").should.eventually.equal "old value"
 
         it "will yield value from computation in case existing value has exceeded its timeToLive", ->
+          prop = getRandomCachePropWithTime()
           prop.set("old value").then ->
-            step()
+            prop.incrementTime()
             prop.computeUnlessValid(-> "fresh value").should.eventually.equal "fresh value"
 
