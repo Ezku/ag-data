@@ -13,6 +13,9 @@ asserting = require './helpers/asserting'
 createCache = require '../src/cache/property-cache'
 asyncKeyValueStorage = require '../src/cache/async-key-value-storage'
 
+willFail = -> Promise.reject(new Error "nope")
+willSucceed = -> Promise.resolve()
+
 describe "ag-data.cache", ->
 
   it "accepts a namespace and a storage", ->
@@ -50,7 +53,7 @@ describe "ag-data.cache", ->
       prop = cache.prop("key-#{Math.random()}")
 
       prop.set("old value").then ->
-        cache.invalidateAllIfSuccessful(-> Promise.reject(new Error "nope")).error ->
+        cache.invalidateAllIfSuccessful(willFail).error ->
           prop.computeUnlessValid(-> "fresh value").should.eventually.equal "old value"
 
     it "invalidates all known keys in the namespace", ->
@@ -61,7 +64,7 @@ describe "ag-data.cache", ->
         propOne.set('one')
         propTwo.set('two')
       ]).then ->
-        cache.invalidateAllIfSuccessful(-> Promise.resolve()).then ->
+        cache.invalidateAllIfSuccessful(willSucceed).then ->
           Promise.all([
             propOne.computeUnlessValid(-> 'fresh one')
             propTwo.computeUnlessValid(-> 'fresh two')
@@ -69,6 +72,26 @@ describe "ag-data.cache", ->
             one.should.equal 'fresh one'
             two.should.equal 'fresh two'
 
+    it "does not invalidate other keys in the storage belonging to a different namespace", ->
+      storage = asyncKeyValueStorage()
+
+      cacheOne = createCache("namespace-#{Math.random()}", storage)
+      cacheTwo = createCache("namespace-#{Math.random()}", storage)
+
+      propOne = cacheOne.prop("key-#{Math.random()}")
+      propTwo = cacheTwo.prop("key-#{Math.random()}")
+
+      Promise.all([
+        propOne.set('one')
+        propTwo.set('two')
+      ]).then ->
+        cacheTwo.invalidateAllIfSuccessful(willSucceed).then ->
+          Promise.all([
+            propOne.computeUnlessValid(-> 'fresh one')
+            propTwo.computeUnlessValid(-> 'fresh two')
+          ]).spread (one, two) ->
+            one.should.equal 'one'
+            two.should.equal 'fresh two'
 
   describe "prop()", ->
 
@@ -111,13 +134,13 @@ describe "ag-data.cache", ->
         it "will invalidate an existing value after success", ->
           prop = getRandomCacheProp()
           prop.set("old value").then ->
-            prop.invalidateIfSuccessful(-> Promise.resolve()).then ->
+            prop.invalidateIfSuccessful(willSucceed).then ->
               prop.computeUnlessValid(-> "fresh value").should.eventually.equal "fresh value"
 
         it "will do nothing after failure", ->
           prop = getRandomCacheProp()
           prop.set("old value").then ->
-            prop.invalidateIfSuccessful(-> Promise.reject(new Error "nope")).error ->
+            prop.invalidateIfSuccessful(willFail).error ->
               prop.computeUnlessValid(-> "fresh value").should.eventually.equal "old value"
 
       describe "computeUnlessValid()", ->
