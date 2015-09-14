@@ -39,16 +39,16 @@ module.exports = decorateWithCaching = (resource, options = {}) ->
           collection
 
     @update: (id, rest...) ->
-      collectionCache.prop({}).invalidateIfSuccessful ->
+      collectionCache.invalidateAllIfSuccessful ->
         instanceCache.prop(id).invalidateIfSuccessful ->
           resource.update(id, rest...)
 
     @create: (args...) ->
-      collectionCache.prop({}).invalidateIfSuccessful ->
+      collectionCache.invalidateAllIfSuccessful ->
         resource.create(args...)
 
     @delete: (id) ->
-      collectionCache.prop({}).invalidateIfSuccessful ->
+      collectionCache.invalidateAllIfSuccessful ->
         instanceCache.prop(id).invalidateIfSuccessful ->
           resource.delete id
 
