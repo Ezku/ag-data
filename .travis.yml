@@ -1,7 +1,7 @@
 sudo: false
 cache:
   directories:
-    - node_modules
+  - node_modules
 language: node_js
 node_js:
 - '0.10'
@@ -9,13 +9,13 @@ before_install: npm install -g grunt-cli
 after_success: grunt travis
 deploy:
   provider: npm
-  email: eevert.saukkokoski@appgyver.com
+  email: hostmaster+npm@appgyver.com
   on:
     tags: true
     all_branches: true
     repo: AppGyver/ag-data
   api_key:
-    secure: eJAXItkyyfiRZW6Q6ueDewQkjWxOiw3kSWKhLayfNeY0AlqCb99COOj+B43e6TpEkiQAWogTCKdt0ptLwkUrq4vvPw2GSMXjk6ANByU9QxMv1qLv9riWg2sHUrM/wsPFhlHQkMf3GxV5QcgD0dwnA2gYSMuV9Zdsqm7jK5AVbyc=
+    secure: DkX5fBx3UQ3f7ZzkAFjo+tO9lcrzgtEMmi/zzxbXZ9vyR32t4CgoqEiDrKQYetk+iLuZ+I0pKMRrT+TJE+D73I5kA5J2qU9K9flnZqLgRniec0kysxBzaMupmPVGoB30vxDWlojjEc3AcdMVV2n7YF752wdMHPQkpGnmV6C+Mh0=
 env:
   global:
     secure: ICA1R6nao6mu3kDnlc/gw+arhkThOSGE4qryYb0adapVea+GDiTxPiSVB5oaXiRXR0lBLFpnQtLzpecAECpoqrHF5wNuUg9BFPG8gMo9EQOTx3R6skrjnbFMS+ZARteZ4R0xuxehkoTEzvhTV2ao8Wea3Xm59OomI84PsE8xDss=
