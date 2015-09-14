@@ -53,6 +53,15 @@ module.exports = (namespace, storage, time) ->
         debug "#{index} invalidated"
         result
 
+  # (operation: () -> Promise) -> Promise
+  invalidateAllIfSuccessful = (operation) ->
+    Promise.resolve(operation()).then (result) ->
+      storage.keys().then (keys) ->
+        Promise.all(
+          storage.removeItem key for key in keys
+        ).then ->
+          result
+
   prop = (key, options) ->
     index = keyWithNamespace key
     timeToLive = options?.timeToLive ? 10000
@@ -69,4 +78,5 @@ module.exports = (namespace, storage, time) ->
     namespace
     storage
     time
+    invalidateAllIfSuccessful
   }
