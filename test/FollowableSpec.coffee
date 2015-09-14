@@ -144,6 +144,20 @@ describe "ag-data.followable", ->
               done asserting ->
                 spy.should.have.been.calledOnce
 
+        it "will not trigger if output object is changed", (done) ->
+          spy = sinon.stub()
+
+          fromPromiseF(-> new Object)
+            .follow(
+              poll: times 2
+            )
+            .changes
+            .doAction((object) -> object['change'] = 'effect')
+            .doAction(spy)
+            .onEnd ->
+              done asserting ->
+                spy.should.have.been.calledOnce
+
       describe "target", ->
         it "refers to the original wrapped function", ->
           followed = -> 'foo'
