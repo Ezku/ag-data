@@ -12,6 +12,10 @@ asserting = require './helpers/asserting'
 followable = require '../src/model/followable'
 itSupportsWhenChanged = require './properties/it-supports-when-changed'
 
+times = (n) ->
+  # NOTE: Poller events need to be asynchronous, not resolve immediately. Why?
+  Bacon.interval(1, true).take(n)
+
 describe "ag-data.followable", ->
   it "is a function", ->
     followable.should.be.a 'function'
@@ -68,6 +72,7 @@ describe "ag-data.followable", ->
         { followed, followable }
 
       describe "updates", ->
+
         it "is a stream", ->
           followed = sinon.stub().returns Promise.resolve()
           fromPromiseF(followed).follow().updates.should.have.property('onValue').be.a 'function'
@@ -98,10 +103,11 @@ describe "ag-data.followable", ->
           followed = sinon.stub().returns Promise.resolve [
             { foo: 'bar' }
           ]
-          poll = Bacon.fromArray [1, 2]
 
           fromPromiseF(followed)
-            .follow({ poll: poll.bufferingThrottle(10) })
+            .follow({
+              poll: times 2
+            })
             .updates
             .onEnd (v) ->
               done asserting ->
@@ -109,10 +115,12 @@ describe "ag-data.followable", ->
 
         it "ends when the { poll } stream ends", (done) ->
           followed = sinon.stub().returns Promise.resolve()
-          { updates } = fromPromiseF(followed).follow {
-            poll: Bacon.never()
-          }
-          updates.onEnd(done)
+          fromPromiseF(followed)
+            .follow({
+              poll: times 0
+            })
+            .updates
+            .onEnd(done)
 
       describe "changes", ->
         it "is a stream", ->
@@ -128,7 +136,7 @@ describe "ag-data.followable", ->
 
           fromPromiseF(followed)
             .follow({
-              poll: Bacon.fromArray [1, 2]
+              poll: times 2
             })
             .changes
             .doAction(spy)
