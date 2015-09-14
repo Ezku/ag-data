@@ -1,6 +1,7 @@
 Promise = require 'bluebird'
 Bacon = require 'baconjs'
 deepEqual = require 'deep-equal'
+cloneDeep = require 'lodash-node/modern/lang/cloneDeep'
 
 module.exports = (defaultInterval = 10000) ->
 
@@ -12,7 +13,9 @@ module.exports = (defaultInterval = 10000) ->
       updates = shouldUpdate.flatMapFirst ->
         Bacon.fromPromise Promise.resolve target(args...)
 
-      changes = updates.skipDuplicates(options.equals ? deepEqual)
+      changes = updates
+        .skipDuplicates(options.equals ? deepEqual)
+        .map(cloneDeep)
 
       whenChanged = (listen) ->
         changes.onValue listen
