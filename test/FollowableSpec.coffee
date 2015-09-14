@@ -41,22 +41,6 @@ describe "ag-data.followable", ->
             'whenChanged'
           ]
 
-      it "knows how to skip duplicates", (done) ->
-        followed = sinon.stub().returns Promise.resolve()
-        { updates, whenChanged } = fromPromiseF(followed).follow({
-          poll: Bacon.fromArray [1, 2]
-        })
-
-        spy = sinon.stub()
-        unsub = whenChanged spy
-        updates
-          .take(2)
-          .fold(0, (a) -> a + 1)
-          .onValue (v) ->
-            done asserting ->
-              unsub()
-              spy.should.have.been.calledOnce
-
       it "knows how to not overfeed the followed function when a previous call takes a long time to finish", (done) ->
         currentDelay = 0
         delayIncrement = 10
@@ -123,6 +107,30 @@ describe "ag-data.followable", ->
             .onValue (v) ->
               done asserting ->
                 followed.should.have.been.calledTwice
+
+      describe "changes", ->
+        it "is a stream", ->
+          followed = sinon.stub().returns Promise.resolve()
+          fromPromiseF(followed)
+            .follow()
+            .changes
+            .should.have.property('onValue').be.a 'function'
+
+        it "knows how to skip duplicates", (done) ->
+          followed = sinon.stub().returns Promise.resolve()
+          { updates, changes } = fromPromiseF(followed).follow({
+            poll: Bacon.fromArray [1, 2]
+          })
+
+          spy = sinon.stub()
+          unsub = changes.onValue spy
+          updates
+            .take(2)
+            .fold(0, (a) -> a + 1)
+            .onValue (v) ->
+              done asserting ->
+                unsub()
+                spy.should.have.been.calledOnce
 
       describe "target", ->
         it "refers to the original wrapped function", ->
