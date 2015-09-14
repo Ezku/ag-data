@@ -41,6 +41,35 @@ describe "ag-data.cache", ->
           stop.should.be.greaterThan start
       , 10
 
+  describe "invalidateAllIfSuccessful", ->
+    it "is a function", ->
+      createCache("namespace", {}).invalidateAllIfSuccessful.should.be.a 'function'
+
+    it 'does nothing after failure', ->
+      cache = createCache("namespace", asyncKeyValueStorage())
+      prop = cache.prop("key-#{Math.random()}")
+
+      prop.set("old value").then ->
+        cache.invalidateAllIfSuccessful(-> Promise.reject(new Error "nope")).error ->
+          prop.computeUnlessValid(-> "fresh value").should.eventually.equal "old value"
+
+    it "invalidates all known keys in the namespace", ->
+      cache = createCache("namespace", asyncKeyValueStorage())
+      propOne = cache.prop("key-#{Math.random()}")
+      propTwo = cache.prop("key-#{Math.random()}")
+      Promise.all([
+        propOne.set('one')
+        propTwo.set('two')
+      ]).then ->
+        cache.invalidateAllIfSuccessful(-> Promise.resolve()).then ->
+          Promise.all([
+            propOne.computeUnlessValid(-> 'fresh one')
+            propTwo.computeUnlessValid(-> 'fresh two')
+          ]).spread (one, two) ->
+            one.should.equal 'fresh one'
+            two.should.equal 'fresh two'
+
+
   describe "prop()", ->
 
     it "optionally accepts a timeToLive argument", ->
