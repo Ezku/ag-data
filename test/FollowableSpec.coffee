@@ -81,9 +81,10 @@ describe "ag-data.followable", ->
           fromPromiseF(followed).follow().updates.toString().should.match /\interval\(10000/
 
         it "outputs data from the followed function", (done) ->
-          followed = sinon.stub().returns Promise.resolve [
+          output = [
             { foo: 'bar' }
           ]
+          followed = sinon.stub().returns Promise.resolve output
           fromPromiseF(followed)
             .follow()
             .updates
@@ -91,7 +92,7 @@ describe "ag-data.followable", ->
             .onValue (v) ->
               done asserting ->
                 followed.should.have.been.calledOnce
-                v[0].foo.should.equal 'bar'
+                v.should.equal output
 
         it "can be driven by a { poll } option to follow()", (done) ->
           followed = sinon.stub().returns Promise.resolve [
