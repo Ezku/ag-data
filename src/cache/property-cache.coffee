@@ -58,9 +58,14 @@ module.exports = (namespace, storage, time) ->
     Promise.resolve(operation()).then (result) ->
       storage.keys().then (keys) ->
         Promise.all(
-          storage.removeItem key for key in keys
+          for key in keys when belongsToNamespace key
+            storage.removeItem key
         ).then ->
           result
+
+  # (key: String) -> boolean
+  belongsToNamespace = (key) ->
+    (key || "").indexOf("#{namespace}(", 0) is 0
 
   prop = (key, options) ->
     index = keyWithNamespace key
