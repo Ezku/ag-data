@@ -124,3 +124,22 @@ describe "ag-data.model.collection", ->
       collection.toJson().should.deep.equal [
         { id: 123, foo: 'bar' }
       ]
+
+  describe "clone()", ->
+
+    it "returns a collection with each record cloned", ->
+      resource = mockResource {
+        identifier: 'id'
+        fields:
+          id: {}
+          foo: {}
+        findAll: [
+          { id: 123, foo: 'bar' }
+        ]
+      }
+      model = buildModel resource
+      model.findAll().then (all) ->
+        cloned = all.clone()
+        all.toJson().should.deep.equal cloned.toJson()
+        cloned[0].foo = 'modified'
+        all.toJson().should.not.deep.equal cloned.toJson

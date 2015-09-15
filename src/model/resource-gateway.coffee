@@ -24,15 +24,24 @@ module.exports = (resource, ModelOps, Model, defaultRequestOptions) ->
         for state in states
           instanceFromPersistentState state
       )
-      collection.save = ->
-        Promise.all (
-          for item in this
-            item.save()
-        )
-      collection.equals = jsonableEquality(collection)
-      collection.toJson = ->
-        item.toJson() for item in collection
-      collection
+
+      extendWithCollectionOps = (modelArray) ->
+        modelArray.save = ->
+          Promise.all (
+            for item in this
+              item.save()
+          )
+        modelArray.equals = jsonableEquality(modelArray)
+        modelArray.toJson = ->
+          item.toJson() for item in modelArray
+        modelArray.clone = ->
+          extendWithCollectionOps(
+            item.clone() for item in modelArray
+          )
+
+        modelArray
+
+      extendWithCollectionOps collection
 
     # (collection: [Model]) -> [Model] & { whenChanged: (f, options) -> unsubscribe }
     dynamifyCollection = (query) -> (collection) ->
