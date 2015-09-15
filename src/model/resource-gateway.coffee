@@ -72,6 +72,8 @@ module.exports = (resource, ModelOps, Model, defaultRequestOptions) ->
     all: (query, options = {}) ->
       options.equals ?= (left, right) ->
         left?.equals?(right)
+      options.clone ?= (collection) ->
+        collection.clone()
 
       followable
         .fromPromiseF(->
@@ -85,6 +87,8 @@ module.exports = (resource, ModelOps, Model, defaultRequestOptions) ->
     one: (id, options = {}) ->
       options.equals ?= (left, right) ->
         left?.equals?(right)
+      options.clone ?= (record) ->
+        record.clone()
 
       followable
         .fromPromiseF(->
