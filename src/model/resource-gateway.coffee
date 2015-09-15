@@ -3,6 +3,7 @@ Bacon = require 'baconjs'
 
 jsonableEquality = require './jsonable-equality'
 followable = require('./followable')(defaultInterval = 10000)
+cloneDeep = require 'lodash-node/modern/lang/cloneDeep'
 
 module.exports = (resource, ModelOps, Model, defaultRequestOptions) ->
   ResourceGateway = do ->
@@ -93,6 +94,13 @@ module.exports = (resource, ModelOps, Model, defaultRequestOptions) ->
       instance = instanceFromPersistentState json
       ModelOps.markAsDirty(instance)
       instance
+
+    # (source: Model) -> Model
+    clone: (source) ->
+      target = new Model {}
+      for clonablePropertyName in ModelOps.clonablePropertyNames
+        target[clonablePropertyName] = cloneDeep source[clonablePropertyName]
+      target
 
     # (data: Object) -> Promise Model
     create: (args...) ->
