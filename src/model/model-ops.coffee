@@ -42,9 +42,20 @@ module.exports = (resource) ->
       equals:
         enumerable: false
         get: -> jsonableEquality(this)
+      clone:
+        enumerable: false
+        get: -> ->
+          ResourceGateway.clone(this)
       toJson:
         enumerable: false
         get: -> => @__data
+
+    clonablePropertyNames: [
+      '__state'
+      '__data'
+      '__changed'
+      '__dirty'
+    ]
 
     modelInstanceProperties: do ->
       createMetadata = (data) ->

@@ -3,6 +3,7 @@ Bacon = require 'baconjs'
 
 jsonableEquality = require './jsonable-equality'
 followable = require('./followable')(defaultInterval = 10000)
+cloneDeep = require 'lodash-node/modern/lang/cloneDeep'
 
 module.exports = (resource, ModelOps, Model, defaultRequestOptions) ->
   ResourceGateway = do ->
@@ -23,15 +24,24 @@ module.exports = (resource, ModelOps, Model, defaultRequestOptions) ->
         for state in states
           instanceFromPersistentState state
       )
-      collection.save = ->
-        Promise.all (
-          for item in this
-            item.save()
-        )
-      collection.equals = jsonableEquality(collection)
-      collection.toJson = ->
-        item.toJson() for item in collection
-      collection
+
+      extendWithCollectionOps = (modelArray) ->
+        modelArray.save = ->
+          Promise.all (
+            for item in this
+              item.save()
+          )
+        modelArray.equals = jsonableEquality(modelArray)
+        modelArray.toJson = ->
+          item.toJson() for item in modelArray
+        modelArray.clone = ->
+          extendWithCollectionOps(
+            item.clone() for item in modelArray
+          )
+
+        modelArray
+
+      extendWithCollectionOps collection
 
     # (collection: [Model]) -> [Model] & { whenChanged: (f, options) -> unsubscribe }
     dynamifyCollection = (query) -> (collection) ->
@@ -62,6 +72,8 @@ module.exports = (resource, ModelOps, Model, defaultRequestOptions) ->
     all: (query, options = {}) ->
       options.equals ?= (left, right) ->
         left?.equals?(right)
+      options.clone ?= (collection) ->
+        collection.clone()
 
       followable
         .fromPromiseF(->
@@ -75,6 +87,8 @@ module.exports = (resource, ModelOps, Model, defaultRequestOptions) ->
     one: (id, options = {}) ->
       options.equals ?= (left, right) ->
         left?.equals?(right)
+      options.clone ?= (record) ->
+        record.clone()
 
       followable
         .fromPromiseF(->
@@ -93,6 +107,13 @@ module.exports = (resource, ModelOps, Model, defaultRequestOptions) ->
       instance = instanceFromPersistentState json
       ModelOps.markAsDirty(instance)
       instance
+
+    # (source: Model) -> Model
+    clone: (source) ->
+      target = new Model {}
+      for clonablePropertyName in ModelOps.clonablePropertyNames
+        target[clonablePropertyName] = cloneDeep source[clonablePropertyName]
+      target
 
     # (data: Object) -> Promise Model
     create: (args...) ->

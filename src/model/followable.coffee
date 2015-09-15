@@ -15,7 +15,7 @@ module.exports = (defaultInterval = 10000) ->
 
       changes = updates
         .skipDuplicates(options.equals ? deepEqual)
-        .map(cloneDeep)
+        .map(options.clone ? cloneDeep)
 
       whenChanged = (listen) ->
         changes.onValue listen

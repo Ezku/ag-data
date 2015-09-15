@@ -104,6 +104,17 @@ describe "ag-data.model.instance", ->
       instance = new model foo: 'bar'
       instance.toJson().should.deep.equal foo: 'bar'
 
+    it "can be cloned", ->
+      model = buildModel mockResource {
+        fields:
+          foo: {}
+      }
+      one = new model foo: 'one'
+      two = one.clone()
+      one.toJson().should.deep.equal two.toJson()
+      two.foo = 'two'
+      one.toJson().should.not.deep.equal two.toJson()
+
     itSupportsEquals ->
       model = buildModel mockResource {
         identifier: 'id'
