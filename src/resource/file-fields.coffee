@@ -2,6 +2,8 @@ cloneDeep = require 'lodash-node/modern/lang/cloneDeep'
 Promise = require 'bluebird'
 Transaction = require('ag-transaction')(Promise)
 
+determineFileUploadHeaders = require './file-fields/determine-file-upload-headers'
+
 getExtension = (filename) ->
   [init..., last] = (filename || '').split(".")
   last
@@ -77,10 +79,7 @@ module.exports = (http) ->
     uploadTransaction = (uploadUrl, file) ->
       http.transactional.request 'put', uploadUrl, {
         type: 'application/octet-stream'
-        headers:
-          "X-AG-Image-Uploader": "on"
-          "X-AG-Image-Uploader-JPG-Quality": 0.8
-          "X-AG-Image-Uploader-Width": 1024
+        headers: determineFileUploadHeaders file
         data: switch true
           when Buffer.isBuffer file then file.toString()
           else file
