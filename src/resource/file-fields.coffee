@@ -3,10 +3,7 @@ Promise = require 'bluebird'
 Transaction = require('ag-transaction')(Promise)
 
 determineFileUploadHeaders = require './file-fields/determine-file-upload-headers'
-
-getExtension = (filename) ->
-  [init..., last] = (filename || '').split(".")
-  last
+getContentForFileField = require './file-fields/get-content-for-file-field'
 
 module.exports = (http) ->
   decorateWithFileFieldSupport = (resource) ->
@@ -65,7 +62,7 @@ module.exports = (http) ->
         # Replace the file with an object that describes its contents.
         # The extension is relevant for the URL generated in the backend.
         if data[fieldName].name?
-          data[fieldName] = extension: getExtension(data[fieldName].name)
+          data[fieldName] = getContentForFileField(data[fieldName])
 
       return (data, fieldsToUpload) ->
         # We're about to modify the input object, so let's make a copy.
