@@ -13,6 +13,13 @@ generateCollisionResistantFilename = (filenameParts) ->
     filenameParts.extension
   ].join '.'
 
+getLastModifiedTimestamp = (file) ->
+  switch
+    when file.lastModified
+      (new Date file.lastModified).toJSON()
+    else
+       null
+
 module.exports = (file) ->
   filenameParts = getFilenameParts(file.name)
 
@@ -20,7 +27,7 @@ module.exports = (file) ->
   key: generateCollisionResistantFilename(filenameParts)
   extension: filenameParts.extension
   meta:
-    lastModified: file.lastModified
+    lastModified: getLastModifiedTimestamp file
     name: file.name
     size: file.size
     type: file.type
