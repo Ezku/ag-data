@@ -1,4 +1,7 @@
-restful = require('ag-restful')(require 'bluebird')
+Promise = require 'bluebird'
+Bacon = require 'baconjs'
+
+restful = require('ag-restful')(Promise, Bacon)
 defaultLoader = require('ag-resource-loader-json')(restful)
 buildModelClass = require './model/build-model-class'
 configureResourceFeatures = require('./resource/configure-features')(restful)
@@ -6,6 +9,8 @@ configureResourceFeatures = require('./resource/configure-features')(restful)
 module.exports = data =
   storages:
     memory: require './cache/async-key-value-storage'
+
+  requests: restful.http.requests
 
   loadResourceBundle: (object) ->
     bundle = defaultLoader.loadResourceBundle object

@@ -2,7 +2,7 @@ Promise = require 'bluebird'
 Bacon = require 'baconjs'
 bodyParser = require 'body-parser'
 
-restful = require('ag-restful')(Promise)
+restful = require('ag-restful')(Promise, Bacon)
 decorateWithFileFieldSupport = require('../src/resource/file-fields')(restful.http)
 
 chai = require('chai')

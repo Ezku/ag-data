@@ -26,6 +26,10 @@ describe "ag-data", ->
           'removeItem'
         ]
 
+  describe "requests", ->
+    it "is a stream", ->
+      data.should.have.property('requests').have.property('onValue').be.a 'function'
+
   describe "loadResourceBundle", ->
     it "is a function", ->
       data.loadResourceBundle.should.be.a 'function'
