@@ -60,7 +60,9 @@ module.exports = (namespace, storage, time) ->
         Promise.all(
           for key in keys when belongsToNamespace key
             storage.removeItem key
-        ).then ->
+            key
+        ).then (invalidatedKeys) ->
+          debug "Invalidated cache keys:", invalidatedKeys
           result
 
   # (key: String) -> boolean
