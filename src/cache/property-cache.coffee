@@ -1,5 +1,7 @@
 Promise = require 'bluebird'
 
+DEFAULT_CACHE_TIMETOLIVE_MILLISECONDS = 10000
+
 module.exports = (namespace, storage, time) ->
   debug = require('debug')("ag-data:cached-property:#{namespace}")
 
@@ -71,7 +73,7 @@ module.exports = (namespace, storage, time) ->
 
   prop = (key, options) ->
     index = keyWithNamespace key
-    timeToLive = options?.timeToLive ? 10000
+    timeToLive = options?.timeToLive ? DEFAULT_CACHE_TIMETOLIVE_MILLISECONDS
 
     # NOTE: Possibly smelly factoring because the only function to deal with timeToLive is computeUnlessValid
     computeIfAbsent: computeIfAbsent index
