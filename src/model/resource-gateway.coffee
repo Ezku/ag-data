@@ -5,7 +5,7 @@ jsonableEquality = require './jsonable-equality'
 followable = require('./followable')(interval: 10000)
 cloneDeep = require 'lodash-node/modern/lang/cloneDeep'
 
-module.exports = (resource, ModelOps, Model, defaultRequestOptions) ->
+module.exports = (resource, ModelOps, Model, options) ->
   ResourceGateway = do ->
     # (state: Object) -> Model
     instanceFromPersistentState = (state) ->
@@ -97,10 +97,7 @@ module.exports = (resource, ModelOps, Model, defaultRequestOptions) ->
         .follow(options)
 
     # Object
-    options: do ->
-      resource.setOptions?(defaultRequestOptions)
-
-      return resource.getOptions?() || {}
+    options: resource.getOptions?() || {}
 
     # (json: Object) -> Model
     fromJson: (json) ->
