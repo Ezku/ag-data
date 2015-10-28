@@ -76,9 +76,12 @@ describe "ag-data.followable", ->
 
       itSupportsWhenChanged ->
         followed = sinon.stub().returns Promise.resolve()
-        followable = fromPromiseF(followed).follow()
+        target = fromPromiseF(followed).follow()
 
-        { followed, followable }
+        {
+          followed
+          followable: target
+        }
 
       describe "updates", ->
 
@@ -130,6 +133,65 @@ describe "ag-data.followable", ->
             })
             .updates
             .onEnd(done)
+
+        describe "poll and interval argument precedence", ->
+
+          describe "options.poll", ->
+            it "gets precedence over options and defaults", ->
+              followed = sinon.stub().returns Promise.resolve()
+              followable(
+                  poll: times 1
+                  interval: 1
+                )
+                .fromPromiseF(followed)
+                .follow(
+                  poll: times 2
+                  interval: 2
+                )
+                .updates
+                .toString()
+                .should.include (times 2).toString()
+
+          describe "defaults.poll", ->
+            it "gets precedence over options.interval, defaults.interval", ->
+              followed = sinon.stub().returns Promise.resolve()
+              followable(
+                  poll: times 1
+                  interval: 1
+                )
+                .fromPromiseF(followed)
+                .follow(
+                  interval: 2
+                )
+                .updates
+                .toString()
+                .should.include (times 1).toString()
+
+          describe "options.interval", ->
+            it "gets precedence over defaults.interval", ->
+              followed = sinon.stub().returns Promise.resolve()
+              followable(
+                  interval: 123
+                )
+                .fromPromiseF(followed)
+                .follow(
+                  interval: 456
+                )
+                .updates
+                .toString()
+                .should.match /\interval\(456/
+
+          describe "defaults.interval", ->
+            it "is the last resort option", ->
+              followed = sinon.stub().returns Promise.resolve()
+              followable(
+                  interval: 123
+                )
+                .fromPromiseF(followed)
+                .follow()
+                .updates
+                .toString()
+                .should.match /\interval\(123/
 
       describe "changes", ->
         it "is a stream", ->
