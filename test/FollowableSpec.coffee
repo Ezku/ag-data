@@ -26,11 +26,11 @@ describe "ag-data.followable", ->
       .have.property('interval')
       .equal 123
 
-  it "accepts the default poll stream as an argument", ->
-    followable(poll: times 2)
+  it "accepts the default poll strategy as an argument", ->
+    followable(poll: -> times 2)
       .should.have.property('defaults')
       .have.property('poll')
-      .have.property('onValue')
+      .be.a 'function'
 
   describe "fromPromiseF()", ->
     fromPromiseF = null
@@ -118,18 +118,18 @@ describe "ag-data.followable", ->
 
           fromPromiseF(followed)
             .follow({
-              poll: times 2
+              poll: -> times 2
             })
             .updates
             .onEnd (v) ->
               done asserting ->
                 followed.should.have.been.calledTwice
 
-        it "ends when the { poll } stream ends", (done) ->
+        it "ends when the poll stream ends", (done) ->
           followed = sinon.stub().returns Promise.resolve()
           fromPromiseF(followed)
             .follow({
-              poll: times 0
+              poll: -> times 0
             })
             .updates
             .onEnd(done)
@@ -140,12 +140,12 @@ describe "ag-data.followable", ->
             it "gets precedence over options and defaults", ->
               followed = sinon.stub().returns Promise.resolve()
               followable(
-                  poll: times 1
+                  poll: -> times 1
                   interval: 1
                 )
                 .fromPromiseF(followed)
                 .follow(
-                  poll: times 2
+                  poll: -> times 2
                   interval: 2
                 )
                 .updates
@@ -156,7 +156,7 @@ describe "ag-data.followable", ->
             it "gets precedence over options.interval, defaults.interval", ->
               followed = sinon.stub().returns Promise.resolve()
               followable(
-                  poll: times 1
+                  poll: -> times 1
                   interval: 1
                 )
                 .fromPromiseF(followed)
@@ -207,7 +207,7 @@ describe "ag-data.followable", ->
 
           fromPromiseF(followed)
             .follow({
-              poll: times 2
+              poll: -> times 2
             })
             .changes
             .doAction(spy)
@@ -220,7 +220,7 @@ describe "ag-data.followable", ->
 
           fromPromiseF(-> new Object)
             .follow(
-              poll: times 2
+              poll: -> times 2
             )
             .changes
             .doAction((object) -> object['change'] = 'effect')

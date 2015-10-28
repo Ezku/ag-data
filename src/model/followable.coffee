@@ -5,21 +5,21 @@ cloneDeep = require 'lodash-node/modern/lang/cloneDeep'
 
 DEFAULT_POLL_INTERVAL_MILLISECONDS = 10000
 
-createUpdatePromptStream = (defaults, options) ->
+createPollingStrategy = (defaults, options) ->
+  interval = options.interval ? defaults.interval ? DEFAULT_POLL_INTERVAL_MILLISECONDS
   switch
     when options.poll?
-      options.poll
+      options.poll interval
     when defaults.poll?
-      defaults.poll
+      defaults.poll interval
     else
-      interval = options.interval ? defaults.interval ? DEFAULT_POLL_INTERVAL_MILLISECONDS
       Bacon.interval(interval, true).startWith true
 
 module.exports = (defaults = {}) ->
   # (target: (args...) -> Promise) -> { follow: (args..., options = {}) -> { updates: Stream, whenChanged: (f) -> unsubscribe } }
   fromPromiseF = (target) ->
     follow: (args..., options = {}) ->
-      shouldUpdate = createUpdatePromptStream(defaults, options)
+      shouldUpdate = createPollingStrategy(defaults, options)
 
       updates = shouldUpdate.flatMapFirst ->
         Bacon.fromPromise Promise.resolve target(args...)
