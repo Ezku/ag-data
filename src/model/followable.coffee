@@ -3,7 +3,12 @@ Bacon = require 'baconjs'
 deepEqual = require 'deep-equal'
 cloneDeep = require 'lodash-node/modern/lang/cloneDeep'
 
-module.exports = (defaultInterval = 10000) ->
+DEFAULT_POLL_INTERVAL_MILLISECONDS = 10000
+
+module.exports = (defaults = {}) ->
+
+  defaultInterval = defaults.interval || DEFAULT_POLL_INTERVAL_MILLISECONDS
+  defaultPoll = defaults.poll
 
   # (target: (args...) -> Promise) -> { follow: (args..., options = {}) -> { updates: Stream, whenChanged: (f) -> unsubscribe } }
   fromPromiseF = (target) ->
@@ -28,6 +33,6 @@ module.exports = (defaultInterval = 10000) ->
       }
 
   {
-    defaultInterval
+    defaults
     fromPromiseF
   }

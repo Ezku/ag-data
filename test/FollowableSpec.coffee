@@ -21,7 +21,16 @@ describe "ag-data.followable", ->
     followable.should.be.a 'function'
 
   it "accepts the default follow interval as an argument", ->
-    followable(123).defaultInterval.should.equal 123
+    followable(interval: 123)
+      .should.have.property('defaults')
+      .have.property('interval')
+      .equal 123
+
+  it "accepts the default poll stream as an argument", ->
+    followable(poll: times 2)
+      .should.have.property('defaults')
+      .have.property('poll')
+      .have.property('onValue')
 
   describe "fromPromiseF()", ->
     fromPromiseF = null

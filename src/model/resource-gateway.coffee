@@ -2,7 +2,7 @@ Promise = require 'bluebird'
 Bacon = require 'baconjs'
 
 jsonableEquality = require './jsonable-equality'
-followable = require('./followable')(defaultInterval = 10000)
+followable = require('./followable')(interval: 10000)
 cloneDeep = require 'lodash-node/modern/lang/cloneDeep'
 
 module.exports = (resource, ModelOps, Model, defaultRequestOptions) ->
