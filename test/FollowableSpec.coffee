@@ -21,7 +21,16 @@ describe "ag-data.followable", ->
     followable.should.be.a 'function'
 
   it "accepts the default follow interval as an argument", ->
-    followable(123).defaultInterval.should.equal 123
+    followable(interval: 123)
+      .should.have.property('defaults')
+      .have.property('interval')
+      .equal 123
+
+  it "accepts the default poll strategy as an argument", ->
+    followable(poll: -> times 2)
+      .should.have.property('defaults')
+      .have.property('poll')
+      .be.a 'function'
 
   describe "fromPromiseF()", ->
     fromPromiseF = null
@@ -67,9 +76,12 @@ describe "ag-data.followable", ->
 
       itSupportsWhenChanged ->
         followed = sinon.stub().returns Promise.resolve()
-        followable = fromPromiseF(followed).follow()
+        target = fromPromiseF(followed).follow()
 
-        { followed, followable }
+        {
+          followed
+          followable: target
+        }
 
       describe "updates", ->
 
@@ -106,21 +118,80 @@ describe "ag-data.followable", ->
 
           fromPromiseF(followed)
             .follow({
-              poll: times 2
+              poll: -> times 2
             })
             .updates
             .onEnd (v) ->
               done asserting ->
                 followed.should.have.been.calledTwice
 
-        it "ends when the { poll } stream ends", (done) ->
+        it "ends when the poll stream ends", (done) ->
           followed = sinon.stub().returns Promise.resolve()
           fromPromiseF(followed)
             .follow({
-              poll: times 0
+              poll: -> times 0
             })
             .updates
             .onEnd(done)
+
+        describe "poll and interval argument precedence", ->
+
+          describe "options.poll", ->
+            it "gets precedence over options and defaults", ->
+              followed = sinon.stub().returns Promise.resolve()
+              followable(
+                  poll: -> times 1
+                  interval: 1
+                )
+                .fromPromiseF(followed)
+                .follow(
+                  poll: -> times 2
+                  interval: 2
+                )
+                .updates
+                .toString()
+                .should.include (times 2).toString()
+
+          describe "defaults.poll", ->
+            it "gets precedence over options.interval, defaults.interval", ->
+              followed = sinon.stub().returns Promise.resolve()
+              followable(
+                  poll: -> times 1
+                  interval: 1
+                )
+                .fromPromiseF(followed)
+                .follow(
+                  interval: 2
+                )
+                .updates
+                .toString()
+                .should.include (times 1).toString()
+
+          describe "options.interval", ->
+            it "gets precedence over defaults.interval", ->
+              followed = sinon.stub().returns Promise.resolve()
+              followable(
+                  interval: 123
+                )
+                .fromPromiseF(followed)
+                .follow(
+                  interval: 456
+                )
+                .updates
+                .toString()
+                .should.match /\interval\(456/
+
+          describe "defaults.interval", ->
+            it "is the last resort option", ->
+              followed = sinon.stub().returns Promise.resolve()
+              followable(
+                  interval: 123
+                )
+                .fromPromiseF(followed)
+                .follow()
+                .updates
+                .toString()
+                .should.match /\interval\(123/
 
       describe "changes", ->
         it "is a stream", ->
@@ -136,7 +207,7 @@ describe "ag-data.followable", ->
 
           fromPromiseF(followed)
             .follow({
-              poll: times 2
+              poll: -> times 2
             })
             .changes
             .doAction(spy)
@@ -149,7 +220,7 @@ describe "ag-data.followable", ->
 
           fromPromiseF(-> new Object)
             .follow(
-              poll: times 2
+              poll: -> times 2
             )
             .changes
             .doAction((object) -> object['change'] = 'effect')

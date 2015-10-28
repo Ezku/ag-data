@@ -2,10 +2,10 @@ Promise = require 'bluebird'
 Bacon = require 'baconjs'
 
 jsonableEquality = require './jsonable-equality'
-followable = require('./followable')(defaultInterval = 10000)
+followable = require('./followable')
 cloneDeep = require 'lodash-node/modern/lang/cloneDeep'
 
-module.exports = (resource, ModelOps, Model, defaultRequestOptions) ->
+module.exports = (resource, ModelOps, Model, defaults = {}) ->
   ResourceGateway = do ->
     # (state: Object) -> Model
     instanceFromPersistentState = (state) ->
@@ -75,7 +75,7 @@ module.exports = (resource, ModelOps, Model, defaultRequestOptions) ->
       options.clone ?= (collection) ->
         collection.clone()
 
-      followable
+      followable(defaults.followable ? {})
         .fromPromiseF(->
           ResourceGateway.findAll(query)
         )
@@ -90,17 +90,14 @@ module.exports = (resource, ModelOps, Model, defaultRequestOptions) ->
       options.clone ?= (record) ->
         record.clone()
 
-      followable
+      followable(defaults.followable ? {})
         .fromPromiseF(->
           ResourceGateway.find(id)
         )
         .follow(options)
 
     # Object
-    options: do ->
-      resource.setOptions?(defaultRequestOptions)
-
-      return resource.getOptions?() || {}
+    options: resource.getOptions?() || {}
 
     # (json: Object) -> Model
     fromJson: (json) ->

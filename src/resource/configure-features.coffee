@@ -12,10 +12,13 @@ module.exports = (restful) ->
 
   ###
   Decorate the given resource with extra features:
+  - options are set on the resource given options passed to the model
   - caching is enabled given a config flag in options
-  TODO: - file uploads are enabled given a file-typed field in the resource schema
+  - file uploads are enabled given a file-typed field in the resource schema
   ###
   (resource, options) ->
+    resource.setOptions?(options)
+
     if options?.cache?.enabled
       resource = decorateWithCaching resource, options.cache
       delete options.cache
