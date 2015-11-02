@@ -50,14 +50,14 @@ module.exports = (namespace, storage, time) ->
 
   # (index: String) -> (operation: () -> Promise) -> Promise
   invalidateIfSuccessful = (index) -> (operation) ->
-    Promise.resolve(operation()).then (result) ->
+    Promise.try(operation).then (result) ->
       storage.removeItem(metadataKeyForIndex index).then ->
         debug "#{index} invalidated"
         result
 
   # (operation: () -> Promise) -> Promise
   invalidateAllIfSuccessful = (operation) ->
-    Promise.resolve(operation()).then (result) ->
+    Promise.try(operation).then (result) ->
       storage.keys().then (keys) ->
         Promise.all(
           for key in keys when belongsToNamespace key
