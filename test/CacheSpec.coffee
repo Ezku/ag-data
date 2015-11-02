@@ -170,3 +170,18 @@ describe "ag-data.cache", ->
             prop.incrementTime()
             prop.computeUnlessValid(-> "fresh value").should.eventually.equal "fresh value"
 
+
+      describe "invalidateAllIfSuccessful()", ->
+        it "has committed invalidations to storage backend when resolved", ->
+          storage = asyncKeyValueStorage()
+          cache = createCache("namespace", storage)
+          propOne = cache.prop("key-#{Math.random()}")
+          propTwo = cache.prop("key-#{Math.random()}")
+
+          Promise.all([
+            propOne.set('one')
+            propTwo.set('two')
+          ]).then ->
+            Object.keys(storage.backend).length.should.be.above(0)
+            cache.invalidateAllIfSuccessful(willSucceed).then ->
+              Object.keys(storage.backend).length.should.equal 0

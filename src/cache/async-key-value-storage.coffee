@@ -4,12 +4,15 @@ module.exports = ->
   storage = {}
 
   getItem: (key) ->
-    Promise.resolve storage[key]
+    Promise.try ->
+      storage[key]
   setItem: (key, value) ->
-    storage[key] = value
-    Promise.resolve()
+    Promise.try ->
+      storage[key] = value
   removeItem: (key) ->
-    storage[key] = null
-    Promise.resolve()
+    Promise.try ->
+      delete storage[key]
   keys: ->
-    Promise.resolve Object.keys storage
+    Promise.try ->
+      Object.keys storage
+  backend: storage
