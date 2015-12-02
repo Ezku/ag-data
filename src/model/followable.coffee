@@ -15,21 +15,38 @@ createPollingStrategy = (defaults, options) ->
     else
       Bacon.interval(interval, true).startWith true
 
+isUnrecoverableError = (e) ->
+  e.status? and (400 <= e.status < 500)
+
 module.exports = (defaults = {}) ->
   # (target: (args...) -> Promise) -> { follow: (args..., options = {}) -> { updates: Stream, whenChanged: (f) -> unsubscribe } }
   fromPromiseF = (target) ->
     follow: (args..., options = {}) ->
       shouldUpdate = createPollingStrategy(defaults, options)
 
-      updates = shouldUpdate.flatMapFirst ->
+      polledValues = shouldUpdate.flatMapFirst ->
         Bacon.fromPromise Promise.resolve target(args...)
+
+      unrecoverableErrors = polledValues
+        .errors()
+        .mapError((e) -> e)
+        .filter(isUnrecoverableError)
+
+      updates = polledValues.takeUntil(unrecoverableErrors)
 
       changes = updates
         .skipDuplicates(options.equals ? deepEqual)
         .map(options.clone ? cloneDeep)
 
-      whenChanged = (listen) ->
-        changes.onValue listen
+      whenChanged = (onSuccess, onError) ->
+
+        unsubValues = changes.onValue onSuccess if onSuccess?
+        unsubErrors = changes.onError onError if onError?
+
+        return unsub = ->
+          unsubValues?()
+          unsubErrors?()
+          null
 
       {
         updates
