@@ -50,29 +50,43 @@ describe "ag-data.followable", ->
         fromPromiseF(->
           Promise.resolve(true)
         ).follow().should.include.keys [
-            'updates'
+            'changes'
             'whenChanged'
           ]
 
-      it "knows how to not overfeed the followed function when a previous call takes a long time to finish", (done) ->
-        currentDelay = 0
-        delayIncrement = 10
-        maxDelay = 50
-        finding = false
+      describe 'failure handling', ->
+        it "knows how to not overfeed the followed function when a previous call takes a long time to finish", (done) ->
+          currentDelay = 0
+          delayIncrement = 10
+          maxDelay = 50
+          finding = false
 
-        unsub = fromPromiseF(->
-          # This assertion will fail in case the "slow" promise is still
-          # resolving and the function is being called too early
-          finding.should.equal(false)
-          finding = true
+          unsub = fromPromiseF(->
+            # This assertion will fail in case the "slow" promise is still
+            # resolving and the function is being called too early
+            finding.should.equal(false)
+            finding = true
 
-          currentDelay += delayIncrement
-          Promise.resolve([{foo:currentDelay}]).delay(currentDelay).tap ->
-            finding = false
-        ).follow({ interval: 10 }).whenChanged (value) ->
-          if currentDelay > maxDelay
-            unsub()
-            done()
+            currentDelay += delayIncrement
+            Promise.resolve([{foo:currentDelay}]).delay(currentDelay).tap ->
+              finding = false
+          ).follow({ interval: 10 }).whenChanged (value) ->
+            if currentDelay > maxDelay
+              unsub()
+              done()
+
+        describe 'whenChanged', ->
+          it 'supports an error callback argument', (done) ->
+            fromPromiseF(->
+              Promise.reject new Error 'failed'
+            )
+            .follow()
+            .whenChanged(
+              ->
+              (e) ->
+                done asserting ->
+                  e.message.should.equal 'failed'
+            )
 
       itSupportsWhenChanged ->
         followed = sinon.stub().returns Promise.resolve()

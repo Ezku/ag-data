@@ -28,8 +28,15 @@ module.exports = (defaults = {}) ->
         .skipDuplicates(options.equals ? deepEqual)
         .map(options.clone ? cloneDeep)
 
-      whenChanged = (listen) ->
-        changes.onValue listen
+      whenChanged = (onSuccess, onError) ->
+
+        unsubValues = changes.onValue onSuccess if onSuccess?
+        unsubErrors = changes.onError onError if onError?
+
+        return unsub = ->
+          unsubValues?()
+          unsubErrors?()
+          null
 
       {
         updates
