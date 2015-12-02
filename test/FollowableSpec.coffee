@@ -88,6 +88,17 @@ describe "ag-data.followable", ->
                   e.message.should.equal 'failed'
             )
 
+        describe 'updates', ->
+          it 'ends when encountering an unrecoverable error', (done) ->
+            fromPromiseF(->
+              unrecoverableError = new Error 'Forbidden'
+              unrecoverableError.status = 403
+              Promise.reject unrecoverableError
+            )
+            .follow()
+            .updates
+            .onEnd done
+
       itSupportsWhenChanged ->
         followed = sinon.stub().returns Promise.resolve()
         target = fromPromiseF(followed).follow()
