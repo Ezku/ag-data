@@ -31,6 +31,12 @@ module.exports = (defaults = {}) ->
         .errors()
         .mapError((e) -> e)
         .filter(isUnrecoverableError)
+        .map (e) ->
+          # WARNING: Mutation here
+          # Enable receiver to detect whether error was unrecoverable and there
+          # will be no further events.
+          e.unrecoverable = true
+          e
 
       updates = polledValues.takeUntil(unrecoverableErrors)
 
