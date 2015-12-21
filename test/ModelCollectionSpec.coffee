@@ -142,4 +142,4 @@ describe "ag-data.model.collection", ->
         cloned = all.clone()
         all.toJson().should.deep.equal cloned.toJson()
         cloned[0].foo = 'modified'
-        all.toJson().should.not.deep.equal cloned.toJson
+        all.toJson().should.not.deep.equal cloned.toJson()
