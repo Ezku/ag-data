@@ -89,6 +89,18 @@ describe "ag-data.followable", ->
             )
 
         describe 'updates', ->
+          it 'yields an error with an unrecoverable flag when status is 4xx', (done) ->
+            fromPromiseF(->
+              unrecoverableError = new Error 'Forbidden'
+              unrecoverableError.status = 403
+              Promise.reject unrecoverableError
+            )
+            .follow()
+            .updates
+            .onError (e) ->
+              done asserting ->
+                e.should.have.property('unrecoverable').equal true
+
           it 'ends when encountering an unrecoverable error', (done) ->
             fromPromiseF(->
               unrecoverableError = new Error 'Forbidden'
