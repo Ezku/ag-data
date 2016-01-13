@@ -27,18 +27,28 @@ module.exports = (defaults = {}) ->
       polledValues = shouldUpdate.flatMapFirst ->
         Bacon.fromPromise Promise.resolve target(args...)
 
-      unrecoverableErrors = polledValues
+      errorsWithRecoverabilityInformation = polledValues
         .errors()
-        .mapError((e) -> e)
-        .filter(isUnrecoverableError)
-        .map (e) ->
+        .mapError((e) ->
           # WARNING: Mutation here
           # Enable receiver to detect whether error was unrecoverable and there
           # will be no further events.
-          e.unrecoverable = true
+          e.unrecoverable = isUnrecoverableError e
           e
+        )
 
-      updates = polledValues.takeUntil(unrecoverableErrors)
+      unrecoverableError = errorsWithRecoverabilityInformation
+        .filter (e) -> e.unrecoverable
+        .take(1)
+
+      updates = polledValues
+        # Because of the mutation above, we need to make sure that the errors
+        # seen by subscribers to this are from the `errors` stream and not
+        # the original, possibly yet-to-be-mutated values.
+        .skipErrors()
+        .merge(errorsWithRecoverabilityInformation.flatMap (e) -> new Bacon.Error e)
+        # Stop polling when we see an unrecoverable error
+        .takeUntil(unrecoverableError)
 
       changes = updates
         .skipDuplicates(options.equals ? deepEqual)
