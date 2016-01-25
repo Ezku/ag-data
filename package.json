@@ -47,7 +47,7 @@
     "ag-restful": "^0.9.1",
     "ag-transaction": "^0.1.1",
     "baconjs": "0.7.83",
-    "bluebird": "2.9.14",
+    "bluebird": "3.1.4",
     "cuid": "^1.3.8",
     "debug": "^2.1.3",
     "deep-equal": "1.0.0",
